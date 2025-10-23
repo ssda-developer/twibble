@@ -4,9 +4,9 @@ import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
 import { useEffect, useRef, useState } from "react";
 
-const Composer = ({ placeholder = "What’s happening?" }) => {
+const Composer = ({ placeholder = "What’s happening?", parentId = null }) => {
     const [text, setText] = useState("");
-    const maxChars = 150;
+    const maxChars = 160;
     const remaining = maxChars - text.length;
     const overLimit = remaining < 0;
     const textareaRef = useRef(null);
@@ -19,6 +19,36 @@ const Composer = ({ placeholder = "What’s happening?" }) => {
         el.style.height = "auto";
         el.style.height = `${el.scrollHeight}px`;
     }, [text]);
+
+    const handlerClick = async () => {
+        try {
+            const body = {
+                content: text,
+                parentId: parentId
+            };
+
+            const res = await fetch("/api/tweets", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                console.error("Error:", errorData);
+                return;
+            }
+
+            const data = await res.json();
+            setText("");
+            // window.dispatchEvent(new CustomEvent("tweets:created", { detail: data }));
+            console.log("Response:", data);
+        } catch (err) {
+            console.error("POST error:", err);
+        }
+    };
 
     return (
         <div className="border-b border-slate-800 p-4 flex">
@@ -60,6 +90,7 @@ const Composer = ({ placeholder = "What’s happening?" }) => {
                     <button
                         className="bg-white px-3 py-1 font-bold text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={overLimit || !text.trim()}
+                        onClick={handlerClick}
                     >
                         Post
                     </button>

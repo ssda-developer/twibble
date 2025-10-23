@@ -2,14 +2,17 @@
 import TweetCard from "@/components/TweetCard";
 import { useEffect, useState } from "react";
 
-const TweetList = () => {
+const TweetList = ({ apiLink = null }) => {
     const [tweets, setTweets] = useState([]);
 
     useEffect(() => {
+        if (!apiLink) return;
+
         async function fetchTweets() {
-            const res = await fetch("/api/tweets");
+            const res = await fetch(apiLink);
             const data = await res.json();
-            setTweets(data);
+
+            setTweets(Array.isArray(data) ? [...data].reverse() : []);
         }
 
         fetchTweets();

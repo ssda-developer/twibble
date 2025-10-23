@@ -5,7 +5,7 @@ export default function HomePage() {
     return (
         <div>
             <Composer />
-            <TweetList />
+            <TweetList apiLink="/api/tweets" />
         </div>
     );
 }

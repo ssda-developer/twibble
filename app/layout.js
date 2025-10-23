@@ -9,9 +9,9 @@ import "./globals.css";
 // });
 
 const geistBarlow = Barlow({
-    subsets: ["latin"],      // необходимые подмножества символов
-    weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"], // все варианты жирности
-    variable: "--font-barlow" // если хочешь использовать CSS-переменную
+    subsets: ["latin"],
+    weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    variable: "--font-barlow"
 });
 
 export const metadata = {

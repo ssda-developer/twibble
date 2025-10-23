@@ -18,3 +18,23 @@ export const kebabToPascal = (name) => {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join("");
 };
+
+export const timeAgo = (date) => {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+
+    const intervals = [
+        { label: "y", seconds: 31536000 },
+        { label: "mo", seconds: 2592000 },
+        { label: "d", seconds: 86400 },
+        { label: "h", seconds: 3600 },
+        { label: "m", seconds: 60 }
+    ];
+
+    for (let i = 0; i < intervals.length; i++) {
+        const interval = Math.floor(seconds / intervals[i].seconds);
+        if (interval >= 1) return interval + intervals[i].label;
+    }
+
+    return "now";
+};
+

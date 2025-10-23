@@ -1,12 +1,14 @@
 import { formatCount } from "@/utils";
 
-const ActionButton = ({ children, count, className = "", ariaLabel }) => {
+const ActionButton = ({ children, count, className = "", ariaLabel, clickHandler }) => {
     const formatted = formatCount(count);
+
     return (
         <button
             className={`flex items-center p-1 cursor-pointer rounded-full ${className}`}
             aria-label={ariaLabel}
             title={ariaLabel}
+            onClick={clickHandler}
         >
             {children}
             {formatted !== 0 && <span className="ml-1">{formatted}</span>}

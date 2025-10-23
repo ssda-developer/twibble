@@ -4,7 +4,7 @@ export const TWEETS = [
         user: {
             name: "John Doe",
             username: "@johndoe",
-            avatar: "JD"
+            avatarInitials: "JD"
         },
         content: "Hello, Next.js!",
         timestamp: "2h",
@@ -18,7 +18,7 @@ export const TWEETS = [
         user: {
             name: "Monica Lamb",
             username: "@monicalamd",
-            avatar: "M"
+            avatarInitials: "M"
         },
         content: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias doloremque nemo nostrum voluptas voluptatibus. A ab adipisci aliquam amet assumenda consequatur earum est eum excepturi fuga hic impedit ipsa ipsam iste laborum magni maxime, necessitatibus neque nisi non porro quaerat quo rem rerum sed similique tenetur vero? Ab aperiam cum debitis eius fugiat harum ipsam iste iure, iusto molestiae nisi numquam perspiciatis, quod similique sunt! Alias assumenda consectetur deserunt doloremque doloribus dolorum eaque, eos error in inventore, itaque laborum libero magni molestiae nobis numquam obcaecati optio pariatur porro quam quidem repellendus rerum sed sequi temporibus velit veniam veritatis voluptas voluptatibus.",
         timestamp: "3h",
@@ -32,7 +32,7 @@ export const TWEETS = [
         user: {
             name: "Mark Loe",
             username: "@markloe",
-            avatar: "M"
+            avatarInitials: "M"
         },
         content: "Hello, I'm Mark",
         timestamp: "4h",
@@ -46,7 +46,7 @@ export const TWEETS = [
         user: {
             name: "Monica 2 Lamb 2",
             username: "@monicalamd22",
-            avatar: "M2"
+            avatarInitials: "M2"
         },
         content: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias doloremque nemo nostrum voluptas voluptatibus. A ab adipisci aliquam amet assumenda consequatur earum est eum excepturi fuga hic impedit ipsa ipsam iste laborum magni maxime, necessitatibus neque nisi non porro quaerat quo rem rerum sed similique tenetur vero? Ab aperiam cum debitis eius fugiat harum ipsam iste iure, iusto molestiae nisi numquam perspiciatis, quod similique sunt! Alias assumenda consectetur deserunt doloremque doloribus dolorum eaque, eos error in inventore, itaque laborum libero magni molestiae nobis numquam obcaecati optio pariatur porro quam quidem repellendus rerum sed sequi temporibus velit veniam veritatis voluptas voluptatibus.",
         timestamp: "4h",
@@ -60,7 +60,7 @@ export const TWEETS = [
         user: {
             name: "Monica 3 Lamb 3",
             username: "@monicalamd33",
-            avatar: "M3"
+            avatarInitials: "M3"
         },
         content: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias doloremque nemo nostrum voluptas voluptatibus. A ab adipisci aliquam amet assumenda consequatur earum est eum excepturi fuga hic impedit ipsa ipsam iste laborum magni maxime, necessitatibus neque nisi non porro quaerat quo rem rerum sed similique tenetur vero? Ab aperiam cum debitis eius fugiat harum ipsam iste iure, iusto molestiae nisi numquam perspiciatis, quod similique sunt! Alias assumenda consectetur deserunt doloremque doloribus dolorum eaque, eos error in inventore, itaque laborum libero magni molestiae nobis numquam obcaecati optio pariatur porro quam quidem repellendus rerum sed sequi temporibus velit veniam veritatis voluptas voluptatibus.",
         timestamp: "5h",
@@ -68,5 +68,22 @@ export const TWEETS = [
         reposts: 33,
         likes: 0,
         views: 333
+    },
+    {
+        "metrics": { "likes": 0, "retweets": 0, "reposts": 0, "views": 0 },
+        "_id": "68f92213964e9fe5bfc65b44",
+        "user": {
+            "_id": "68f54950e06509db67a7cf00",
+            "name": "Serhii",
+            "username": "serhiitest",
+            "avatarUrl": "",
+            "avatarInitials": "ST",
+            "__v": 0
+        },
+        "content": "New NEW",
+        "parentId": null,
+        "createdAt": "2025-10-22T18:27:31.464Z",
+        "updatedAt": "2025-10-22T18:27:31.464Z",
+        "__v": 0
     }
 ];

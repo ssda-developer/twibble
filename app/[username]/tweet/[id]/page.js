@@ -3,7 +3,8 @@ import TweetCardDetailed from "@/components/TweetCardDetailed";
 import TweetList from "@/components/TweetList";
 
 const PostPage = async ({ params }) => {
-    const { id } = await params;
+    const { id, username } = await params;
+    // console.log(id, username);
 
     const res = await fetch(`http://localhost:3000/api/tweets/${encodeURIComponent(id)}`);
     const post = await res.json();
@@ -11,8 +12,8 @@ const PostPage = async ({ params }) => {
     return (
         <article className="max-w-3xl mx-auto">
             <TweetCardDetailed {...post} />
-            <Composer placeholder="Post your reply" />
-            <TweetList />
+            <Composer parentId={id} placeholder="Post your reply" />
+            <TweetList apiLink={`/api/tweets/${id}/replies`} />
         </article>
     );
 };
