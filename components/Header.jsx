@@ -1,14 +1,19 @@
-import IconButton from "@/components/IconButton";
+"use client";
 
-const LIST_LINKS = [
-    { label: "Home", href: "/", icon: "home" },
-    { label: "Explore", href: "/explore", icon: "magnifying-glass" },
-    { label: "Notifications", href: "/notifications", icon: "bell" },
-    { label: "Messages", href: "/messages", icon: "envelope" },
-    { label: "Profile", href: "/profile", icon: "user" }
-];
+import IconButton from "@/components/IconButton";
+import { useUserContext } from "@/context/UserContext";
 
 const Header = () => {
+    const { currentUser } = useUserContext();
+
+    const LIST_LINKS = [
+        { label: "Home", href: "/", icon: "home" },
+        { label: "Explore", href: "/explore", icon: "magnifying-glass" },
+        { label: "Notifications", href: "/notifications", icon: "bell" },
+        { label: "Messages", href: "/messages", icon: "envelope" },
+        { label: "Profile", href: `/${currentUser.username}/posts`, icon: "user" }
+    ];
+
     return (
         <div className="w-65 sticky top-0 h-screen shrink-0">
             <>

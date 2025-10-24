@@ -2,48 +2,32 @@
 
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
+import { useUserContext } from "@/context/UserContext";
 import { useState } from "react";
 
 const ActionsBlock = ({ classes, retweets, reposts, likes = [], views, tweetId }) => {
+    const { currentUser } = useUserContext();
+
     const [currentLikes, setCurrentLikes] = useState(likes.length);
     const [liked, setLiked] = useState(() => {
-        return likes.filter(like => like === "68f54950e06509db67a7cf00").length > 0;
+        return likes.filter(like => like === currentUser._id).length > 0;
     });
-    // const onLikeClick = async (e) => {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    //
-    //     try {
-    //         const res = await fetch(`/api//tweets/${encodeURIComponent(tweetId)}`, {
-    //             method: "PATCH"
-    //         });
-    //
-    //         if (!res.ok) {
-    //             const err = await res.json().catch(() => ({}));
-    //             console.error("Like error:", err?.error || res.statusText);
-    //             return;
-    //         }
-    //
-    //         const updatedTweet = await res.json();
-    //         setCurrentLikes(prev => prev + 1);
-    //         console.log(currentLikes);
-    //     } catch (e) {
-    //         console.error("Network like error:", e);
-    //     }
-    // };
-    const onLikeClick = async (e, userId = "68f54950e06509db67a7cf00") => {
+
+    const onLikeClick = async (e, userId = currentUser._id) => {
         e.preventDefault();
         e.stopPropagation();
 
-        const res = await fetch(`/api/tweets/${tweetId}`, {
+        const res = await fetch(`/api/posts/${tweetId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: liked ? "unlike" : "like", userId })
         });
+
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
             throw new Error(err.error || "Failed to toggle like");
         }
+
         setCurrentLikes((prev) => liked ? prev - 1 : prev + 1);
         setLiked((prev) => !prev);
         return res.json();

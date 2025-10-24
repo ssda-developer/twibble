@@ -10,11 +10,11 @@ export async function GET(_req, { params }) {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return new Response(JSON.stringify({ error: "Invalid id" }), { status: 400 });
         }
-        const tweet = await Tweet.findById(id).populate("user");
-        if (!tweet) {
+        const post = await Tweet.findById(id).populate("user");
+        if (!post) {
             return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
         }
-        return new Response(JSON.stringify(tweet), { status: 200 });
+        return new Response(JSON.stringify(post), { status: 200 });
     } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }

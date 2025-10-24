@@ -3,7 +3,7 @@ import TweetCard from "@/components/TweetCard";
 import { useEffect, useState } from "react";
 
 const TweetList = ({ apiLink = null }) => {
-    const [tweets, setTweets] = useState([]);
+    const [posts, setPosts] = useState([]);
 
     useEffect(() => {
         if (!apiLink) return;
@@ -12,7 +12,7 @@ const TweetList = ({ apiLink = null }) => {
             const res = await fetch(apiLink);
             const data = await res.json();
 
-            setTweets(Array.isArray(data) ? [...data].reverse() : []);
+            setPosts(Array.isArray(data) ? [...data] : []);
         }
 
         fetchTweets();
@@ -20,9 +20,9 @@ const TweetList = ({ apiLink = null }) => {
 
     return (
         <ul>
-            {tweets.map((tweet, idx) => (
-                <li key={`${tweet.user.user}-${idx}`} className="border-b border-slate-800">
-                    <TweetCard {...tweet} />
+            {posts.map((post, idx) => (
+                <li key={`${post.user.user}-${idx}`} className="border-b border-slate-800">
+                    <TweetCard {...post} />
                 </li>
             ))}
         </ul>

@@ -4,9 +4,8 @@ import { timeAgo } from "@/utils";
 import Link from "next/link";
 
 const TweetCard = ({ _id, user, content, createdAt, metrics }) => {
-    // console.log(metrics);
     return (
-        <Link href={`/${user.username}/tweet/${_id}`} className="flex p-4">
+        <Link href={`/${user.username}/post/${_id}`} className="flex p-4">
             <div className="mr-2">
                 <Avatar letter={user.avatarInitials} />
             </div>

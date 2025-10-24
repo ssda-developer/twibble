@@ -1,12 +1,8 @@
 import Aside from "@/components/Aside";
 import Header from "@/components/Header";
+import { Providers } from "@/context/providers";
 import { Barlow } from "next/font/google";
 import "./globals.css";
-
-// const geistSans = Geist({
-//     variable: "--font-geist-sans",
-//     subsets: ["latin"]
-// });
 
 const geistBarlow = Barlow({
     subsets: ["latin"],
@@ -21,19 +17,18 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="en">
-        <body
-            className={`${geistBarlow.variable} antialiased min-h-screen
-`}
-        >
-        <div className="flex max-w-6xl m-auto">
-            <Header />
-            <main className="flex-1 border-l border-r border-slate-800">
-                {children}
-            </main>
-            <Aside />
-        </div>
-        </body>
-        </html>
+        <Providers>
+            <html lang="en">
+            <body className={`${geistBarlow.variable} antialiased min-h-screen`}>
+            <div className="flex max-w-6xl m-auto">
+                <Header />
+                <main className="flex-1 border-l border-r border-slate-800">
+                    {children}
+                </main>
+                <Aside />
+            </div>
+            </body>
+            </html>
+        </Providers>
     );
 }

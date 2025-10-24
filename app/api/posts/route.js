@@ -4,10 +4,24 @@ import mongoose from "mongoose";
 import "@/models/User";
 
 export async function GET(req) {
+    // console.log(req);
     try {
         await dbConnect();
-        const tweets = await Tweet.find({ parentId: null }).populate("user");
-        return new Response(JSON.stringify(tweets), { status: 200 });
+        const { searchParams } = new URL(req.url);
+        const userId = searchParams.get("user");
+        console.log(userId);
+        // const userObjectId = ;
+        // console.log(userObjectId);
+
+        const query = {};
+
+        if (userId) {
+            console.log(userId, new mongoose.Types.ObjectId(userId));
+            query.user = new mongoose.Types.ObjectId(userId);
+        }
+        console.log(query);
+        const posts = await Tweet.find(query).populate("user").sort({ createdAt: -1 });
+        return new Response(JSON.stringify(posts), { status: 200 });
     } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
@@ -18,13 +32,13 @@ export async function GET(req) {
 //         await dbConnect();
 //         const body = await req.json();
 //
-//         const tweet = await Tweet.create({
+//         const post = await Tweet.create({
 //             user: new mongoose.Types.ObjectId("68f54950e06509db67a7cf00"),
 //             ...body
 //         });
 //
-//         console.log("Created tweet:", tweet);
-//         return new Response(JSON.stringify(tweet), { status: 201 });
+//         console.log("Created post:", post);
+//         return new Response(JSON.stringify(post), { status: 201 });
 //     } catch (err) {
 //         console.error("POST error:", err);
 //         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
@@ -35,13 +49,13 @@ export async function POST(req) {
     try {
         await dbConnect();
         const body = await req.json();
-        const { parentId, content } = body || {};
+        const { parentId, content, userId } = body || {};
 
         if (parentId && !mongoose.Types.ObjectId.isValid(parentId)) {
             return new Response(JSON.stringify({ error: "Invalid parentId" }), { status: 400 });
         }
 
-        const userId = new mongoose.Types.ObjectId("68f54950e06509db67a7cf00");
+        const userObjectId = new mongoose.Types.ObjectId(userId);
 
         const session = await mongoose.startSession();
         let createdTweet;
@@ -56,14 +70,14 @@ export async function POST(req) {
                     );
 
                     if (!parent) {
-                        throw new Error("Parent tweet not found");
+                        throw new Error("Parent post not found");
                     }
                 }
 
                 const [tweetDoc] = await Tweet.create(
                     [
                         {
-                            user: userId,
+                            user: userObjectId,
                             content,
                             parentId: parentId || null
                         }
@@ -75,12 +89,12 @@ export async function POST(req) {
             });
 
             if (!createdTweet) {
-                return new Response(JSON.stringify({ error: "Failed to create tweet" }), { status: 500 });
+                return new Response(JSON.stringify({ error: "Failed to create post" }), { status: 500 });
             }
 
             return new Response(JSON.stringify(createdTweet), { status: 201 });
         } catch (txErr) {
-            if (txErr?.message === "Parent tweet not found") {
+            if (txErr?.message === "Parent post not found") {
                 return new Response(JSON.stringify({ error: txErr.message }), { status: 404 });
             }
             console.error("Transaction error:", txErr);

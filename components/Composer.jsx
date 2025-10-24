@@ -2,11 +2,14 @@
 
 import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
+import { useUserContext } from "@/context/UserContext";
 import { useEffect, useRef, useState } from "react";
 
 const Composer = ({ placeholder = "What’s happening?", parentId = null }) => {
+    const { currentUser } = useUserContext();
+
     const [text, setText] = useState("");
-    const maxChars = 160;
+    const maxChars = 240;
     const remaining = maxChars - text.length;
     const overLimit = remaining < 0;
     const textareaRef = useRef(null);
@@ -24,10 +27,11 @@ const Composer = ({ placeholder = "What’s happening?", parentId = null }) => {
         try {
             const body = {
                 content: text,
-                parentId: parentId
+                parentId: parentId,
+                userId: currentUser._id
             };
 
-            const res = await fetch("/api/tweets", {
+            const res = await fetch("/api/posts", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -43,7 +47,7 @@ const Composer = ({ placeholder = "What’s happening?", parentId = null }) => {
 
             const data = await res.json();
             setText("");
-            // window.dispatchEvent(new CustomEvent("tweets:created", { detail: data }));
+            // window.dispatchEvent(new CustomEvent("posts:created", { detail: data }));
             console.log("Response:", data);
         } catch (err) {
             console.error("POST error:", err);
@@ -53,7 +57,7 @@ const Composer = ({ placeholder = "What’s happening?", parentId = null }) => {
     return (
         <div className="border-b border-slate-800 p-4 flex">
             <div className="mr-2">
-                <Avatar letter="SS" />
+                <Avatar letter={currentUser?.avatarInitials} />
             </div>
             <div className="w-full">
                 <div

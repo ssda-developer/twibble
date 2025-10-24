@@ -1,7 +1,7 @@
 import ActionsBlock from "@/components/ActionsBlock";
 import Avatar from "@/components/Avatar";
 
-const TweetCardDetailed = ({ user, content, metrics }) => {
+const TweetCardDetailed = ({ _id, user, content, metrics }) => {
     return (
         <div className="flex flex-col p-4">
             <div className="flex mb-2">
@@ -18,6 +18,7 @@ const TweetCardDetailed = ({ user, content, metrics }) => {
                               reposts={metrics.reposts}
                               likes={metrics.likes}
                               views={metrics.views}
+                              tweetId={_id}
                 />
             </div>
         </div>

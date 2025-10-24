@@ -8,8 +8,8 @@ export async function GET(_req, { params }) {
         await dbConnect();
         const { id } = await params;
 
-        const tweets = await Tweet.find({ parentId: new mongoose.Types.ObjectId(id) }).populate("user");
-        return new Response(JSON.stringify(tweets), { status: 200 });
+        const posts = await Tweet.find({ parentId: new mongoose.Types.ObjectId(id) }).populate("user");
+        return new Response(JSON.stringify(posts), { status: 200 });
     } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }

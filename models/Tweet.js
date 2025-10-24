@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const TweetSchema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    content: { type: String, required: true, maxlength: 160 },
+    content: { type: String, required: true, maxlength: 240 },
     metrics: {
         // likes: { type: Number, default: 0, min: 0 },
         likes: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
