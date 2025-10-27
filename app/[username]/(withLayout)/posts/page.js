@@ -1,16 +1,13 @@
 "use client";
 
-import TweetList from "@/components/TweetList";
+import PostListData from "@/components/PostListData";
 import { useUserContext } from "@/context/UserContext";
 
 const ProfilePostsPage = () => {
     const { currentUser } = useUserContext();
 
     return (
-        <div>
-            Profile Posts Page
-            <TweetList apiLink={`/api/posts?user=${currentUser._id}`} />
-        </div>
+        <PostListData userId={currentUser._id} type="userPosts" />
     );
 };
 

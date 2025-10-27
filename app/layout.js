@@ -1,6 +1,6 @@
+import { Providers } from "@/app/providers";
 import Aside from "@/components/Aside";
 import Header from "@/components/Header";
-import { Providers } from "@/context/providers";
 import { Barlow } from "next/font/google";
 import "./globals.css";
 
@@ -17,9 +17,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
+        <html lang="en">
+        <body className={`${geistBarlow.variable} antialiased min-h-screen`}>
         <Providers>
-            <html lang="en">
-            <body className={`${geistBarlow.variable} antialiased min-h-screen`}>
             <div className="flex max-w-6xl m-auto">
                 <Header />
                 <main className="flex-1 border-l border-r border-slate-800">
@@ -27,8 +27,8 @@ export default function RootLayout({ children }) {
                 </main>
                 <Aside />
             </div>
-            </body>
-            </html>
         </Providers>
+        </body>
+        </html>
     );
 }

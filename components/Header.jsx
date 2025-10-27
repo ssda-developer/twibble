@@ -11,7 +11,7 @@ const Header = () => {
         { label: "Explore", href: "/explore", icon: "magnifying-glass" },
         { label: "Notifications", href: "/notifications", icon: "bell" },
         { label: "Messages", href: "/messages", icon: "envelope" },
-        { label: "Profile", href: `/${currentUser.username}/posts`, icon: "user" }
+        { label: "Profile", href: `/${currentUser?.username}/posts`, icon: "user" }
     ];
 
     return (

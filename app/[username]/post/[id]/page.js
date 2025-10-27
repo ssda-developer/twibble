@@ -1,20 +1,12 @@
-import Composer from "@/components/Composer";
-import TweetCardDetailed from "@/components/TweetCardDetailed";
-import TweetList from "@/components/TweetList";
+import { PostView } from "@/components/post/PostView";
 
 const PostPage = async ({ params }) => {
     const { id, username } = await params;
-    // console.log(id, username);
-
-    const res = await fetch(`http://localhost:3000/api/posts/${encodeURIComponent(id)}`);
-    const post = await res.json();
 
     return (
-        <article className="max-w-3xl mx-auto">
-            <TweetCardDetailed {...post} />
-            <Composer parentId={id} placeholder="Post your reply" />
-            <TweetList apiLink={`/api/posts/${id}/replies`} />
-        </article>
+        <div className="max-w-3xl mx-auto">
+            <PostView id={id} username={username} />
+        </div>
     );
 };
 

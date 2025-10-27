@@ -13,7 +13,7 @@ const Profile = () => {
             const res = await fetch("http://localhost:3000/api/users");
             const data = await res.json();
 
-            const users = Array.isArray(data) ? [...data] : [];
+            const users = Array.isArray(data.users) ? [...data.users] : [];
             const randomIndex = Math.floor(Math.random() * users.length);
 
             setUser(users[randomIndex]);
@@ -26,10 +26,10 @@ const Profile = () => {
 
     return (
         <div className="p-4 rounded-xl border border-slate-800 flex">
-            <Avatar letter={user.avatarInitials} />
+            <Avatar letter={user?.avatarInitials} />
             <div className="flex flex-col ml-2">
-                <span>{user.name}</span>
-                <span className="text-sm">@{user.username}</span>
+                <span>{user?.displayName}</span>
+                <span className="text-sm">@{user?.username}</span>
             </div>
         </div>
     );

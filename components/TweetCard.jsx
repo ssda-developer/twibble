@@ -3,24 +3,25 @@ import Avatar from "@/components/Avatar";
 import { timeAgo } from "@/utils";
 import Link from "next/link";
 
-const TweetCard = ({ _id, user, content, createdAt, metrics }) => {
+const TweetCard = ({ _id, authorSnapshot, type, content, createdAt, replyCount, repostCount, likeCount }) => {
     return (
-        <Link href={`/${user.username}/post/${_id}`} className="flex p-4">
+        <Link href={`/${authorSnapshot.username}/post/${_id}`} className="flex p-4">
             <div className="mr-2">
-                <Avatar letter={user.avatarInitials} />
+                <Avatar letter={authorSnapshot.avatarInitials} />
             </div>
             <div className="flex-1">
                 <div className="text-gray-400 mb-1">
-                    <span className="font-bold mr-1 text-white">{user.name}</span>
-                    <span className="mr-1">@{user.username}</span>
+                    <span className="font-bold mr-1 text-white">{authorSnapshot.displayName}</span>
+                    <span className="mr-1">@{authorSnapshot.username}</span>
                     <span className="mr-1">·</span>
                     <span className="mr-1">{timeAgo(createdAt)}</span>
                 </div>
+                <p>type: {type}</p>
                 <p>{content}</p>
-                <ActionsBlock retweets={metrics.retweets}
-                              reposts={metrics.reposts}
-                              likes={metrics.likes}
-                              views={metrics.views}
+                <ActionsBlock replies={replyCount}
+                              reposts={repostCount}
+                              likes={likeCount}
+                              views=""
                               tweetId={_id}
                 />
             </div>

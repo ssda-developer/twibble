@@ -1,109 +1,120 @@
 import dbConnect from "@/lib/mongoose";
-import Tweet from "@/models/Tweet";
-import mongoose from "mongoose";
-import "@/models/User";
+import Post from "@/models/Post";
+import User from "@/models/User";
 
+/**
+ * GET /api/posts?cursor=...&limit=20
+ */
 export async function GET(req) {
-    // console.log(req);
     try {
         await dbConnect();
+
         const { searchParams } = new URL(req.url);
-        const userId = searchParams.get("user");
-        console.log(userId);
-        // const userObjectId = ;
-        // console.log(userObjectId);
+        const limit = parseInt(searchParams.get("limit")) || 2000;
+        const onlyOriginal = searchParams.get("onlyOriginal") === "true";
+        const cursor = searchParams.get("cursor");
+        const author = searchParams.get("author");
 
-        const query = {};
+        const filter = {};
 
-        if (userId) {
-            console.log(userId, new mongoose.Types.ObjectId(userId));
-            query.user = new mongoose.Types.ObjectId(userId);
+        if (cursor) {
+            filter._id = { $lt: cursor };
         }
-        console.log(query);
-        const posts = await Tweet.find(query).populate("user").sort({ createdAt: -1 });
-        return new Response(JSON.stringify(posts), { status: 200 });
-    } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+
+        if (onlyOriginal) {
+            filter.type = "original";
+        }
+
+        if (author) {
+            filter.author = author;
+        }
+
+        const posts = await Post.find(filter)
+            .sort({ createdAt: -1 })
+            .limit(limit);
+
+        return new Response(JSON.stringify({ posts }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
+        });
+    } catch (error) {
+        console.error("Failed to fetch posts:", error);
+        return new Response(JSON.stringify({ error: "Failed to fetch posts" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
     }
 }
-
-// export async function POST(req) {
-//     try {
-//         await dbConnect();
-//         const body = await req.json();
-//
-//         const post = await Tweet.create({
-//             user: new mongoose.Types.ObjectId("68f54950e06509db67a7cf00"),
-//             ...body
-//         });
-//
-//         console.log("Created post:", post);
-//         return new Response(JSON.stringify(post), { status: 201 });
-//     } catch (err) {
-//         console.error("POST error:", err);
-//         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
-//     }
-// }
 
 export async function POST(req) {
     try {
         await dbConnect();
+
         const body = await req.json();
-        const { parentId, content, userId } = body || {};
+        const { userId, content, media, parentId = null } = body;
 
-        if (parentId && !mongoose.Types.ObjectId.isValid(parentId)) {
-            return new Response(JSON.stringify({ error: "Invalid parentId" }), { status: 400 });
-        }
-
-        const userObjectId = new mongoose.Types.ObjectId(userId);
-
-        const session = await mongoose.startSession();
-        let createdTweet;
-
-        try {
-            await session.withTransaction(async () => {
-                if (parentId) {
-                    const parent = await Tweet.findByIdAndUpdate(
-                        parentId,
-                        { $inc: { "metrics.retweets": 1 } },
-                        { new: true, session }
-                    );
-
-                    if (!parent) {
-                        throw new Error("Parent post not found");
-                    }
-                }
-
-                const [tweetDoc] = await Tweet.create(
-                    [
-                        {
-                            user: userObjectId,
-                            content,
-                            parentId: parentId || null
-                        }
-                    ],
-                    { session }
-                );
-
-                createdTweet = tweetDoc;
+        if (!userId || !content) {
+            return new Response(JSON.stringify({ error: "userId and content are required" }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" }
             });
-
-            if (!createdTweet) {
-                return new Response(JSON.stringify({ error: "Failed to create post" }), { status: 500 });
-            }
-
-            return new Response(JSON.stringify(createdTweet), { status: 201 });
-        } catch (txErr) {
-            if (txErr?.message === "Parent post not found") {
-                return new Response(JSON.stringify({ error: txErr.message }), { status: 404 });
-            }
-            console.error("Transaction error:", txErr);
-            return new Response(JSON.stringify({ error: txErr.message }), { status: 500 });
-        } finally {
-            session.endSession();
         }
-    } catch (err) {
-        console.error("POST error:", err);
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+
+        const user = await User.findById(userId).select("_id username displayName avatarInitials");
+        if (!user) {
+            return new Response(JSON.stringify({ error: "User not found" }), {
+                status: 404,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        let type = "original";
+        let parentPost = null;
+        let rootPost = null;
+
+        if (parentId) {
+            const parent = await Post.findById(parentId);
+            if (!parent) {
+                return new Response(JSON.stringify({ error: "Parent post not found" }), {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            type = "reply";
+            parentPost = parentId;
+            rootPost = parent.rootPost ? parent.rootPost : parentId;
+        }
+
+        const newPost = await Post.create({
+            author: user._id,
+            authorSnapshot: {
+                _id: user._id,
+                username: user.username,
+                displayName: user.displayName,
+                avatarInitials: user.avatarInitials
+            },
+            content,
+            media: media || [],
+            type,
+            parentPost,
+            rootPost
+        });
+
+        if (parentId) {
+            await Post.findByIdAndUpdate(parentId, { $inc: { replyCount: 1 } });
+        }
+
+        return new Response(JSON.stringify({ post: newPost }), {
+            status: 201,
+            headers: { "Content-Type": "application/json" }
+        });
+
+    } catch (error) {
+        console.error("Failed to create post:", error);
+        return new Response(JSON.stringify({ error: "Failed to create post" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
     }
 }

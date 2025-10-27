@@ -1,33 +1,95 @@
 import dbConnect from "@/lib/mongoose";
 import User from "@/models/User";
 
+/**
+ * GET /api/users?page=1&limit=20&search=username
+ */
 export async function GET(req) {
     try {
         await dbConnect();
-        const users = await User.find();
-        return new Response(JSON.stringify(users), { status: 200 });
-    } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get("page")) || 1;
+        const limit = parseInt(searchParams.get("limit")) || 20;
+        const search = searchParams.get("search") || "";
+
+        const filter = search
+            ? { username: { $regex: search, $options: "i" } }
+            : {};
+
+        const users = await User.find(filter)
+            .select("_id username displayName avatarInitials bio stats")
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const total = await User.countDocuments(filter);
+
+        return new Response(JSON.stringify({
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            users
+        }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
+        });
+    } catch (error) {
+        console.error("Failed to fetch users:", error);
+        return new Response(JSON.stringify({ error: "Failed to fetch users" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
     }
 }
 
+/**
+ * POST /api/users/create
+ */
 export async function POST(req) {
     try {
         await dbConnect();
-        const body = await req.json();
 
-        const user = await User.create({
-            name: body.name || "Test User",
-            username: body.username || "testuser",
-            avatarUrl: body.avatarUrl || "",
-            avatarInitials: body.avatarInitials || "TU"
+        const body = await req.json();
+        const { username, displayName, avatarInitials, bio } = body;
+
+        if (!username) {
+            return new Response(JSON.stringify({ error: "Username is required" }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+
+        const newUser = await User.create({
+            username,
+            displayName: displayName || "",
+            avatarInitials: avatarInitials || "",
+            bio: bio || "",
+            likedPostsCache: [],
+            savedPostsCache: [],
+            stats: {
+                postsCount: 0,
+                followersCount: 0,
+                followingCount: 0,
+                likesGiven: 0,
+                savesGiven: 0
+            }
         });
 
-        console.log("Created user:", user);
-        return new Response(JSON.stringify(user), { status: 201 });
-    } catch (err) {
-        console.error("POST error:", err);
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+
+        return new Response(JSON.stringify({ user: newUser }), {
+            status: 201,
+            headers: { "Content-Type": "application/json" }
+        });
+
+
+    } catch (error) {
+        console.error("Failed to create user:", error);
+        return new Response(JSON.stringify({ error: "Failed to create user" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
     }
 }
-

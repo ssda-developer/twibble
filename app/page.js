@@ -1,11 +1,11 @@
 import Composer from "@/components/Composer";
-import TweetList from "@/components/TweetList";
+import PostListData from "@/components/PostListData";
 
 export default function HomePage() {
     return (
         <div>
             <Composer />
-            <TweetList apiLink="/api/posts" />
+            <PostListData />
         </div>
     );
 }

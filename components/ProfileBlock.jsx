@@ -11,7 +11,7 @@ const ProfileBlock = () => {
         <div>
             <div className="flex border-b border-slate-800 justify-between p-6">
                 <div className="flex flex-col text-gray-400 ml-1">
-                    <h2 className="font-bold text-white text-2xl">{currentUser.name}</h2>
+                    <h2 className="font-bold text-white text-2xl">{currentUser.displayName}</h2>
                     <span className="mb-4">@{currentUser.username}</span>
                     <span className="text-sm">Joined October 2025</span>
                 </div>

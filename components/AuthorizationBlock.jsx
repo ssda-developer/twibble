@@ -1,23 +1,7 @@
 const AuthorizationBlock = () => {
     return (
         <div className="p-4 rounded-xl border border-slate-800 flex flex-col">
-            {/*<div className="mb-6 flex items-center gap-2">*/}
-            {/*    <button*/}
-            {/*        type="button"*/}
-            {/*        className="px-4 py-2 rounded-lg text-slate-200 bg-slate-800 hover:bg-slate-700 transition"*/}
-            {/*        aria-current="page"*/}
-            {/*    >*/}
-            {/*        Login*/}
-            {/*    </button>*/}
-            {/*    <button*/}
-            {/*        type="button"*/}
-            {/*        className="px-4 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"*/}
-            {/*    >*/}
-            {/*        Registration */}
-            {/*    </button>*/}
-            {/*</div>*/}
-
-            <form className="space-y-4" aria-label="Форма авторизации">
+            <form className="space-y-4" aria-label="Authorization form">
                 <div className="space-y-2">
                     <label htmlFor="email" className="block text-sm text-slate-300">
                         Email
@@ -64,22 +48,12 @@ const AuthorizationBlock = () => {
                 </button>
             </form>
 
-            {/*<div className="relative my-6">*/}
-            {/*    <div className="absolute inset-0 flex items-center">*/}
-            {/*        <span className="w-full border-t border-slate-800"></span>*/}
-            {/*    </div>*/}
-            {/*    <div className="relative flex justify-center text-sm">*/}
-            {/*        <span className="px-2 bg-slate-900/40 text-slate-400">or</span>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
-
             <p className="mt-2 text-center text-sm text-slate-400">
                 Don't have an account?
                 <a href="#" className="text-sky-400 hover:text-sky-300 transition">
                     Register
                 </a>
             </p>
-
         </div>
     );
 };
