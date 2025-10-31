@@ -6,7 +6,8 @@ import {
     fetchReplies,
     fetchUserPosts,
     fetchUserReplies,
-    toggleLike
+    toggleLike,
+    toggleSave
 } from "./api";
 import { POSTS_STALE_TIME, postsKeys } from "./keys";
 
@@ -90,6 +91,39 @@ export function useToggleLike(userId) {
                 queryClient.setQueryData(postsKeys.lists.byId(postId), old => ({
                     ...old,
                     likeCount: action === "like" ? old.likeCount + 1 : Math.max(0, old.likeCount - 1)
+                }));
+            }
+
+            return { previousPost };
+        },
+
+        onError: (_err, _variables, context) => {
+            if (context?.previousPost) {
+                queryClient.setQueryData(postsKeys.lists.byId(context.previousPost._id), context.previousPost);
+            }
+        },
+
+        onSuccess: (_data) => {
+            queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === "posts" });
+        }
+    });
+}
+
+export function useToggleSave(userId) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ postId, action }) => toggleSave(postId, userId, action),
+
+        onMutate: async ({ postId, action }) => {
+            await queryClient.cancelQueries(postsKeys.lists.byId(postId));
+
+            const previousPost = queryClient.getQueryData(postsKeys.lists.byId(postId));
+
+            if (previousPost) {
+                queryClient.setQueryData(postsKeys.lists.byId(postId), old => ({
+                    ...old,
+                    saveCount: action === "save" ? old.saveCount + 1 : Math.max(0, old.saveCount - 1)
                 }));
             }
 

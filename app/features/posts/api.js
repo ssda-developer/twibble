@@ -8,7 +8,7 @@ function buildQuery(params = {}) {
 }
 
 export async function fetchPosts(params = {}) {
-    const queryString = buildQuery(params);
+    const queryString = buildQuery({ ...params, onlyOriginal: true });
 
     const res = await fetch(`http://localhost:3000/api/posts?${queryString}`);
     if (!res.ok) throw new Error("Failed to fetch posts");
@@ -48,7 +48,17 @@ export async function fetchUserReplies(userId, params = {}) {
 }
 
 export async function toggleLike(postId, userId, action) {
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}/likes`, {
+    const res = await fetch(`http://localhost:3000/api/posts/${postId}/like`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action })
+    });
+    if (!res.ok) throw new Error("Failed to toggle like");
+    return res.json();
+}
+
+export async function toggleSave(postId, userId, action) {
+    const res = await fetch(`http://localhost:3000/api/posts/${postId}/save`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, action })

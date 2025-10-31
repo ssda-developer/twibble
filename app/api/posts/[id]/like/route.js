@@ -3,7 +3,7 @@ import Post from "@/models/Post";
 import mongoose from "mongoose";
 
 /**
- * PATCH /api/posts/:id/likes
+ * PATCH /api/posts/:id/like
  * body: { action: "like" | "unlike", userId: string }
  */
 export async function PATCH(req, { params }) {

@@ -2,6 +2,7 @@
 
 import { useToggleLike } from "@/app/features/posts/hooks";
 import ActionButton from "@/components/ActionButton";
+import ActionSaveButton from "@/components/ActionSaveButton";
 import Icon from "@/components/Icon";
 import { useUserContext } from "@/context/UserContext";
 import { useState } from "react";
@@ -56,9 +57,7 @@ const ActionsBlock = ({ classes, replies, reposts, likes = 0, views, userState, 
                 <Icon name="chart-bar-square" />
             </ActionButton>
             <div className="flex">
-                <button className="flex items-center cursor-pointer p-1 rounded-full hover:text-blue-500">
-                    <Icon name="bookmark" />
-                </button>
+                <ActionSaveButton postId={tweetId} userState={userState} currentUser={currentUser} />
                 <button className="flex items-center cursor-pointer p-1 ml-1 rounded-full hover:text-blue-500">
                     <Icon name="arrow-up-tray" />
                 </button>

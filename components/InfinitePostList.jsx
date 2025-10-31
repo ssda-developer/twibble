@@ -5,7 +5,7 @@ import { useUserContext } from "@/context/UserContext";
 import { useEffect, useRef } from "react";
 import PostList from "./PostList";
 
-const InfinitePostList = ({ parentId, type }) => {
+const InfinitePostList = ({ userId, parentId, type }) => {
     const { currentUser } = useUserContext();
 
     let query;
@@ -16,6 +16,14 @@ const InfinitePostList = ({ parentId, type }) => {
             query = useInfiniteReplies(parentId);
             posts = query.data?.pages.flatMap(page => page.replies) || [];
             break;
+        // case "userPosts":
+        //     query = useInfiniteUserPosts(userId);
+        //     posts = query.data?.pages.flatMap(page => page.posts) || [];
+        //     break;
+        // case "userReplies":
+        //     query = useInfiniteUserReplies(userId);
+        //     posts = query.data?.pages.flatMap(page => page.replies) || [];
+        //     break;
         default:
             query = useInfinitePosts({ currentUserId: currentUser._id });
             posts = query.data?.pages.flatMap(page => page.posts) || [];

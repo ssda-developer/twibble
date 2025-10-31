@@ -1,4 +1,5 @@
 import Like from "@/models/Like";
+import Save from "@/models/Save";
 import mongoose, { Schema } from "mongoose";
 
 const PostSchema = new Schema(
@@ -70,5 +71,34 @@ PostSchema.statics.removeLike = async function (postId, userId, session) {
 
     return post;
 };
+
+PostSchema.statics.addSave = async function (postId, userId, session) {
+    const post = await this.findById(postId);
+    if (!post) return null;
+
+    const existing = await Save.findOne({ post: postId, user: userId }).session(session);
+    if (existing) return post;
+
+    await Save.create([{ post: postId, user: userId }], { session });
+
+    post.saveCount += 1;
+    await post.save({ session });
+
+    return post;
+};
+
+PostSchema.statics.removeSave = async function (postId, userId, session) {
+    const post = await this.findById(postId);
+    if (!post) return null;
+
+    const res = await Save.deleteOne({ post: postId, user: userId }).session(session);
+    if (res.deletedCount > 0) {
+        post.saveCount = Math.max(0, post.saveCount - 1);
+        await post.save({ session });
+    }
+
+    return post;
+};
+
 
 export default mongoose.models.Post || mongoose.model("Post", PostSchema);
