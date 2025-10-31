@@ -1,49 +1,67 @@
-const base = "/api/posts";
+function buildQuery(params = {}) {
+    const query = new URLSearchParams();
 
-export async function fetchPosts({ originalOnly = true, cursor, limit = 20 } = {}) {
-    const params = new URLSearchParams();
-    if (originalOnly) params.set("onlyOriginal", "true");
-    if (cursor) params.set("cursor", cursor);
-    if (limit) params.set("limit", String(limit));
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) query.append(key, value);
+    });
+    return query.toString();
+}
 
-    const res = await fetch(`http://localhost:3000${base}?${params.toString()}`, { method: "GET" });
-    if (!res.ok) throw new Error("Failed to load posts");
+export async function fetchPosts(params = {}) {
+    const queryString = buildQuery(params);
+
+    const res = await fetch(`http://localhost:3000/api/posts?${queryString}`);
+    if (!res.ok) throw new Error("Failed to fetch posts");
     return res.json();
 }
 
-export async function fetchUserPosts({ originalOnly = true, cursor, limit = 20, author = null } = {}) {
-    const params = new URLSearchParams();
-    if (originalOnly) params.set("onlyOriginal", "true");
-    if (author) params.set("author", author);
-    if (cursor) params.set("cursor", cursor);
-    if (limit) params.set("limit", String(limit));
+export async function fetchPostById(postId, params) {
+    const queryString = buildQuery(params);
 
-    const res = await fetch(`http://localhost:3000${base}?${params.toString()}`, { method: "GET" });
-    if (!res.ok) throw new Error("Failed to load posts");
+    const res = await fetch(`http://localhost:3000/api/posts/${postId}?${queryString}`);
+    if (!res.ok) throw new Error("Failed to fetch post");
     return res.json();
 }
 
-export async function fetchReplies(postId, { cursor, limit = 20 } = {}) {
-    const params = new URLSearchParams();
-    if (cursor) params.set("cursor", cursor);
-    if (limit) params.set("limit", String(limit));
+export async function fetchReplies(postId, params = {}) {
+    const queryString = buildQuery(params);
 
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}/replies?${params.toString()}`);
-    if (!res.ok) throw new Error("Failed to load replies");
+    const res = await fetch(`http://localhost:3000/api/posts/${postId}/replies?${queryString}`);
+    if (!res.ok) throw new Error("Failed to fetch replies");
     return res.json();
 }
 
-export async function fetchPostById(id) {
-    const res = await fetch(`http://localhost:3000${base}/${encodeURIComponent(id)}`, { method: "GET" });
-    if (!res.ok) throw new Error(`Failed to load post by ${id}`);
+export async function fetchUserPosts(userId, params = {}) {
+    const queryString = buildQuery(params);
+
+    const res = await fetch(`http://localhost:3000/api/users/${userId}/posts?${queryString}`);
+    if (!res.ok) throw new Error("Failed to fetch user posts");
     return res.json();
 }
 
-export async function createPost(payload) {
-    const res = await fetch(`http://localhost:3000${base}`, {
+export async function fetchUserReplies(userId, params = {}) {
+    const queryString = buildQuery(params);
+
+    const res = await fetch(`http://localhost:3000/api/users/${userId}/replies?${queryString}`);
+    if (!res.ok) throw new Error("Failed to fetch user replies");
+    return res.json();
+}
+
+export async function toggleLike(postId, userId, action) {
+    const res = await fetch(`http://localhost:3000/api/posts/${postId}/likes`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action })
+    });
+    if (!res.ok) throw new Error("Failed to toggle like");
+    return res.json();
+}
+
+export async function createPost(postData) {
+    const res = await fetch(`http://localhost:3000/api/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(postData)
     });
     if (!res.ok) throw new Error("Failed to create post");
     return res.json();

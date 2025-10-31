@@ -1,3 +1,4 @@
+import { addUserStateToPosts } from "@/app/features/posts/utils";
 import dbConnect from "@/lib/mongoose";
 import Post from "@/models/Post";
 
@@ -6,7 +7,10 @@ export async function GET(req, { params }) {
         await dbConnect();
 
         const { id } = await params;
-        const post = await Post.findById(id);
+        const { searchParams } = new URL(req.url);
+        const currentUserId = searchParams.get("currentUserId");
+
+        const post = await Post.findById(id).lean();
 
         if (!post) {
             return new Response(JSON.stringify({ error: "Post not found" }), {
@@ -15,7 +19,9 @@ export async function GET(req, { params }) {
             });
         }
 
-        return new Response(JSON.stringify({ post }), {
+        const postWithState = await addUserStateToPosts(post, currentUserId);
+
+        return new Response(JSON.stringify({ post: postWithState }), {
             status: 200,
             headers: { "Content-Type": "application/json" }
         });

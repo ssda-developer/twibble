@@ -1,6 +1,6 @@
 import { formatCount } from "@/utils";
 
-const ActionButton = ({ children, count, className = "", ariaLabel, clickHandler }) => {
+const ActionButton = ({ children, count, className = "", ariaLabel, clickHandler, disabled }) => {
     const formatted = formatCount(count);
 
     return (
@@ -9,6 +9,7 @@ const ActionButton = ({ children, count, className = "", ariaLabel, clickHandler
             aria-label={ariaLabel}
             title={ariaLabel}
             onClick={clickHandler}
+            disabled={disabled}
         >
             {children}
             {formatted !== 0 && <span className="ml-1">{formatted}</span>}

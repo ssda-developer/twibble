@@ -3,7 +3,17 @@ import Avatar from "@/components/Avatar";
 import { timeAgo } from "@/utils";
 import Link from "next/link";
 
-const TweetCard = ({ _id, authorSnapshot, type, content, createdAt, replyCount, repostCount, likeCount }) => {
+const TweetCard = ({
+                       _id,
+                       authorSnapshot,
+                       type,
+                       content,
+                       createdAt,
+                       replyCount,
+                       repostCount,
+                       likeCount,
+                       userState
+                   }) => {
     return (
         <Link href={`/${authorSnapshot.username}/post/${_id}`} className="flex p-4">
             <div className="mr-2">
@@ -23,6 +33,7 @@ const TweetCard = ({ _id, authorSnapshot, type, content, createdAt, replyCount, 
                               likes={likeCount}
                               views=""
                               tweetId={_id}
+                              userState={userState}
                 />
             </div>
         </Link>

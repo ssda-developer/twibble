@@ -1,6 +1,8 @@
 import TweetCard from "@/components/TweetCard";
 
-const PostList = ({ posts = [] }) => {
+const PostList = ({ posts }) => {
+    if (!posts || posts.length === 0) return <p>No posts</p>;
+
     return (
         <ul>
             {posts.map((post) => (

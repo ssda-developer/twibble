@@ -1,15 +1,27 @@
 "use client";
 
+import { useToggleLike } from "@/app/features/posts/hooks";
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
 import { useUserContext } from "@/context/UserContext";
 import { useState } from "react";
 
-const ActionsBlock = ({ classes, replies, reposts, likes = [], views, tweetId }) => {
+const ActionsBlock = ({ classes, replies, reposts, likes = 0, views, userState, tweetId }) => {
     const { currentUser } = useUserContext();
 
-    const [currentLikes, setCurrentLikes] = useState(likes);
-    const [liked, setLiked] = useState(false);
+    const { mutate: toggleLike, isPending } = useToggleLike(currentUser._id);
+    const [liked, setLiked] = useState(userState?.liked || false);
+
+    const handleLiked = (evt) => {
+        evt.preventDefault();
+        evt.stopPropagation();
+
+        toggleLike({
+            postId: tweetId,
+            action: liked ? "unlike" : "like"
+        });
+        setLiked((prev) => !prev);
+    };
 
     return (
         <div className={`flex justify-between text-gray-400 text-sm mt-2 mx-[-4px] ${classes}`}>
@@ -28,9 +40,11 @@ const ActionsBlock = ({ classes, replies, reposts, likes = [], views, tweetId })
                 <Icon name="arrow-path-rounded-square" />
             </ActionButton>
             <ActionButton
-                count={currentLikes}
+                count={likes}
                 className={`hover:text-red-400 ${liked && "text-red-500"}`}
                 ariaLabel="Likes"
+                clickHandler={handleLiked}
+                disabled={isPending}
             >
                 {liked ? <Icon name="heart" type="solid" /> : <Icon name="heart" />}
             </ActionButton>

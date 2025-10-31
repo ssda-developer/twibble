@@ -2,34 +2,16 @@
 
 import Avatar from "@/components/Avatar";
 import { useUserContext } from "@/context/UserContext";
-import { useEffect, useState } from "react";
 
 const Profile = () => {
-    const [user, setUser] = useState([]);
-    const { addCurrentUser } = useUserContext();
-
-    useEffect(() => {
-        async function fetchUsers() {
-            const res = await fetch("http://localhost:3000/api/users");
-            const data = await res.json();
-
-            const users = Array.isArray(data.users) ? [...data.users] : [];
-            const randomIndex = Math.floor(Math.random() * users.length);
-
-            setUser(users[randomIndex]);
-            addCurrentUser(users[randomIndex]);
-        }
-
-        fetchUsers();
-    }, []);
-
+    const { currentUser } = useUserContext();
 
     return (
         <div className="p-4 rounded-xl border border-slate-800 flex">
-            <Avatar letter={user?.avatarInitials} />
+            <Avatar letter={currentUser?.avatarInitials} />
             <div className="flex flex-col ml-2">
-                <span>{user?.displayName}</span>
-                <span className="text-sm">@{user?.username}</span>
+                <span>{currentUser?.displayName}</span>
+                <span className="text-sm">@{currentUser?.currentUsername}</span>
             </div>
         </div>
     );

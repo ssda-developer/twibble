@@ -1,3 +1,4 @@
+import { addUserStateToPosts } from "@/app/features/posts/utils";
 import dbConnect from "@/lib/mongoose";
 import Post from "@/models/Post";
 import User from "@/models/User";
@@ -10,16 +11,13 @@ export async function GET(req) {
         await dbConnect();
 
         const { searchParams } = new URL(req.url);
-        const limit = parseInt(searchParams.get("limit")) || 2000;
+        const limit = parseInt(searchParams.get("limit")) || 20;
         const onlyOriginal = searchParams.get("onlyOriginal") === "true";
         const cursor = searchParams.get("cursor");
         const author = searchParams.get("author");
+        const currentUserId = searchParams.get("currentUserId");
 
         const filter = {};
-
-        if (cursor) {
-            filter._id = { $lt: cursor };
-        }
 
         if (onlyOriginal) {
             filter.type = "original";
@@ -29,20 +27,35 @@ export async function GET(req) {
             filter.author = author;
         }
 
+        if (cursor) {
+            filter.createdAt = { $lt: new Date(cursor) };
+        }
+
         const posts = await Post.find(filter)
             .sort({ createdAt: -1 })
-            .limit(limit);
+            .limit(limit + 1)
+            .lean();
 
-        return new Response(JSON.stringify({ posts }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" }
-        });
+        let nextCursor = null;
+
+        if (posts.length > limit) {
+            const lastPost = posts.pop();
+            nextCursor = lastPost.createdAt.toISOString();
+        }
+
+        const postsWithState = await addUserStateToPosts(posts, currentUserId);
+
+        return new Response(
+            JSON.stringify({ posts: postsWithState, nextCursor }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+
     } catch (error) {
         console.error("Failed to fetch posts:", error);
-        return new Response(JSON.stringify({ error: "Failed to fetch posts" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" }
-        });
+        return new Response(
+            JSON.stringify({ error: "Failed to fetch posts" }),
+            { status: 500, headers: { "Content-Type": "application/json" } }
+        );
     }
 }
 

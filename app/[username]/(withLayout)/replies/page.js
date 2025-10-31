@@ -1,9 +1,14 @@
-const ProfileRepliesPage = () => {
+"use client";
+
+import PostListData from "@/components/PostListData";
+import { useUserContext } from "@/context/UserContext";
+
+const ProfilePostsPage = () => {
+    const { currentUser } = useUserContext();
+
     return (
-        <div>
-            Profile Replies Page
-        </div>
+        <PostListData userId={currentUser._id} type="userReplies" />
     );
 };
 
-export default ProfileRepliesPage;
+export default ProfilePostsPage;
