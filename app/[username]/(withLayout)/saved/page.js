@@ -1,8 +1,13 @@
+"use client";
+
+import PostListData from "@/components/PostListData";
+import { useUserContext } from "@/context/UserContext";
+
 const ProfileSavedPage = () => {
+    const { currentUser } = useUserContext();
+
     return (
-        <div>
-            Profile Saved Page
-        </div>
+        <PostListData userId={currentUser._id} type="userSaves" />
     );
 };
 

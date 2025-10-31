@@ -47,6 +47,22 @@ export async function fetchUserReplies(userId, params = {}) {
     return res.json();
 }
 
+export async function fetchUserSaves(userId, params = {}) {
+    const queryString = buildQuery(params);
+
+    const res = await fetch(`http://localhost:3000/api/users/${userId}/saves?${queryString}`);
+    if (!res.ok) throw new Error("Failed to fetch user saves");
+    return res.json();
+}
+
+export async function fetchUserLikes(userId, params = {}) {
+    const queryString = buildQuery(params);
+
+    const res = await fetch(`http://localhost:3000/api/users/${userId}/likes?${queryString}`);
+    if (!res.ok) throw new Error("Failed to fetch user likes");
+    return res.json();
+}
+
 export async function toggleLike(postId, userId, action) {
     const res = await fetch(`http://localhost:3000/api/posts/${postId}/like`, {
         method: "PATCH",

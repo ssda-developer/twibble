@@ -1,3 +1,4 @@
+import { addUserStateToPosts } from "@/app/features/posts/utils";
 import dbConnect from "@/lib/mongoose";
 import Post from "@/models/Post";
 
@@ -24,9 +25,11 @@ export async function GET(req, { params }) {
             .limit(limit)
             .lean();
 
+        const postsWithState = await addUserStateToPosts(replies, id);
+
         const nextCursor = replies.length > 0 ? replies[replies.length - 1]._id : null;
 
-        return new Response(JSON.stringify({ replies, nextCursor }), {
+        return new Response(JSON.stringify({ replies: postsWithState, nextCursor }), {
             status: 200,
             headers: { "Content-Type": "application/json" }
         });

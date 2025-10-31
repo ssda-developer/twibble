@@ -4,8 +4,10 @@ import {
     fetchPostById,
     fetchPosts,
     fetchReplies,
+    fetchUserLikes,
     fetchUserPosts,
     fetchUserReplies,
+    fetchUserSaves,
     toggleLike,
     toggleSave
 } from "./api";
@@ -59,20 +61,35 @@ export function useInfiniteReplies(postId, params = {}) {
 }
 
 export function useInfiniteUserItems({ userId, type = "posts", params = {} }) {
-    const fetchFn = type === "posts" ? fetchUserPosts : fetchUserReplies;
+    let fetchFn;
+    let keyFn;
 
-    const keyFn =
-        type === "posts"
-            ? postsKeys.lists.infiniteByUser
-            : (id, p) => postsKeys.lists.infiniteByUser(id, { ...p, type: "replies" });
+    if (type === "posts") {
+        fetchFn = fetchUserPosts;
+        keyFn = postsKeys.lists.infiniteByUser;
+    }
+
+    if (type === "replies") {
+        fetchFn = fetchUserReplies;
+        keyFn = (id, p) => postsKeys.lists.infiniteByUser(id, { ...p, type: "replies" });
+    }
+
+    if (type === "saves") {
+        fetchFn = fetchUserSaves;
+        keyFn = (id, p) => postsKeys.lists.infiniteByUser(id, { ...p, type: "saves" });
+    }
+
+    if (type === "likes") {
+        fetchFn = fetchUserLikes;
+        keyFn = (id, p) => postsKeys.lists.infiniteByUser(id, { ...p, type: "likes" });
+    }
 
     return useInfiniteQuery({
         queryKey: keyFn(userId, params),
         queryFn: ({ pageParam }) => fetchFn(userId, { ...params, cursor: pageParam }),
         getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
         staleTime: POSTS_STALE_TIME,
-        suspense: true,
-        enabled: !!userId
+        suspense: true
     });
 }
 

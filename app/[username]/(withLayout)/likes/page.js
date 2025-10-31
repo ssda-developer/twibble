@@ -1,8 +1,13 @@
+"use client";
+
+import PostListData from "@/components/PostListData";
+import { useUserContext } from "@/context/UserContext";
+
 const ProfileLikesPage = () => {
+    const { currentUser } = useUserContext();
+
     return (
-        <div>
-            Profile likes page
-        </div>
+        <PostListData userId={currentUser._id} type="userLikes" />
     );
 };
 
