@@ -1,66 +1,31 @@
 "use client";
 
-import { useToggleLike } from "@/app/features/posts/hooks";
 import ActionButton from "@/components/ActionButton";
+import ActionLikeButton from "@/components/ActionLikeButton";
 import ActionSaveButton from "@/components/ActionSaveButton";
 import Icon from "@/components/Icon";
 import { useUserContext } from "@/context/UserContext";
-import { useState } from "react";
 
-const ActionsBlock = ({ classes, replies, reposts, likes = 0, views, userState, tweetId }) => {
+const ActionsBlock = ({ tweetId, replies, reposts, likes, views, userState, classes }) => {
     const { currentUser } = useUserContext();
 
-    const { mutate: toggleLike, isPending } = useToggleLike(currentUser._id);
-    const [liked, setLiked] = useState(userState?.liked || false);
-
-    const handleLiked = (evt) => {
-        evt.preventDefault();
-        evt.stopPropagation();
-
-        toggleLike({
-            postId: tweetId,
-            action: liked ? "unlike" : "like"
-        });
-        setLiked((prev) => !prev);
-    };
-
     return (
-        <div className={`flex justify-between text-gray-400 text-sm mt-2 mx-[-4px] ${classes}`}>
-            <ActionButton
-                count={replies}
-                className="hover:text-blue-500"
-                ariaLabel="Retweets"
-            >
+        <div className={`flex justify-between text-sm mt-2 mx-[-8px] text-gray-400 ${classes}`}>
+            <ActionButton count={replies} ariaLabel="Replies" type="replies">
                 <Icon name="chat-bubble-oval-left" />
             </ActionButton>
-            <ActionButton
-                count={reposts}
-                className="hover:text-green-500"
-                ariaLabel="Reposts"
-            >
+            <ActionButton count={reposts} ariaLabel="Reposts" type="reposts">
                 <Icon name="arrow-path-rounded-square" />
             </ActionButton>
-            <ActionButton
-                count={likes}
-                className={`hover:text-red-400 ${liked && "text-red-500"}`}
-                ariaLabel="Likes"
-                clickHandler={handleLiked}
-                disabled={isPending}
-            >
-                {liked ? <Icon name="heart" type="solid" /> : <Icon name="heart" />}
-            </ActionButton>
-            <ActionButton
-                count={views}
-                className="hover:text-purple-500"
-                ariaLabel="Views"
-            >
+            <ActionLikeButton postId={tweetId} likeCount={likes} userState={userState} currentUser={currentUser} />
+            <ActionButton count={views} ariaLabel="Views" type="views">
                 <Icon name="chart-bar-square" />
             </ActionButton>
-            <div className="flex">
+            <div className="flex space-x-1">
                 <ActionSaveButton postId={tweetId} userState={userState} currentUser={currentUser} />
-                <button className="flex items-center cursor-pointer p-1 ml-1 rounded-full hover:text-blue-500">
+                <ActionButton ariaLabel="Share" type="share">
                     <Icon name="arrow-up-tray" />
-                </button>
+                </ActionButton>
             </div>
         </div>
     );

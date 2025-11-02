@@ -13,10 +13,6 @@ const IconButton = ({ icon, label, href = "#", ariaLabel = "" }) => {
     const content = (
         <span
             className={`inline-flex items-center text-xl ${isActive ? "font-black" : "font-semibold"} rounded-full py-3 px-4 group-hover/link:bg-gray-700`}
-            role="button"
-            tabIndex={0}
-            aria-label={ariaLabel ?? label}
-            title={label}
         >
             <Icon name={icon} type={`${isActive ? "solid" : "outline"}`} />
             {label && <span className="hidden md:inline ml-2">{label}</span>}

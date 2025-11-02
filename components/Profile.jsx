@@ -11,7 +11,7 @@ const Profile = () => {
             <Avatar letter={currentUser?.avatarInitials} />
             <div className="flex flex-col ml-2">
                 <span>{currentUser?.displayName}</span>
-                <span className="text-sm">@{currentUser?.currentUsername}</span>
+                <span className="text-sm">@{currentUser?.username}</span>
             </div>
         </div>
     );

@@ -1,7 +1,9 @@
 "use client";
 
+import { SITE_NAME } from "@/app/constants";
+
 export default function TwibbleLoader() {
-    const letters = "Twibble".split("");
+    const letters = SITE_NAME.split("");
 
     return (
         <div className="flex items-center justify-center min-h-screen">
