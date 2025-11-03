@@ -12,6 +12,9 @@ const ActionLikeButton = ({ postId, userState, likeCount, currentUser }) => {
     const handleClick = (e) => {
         e.preventDefault();
         e.stopPropagation();
+
+        if (isPending) return;
+
         toggleLike({ postId, action: liked ? "unlike" : "like" });
         setLiked((prev) => !prev);
     };

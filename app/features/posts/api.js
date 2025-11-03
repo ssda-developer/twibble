@@ -92,3 +92,11 @@ export async function createPost(postData) {
     if (!res.ok) throw new Error("Failed to create post");
     return res.json();
 }
+
+export async function deletePost(postId) {
+    const res = await fetch(`http://localhost:3000/api/posts/${postId}`, {
+        method: "DELETE"
+    });
+    if (!res.ok) throw new Error("Failed to delete post");
+    return res.json();
+}

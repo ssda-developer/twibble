@@ -1,4 +1,3 @@
-import AuthorizationBlock from "@/components/AuthorizationBlock";
 import Profile from "@/components/Profile";
 import Search from "@/components/Search";
 
@@ -11,9 +10,9 @@ const Aside = () => {
             <div className="mb-6">
                 <Profile />
             </div>
-            <div className="mb-6">
-                <AuthorizationBlock />
-            </div>
+            {/*<div className="mb-6">*/}
+            {/*    <AuthorizationBlock />*/}
+            {/*</div>*/}
             <div className="mb-6">
                 <div className="flex flex-col p-4 rounded-xl border border-slate-800">
                     <h3 className="font-black mb-4 text-xl">Popular today</h3>

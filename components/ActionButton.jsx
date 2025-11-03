@@ -3,7 +3,7 @@
 import { formatCount } from "@/utils";
 
 const ActionButton = ({
-                          count,
+                          count = 0,
                           ariaLabel,
                           children,
                           onClick,
@@ -41,7 +41,7 @@ const ActionButton = ({
         },
         default: {
             text: "text-gray-500",
-            hover: "hover:bg-gray-500/10 hover:text-gray-500"
+            hover: "hover:bg-gray-500/10"
         }
     };
 

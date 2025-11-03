@@ -38,3 +38,4 @@ export const timeAgo = (date) => {
     return "now";
 };
 
+export const getRandomValue = (maxValue) => Math.floor(Math.random() * maxValue);

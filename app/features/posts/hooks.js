@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createPost,
+    deletePost,
     fetchPostById,
     fetchPosts,
     fetchReplies,
@@ -186,6 +187,37 @@ export function useCreatePost() {
 
         onSuccess: () => {
             qc.invalidateQueries(postsKeys.all);
+        }
+    });
+}
+
+export function useDeletePost() {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id) => deletePost(id),
+
+        onMutate: async (id) => {
+            await qc.cancelQueries({ queryKey: postsKeys.all });
+
+            const previous = qc.getQueryData(postsKeys.all) || [];
+
+            qc.setQueryData(postsKeys.all, (old = []) =>
+                Array.isArray(old) ? old.filter((p) => p._id !== id) : old
+            );
+
+            return { previous };
+        },
+
+        onError: (_err, _id, context) => {
+            if (context?.previous) {
+                qc.setQueryData(postsKeys.all, context.previous);
+            }
+            console.error("Delete failed", _err);
+        },
+
+        onSettled: () => {
+            qc.invalidateQueries({ queryKey: postsKeys.all });
         }
     });
 }

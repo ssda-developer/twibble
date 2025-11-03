@@ -32,9 +32,9 @@ const PostSchema = new Schema(
         likeCount: { type: Number, default: 0 },
         replyCount: { type: Number, default: 0 },
         repostCount: { type: Number, default: 0 },
-        saveCount: { type: Number, default: 0 },
+        saveCount: { type: Number, default: 0 }
 
-        deleted: { type: Boolean, default: false }
+        // deleted: { type: Boolean, default: false }
     },
     { timestamps: true }
 );

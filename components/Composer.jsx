@@ -4,6 +4,7 @@ import { useCreatePost } from "@/app/features/posts/hooks";
 import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
 import { useUserContext } from "@/context/UserContext";
+import { getRandomValue } from "@/utils";
 import { useEffect, useRef, useState } from "react";
 
 const Composer = ({
@@ -19,6 +20,7 @@ const Composer = ({
     const maxChars = 280;
     const remaining = maxChars - text.length;
     const overLimit = remaining < 0;
+    const [imgLink, setImgLink] = useState("");
 
     useEffect(() => {
         const el = textareaRef.current;
@@ -29,13 +31,28 @@ const Composer = ({
     }, [text]);
 
     const handleSubmit = () => {
+        const arrayMedia = [];
+
         if (overLimit || !text.trim()) return;
+        if (imgLink) {
+            arrayMedia.push({
+                url: imgLink,
+                type: "image",
+                meta: {}
+            });
+        }
 
         createPost.mutate({
             content: text.trim(),
+            media: arrayMedia,
             parentId,
             userId: currentUser._id
-        }, { onSuccess: () => setText("") });
+        }, {
+            onSuccess: () => {
+                setText("");
+                setImgLink("");
+            }
+        });
     };
 
     const handleKeyDown = (e) => {
@@ -43,6 +60,14 @@ const Composer = ({
             e.preventDefault();
             handleSubmit();
         }
+    };
+
+    const handlePhoto = (e) => {
+        e.preventDefault();
+
+        const link = `https://picsum.photos/60${getRandomValue(9)}/30${getRandomValue(9)}`;
+
+        setImgLink(link);
     };
 
     return (
@@ -57,7 +82,7 @@ const Composer = ({
                 )}
 
                 <div
-                    className="flex-1 border-b border-slate-800 flex items-center justify-center text-white font-semibold">
+                    className="flex-1 border-b border-slate-800 flex flex-col text-white font-semibold">
                     <textarea
                         ref={textareaRef}
                         value={text}
@@ -69,11 +94,21 @@ const Composer = ({
                             overLimit ? "text-red-500" : "text-white"
                         }`}
                     />
+                    {imgLink &&
+                        <div className="flex rounded-xl overflow-hidden mb-6 relative">
+                            <img src={imgLink} alt="image" className="object-contain w-full object-center" />
+                            <button
+                                className="flex bg-black/80 backdrop-blur-md hover:bg-black items-center p-2 rounded-full cursor-pointer transition absolute top-2 right-2"
+                                onClick={() => setImgLink("")}>
+                                <Icon name="x-mark" />
+                            </button>
+                        </div>
+                    }
                 </div>
 
                 <div className="flex mt-4 items-center">
                     <div className="flex items-center justify-center text-white">
-                        <button className="mr-2"><Icon name="photo" /></button>
+                        <button className="mr-2" onClick={handlePhoto}><Icon name="photo" /></button>
                         <button className="mr-2"><Icon name="gif" /></button>
                         <button className="mr-2"><Icon name="face-smile" /></button>
                     </div>

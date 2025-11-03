@@ -1,4 +1,4 @@
-import TweetCard from "@/components/TweetCard";
+import PostCard from "@/components/PostCard";
 
 const PostList = ({ posts }) => {
     if (!posts || posts.length === 0) return <p>No posts</p>;
@@ -7,7 +7,7 @@ const PostList = ({ posts }) => {
         <ul>
             {posts.map((post) => (
                 <li key={post._id} className="border-b border-slate-800">
-                    <TweetCard {...post} />
+                    <PostCard {...post} />
                 </li>
             ))}
         </ul>

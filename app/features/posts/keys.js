@@ -10,6 +10,7 @@ export const postsKeys = {
         infiniteByUser: (userId, params = {}) => ["posts", "user", userId, "infinite", params],
         byId: (id) => ["posts", "detail", id],
         replies: (postId, params = {}) => ["posts", "detail", postId, "replies", params],
-        infiniteReplies: (postId, params = {}) => ["posts", "detail", postId, "replies", "infinite", params]
+        infiniteReplies: (postId, params = {}) => ["posts", "detail", postId, "replies", "infinite", params],
+        delete: (id) => ["posts", "delete", id]
     }
 };
