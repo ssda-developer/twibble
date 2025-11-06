@@ -9,12 +9,13 @@ export async function GET(req, { params }) {
     try {
         await dbConnect();
 
-        const { id } = params;
+        const { id } = await params;
         const { searchParams } = new URL(req.url);
         const limit = parseInt(searchParams.get("limit")) || 20;
         const cursor = searchParams.get("cursor");
 
         const filter = { user: id };
+
         if (cursor) {
             filter._id = { $lt: cursor };
         }
@@ -22,7 +23,6 @@ export async function GET(req, { params }) {
         const likes = await Like.find(filter)
             .populate({
                 path: "post",
-                match: { deleted: false },
                 options: { sort: { _id: -1 } }
             })
             .sort({ _id: -1 })

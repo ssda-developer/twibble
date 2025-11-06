@@ -9,7 +9,7 @@ export async function GET(req, { params }) {
     try {
         await dbConnect();
 
-        const { id: userId } = params;
+        const { id: userId } = await params;
         const { searchParams } = new URL(req.url);
         const limit = parseInt(searchParams.get("limit")) || 20;
         const cursor = searchParams.get("cursor");
@@ -22,7 +22,6 @@ export async function GET(req, { params }) {
         const saves = await Save.find(filter)
             .populate({
                 path: "post",
-                match: { deleted: false },
                 options: { sort: { _id: -1 } }
             })
             .sort({ _id: -1 })

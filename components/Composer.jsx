@@ -3,56 +3,93 @@
 import { useCreatePost } from "@/app/features/posts/hooks";
 import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
+import MediaGallery from "@/components/MediaGallery";
 import { useUserContext } from "@/context/UserContext";
 import { getRandomValue } from "@/utils";
 import { useEffect, useRef, useState } from "react";
 
-const Composer = ({
-                      placeholder = "What’s happening?",
-                      parentId = null,
-                      replyingToUser = null
-                  }) => {
-    const { currentUser } = useUserContext();
+function ComposerTextarea({ value, onChange, onKeyDown, placeholder }) {
+    const ref = useRef(null);
 
+    useEffect(() => {
+        const el = ref.current;
+
+        if (!el) return;
+
+        el.style.height = "auto";
+        el.style.height = `${el.scrollHeight}px`;
+    }, [ref, value]);
+
+    return (
+        <textarea
+            ref={ref}
+            value={value}
+            onChange={onChange}
+            onKeyDown={onKeyDown}
+            placeholder={placeholder}
+            rows={1}
+            className="w-full bg-transparent text-xl py-3 mb-2 outline-none resize-none overflow-hidden placeholder-slate-500 leading-5"
+        />
+    );
+}
+
+function ComposerActions({ remaining, overLimit, onAddPhoto, onAddGif, onAddEmoji, onSubmit, isDisabled, isReply }) {
+    return (
+        <div className="flex mt-4 items-center">
+            <div className="flex items-center justify-center text-white">
+                <button type="button" className="mr-2" onClick={onAddPhoto} aria-label="Add photo">
+                    <Icon name="photo" />
+                </button>
+                <button type="button" className="mr-2" onClick={onAddGif} aria-label="Add gif">
+                    <Icon name="gif" />
+                </button>
+                <button type="button" className="mr-2" onClick={onAddEmoji} aria-label="Add emoji">
+                    <Icon name="face-smile" />
+                </button>
+            </div>
+
+            <span className={`ml-auto mr-3 text-sm ${overLimit ? "text-red-500" : "text-slate-400"}`}>
+                {remaining}
+            </span>
+            <button
+                type="button"
+                className="bg-white px-3 py-1 font-bold text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isDisabled}
+                onClick={onSubmit}
+            >
+                {isReply ? "Reply" : "Post"}
+            </button>
+        </div>
+    );
+}
+
+export default function Composer({ placeholder = "What’s happening?", parentId = null, replyingToUser = null }) {
+    const { currentUser } = useUserContext();
     const [text, setText] = useState("");
+    const [imgLinks, setImgLinks] = useState([]);
     const createPost = useCreatePost();
-    const textareaRef = useRef(null);
+
     const maxChars = 280;
     const remaining = maxChars - text.length;
     const overLimit = remaining < 0;
-    const [imgLink, setImgLink] = useState("");
-
-    useEffect(() => {
-        const el = textareaRef.current;
-
-        if (!el) return;
-        el.style.height = "auto";
-        el.style.height = `${el.scrollHeight}px`;
-    }, [text]);
 
     const handleSubmit = () => {
-        const arrayMedia = [];
-
         if (overLimit || !text.trim()) return;
-        if (imgLink) {
-            arrayMedia.push({
-                url: imgLink,
-                type: "image",
-                meta: {}
-            });
-        }
 
-        createPost.mutate({
-            content: text.trim(),
-            media: arrayMedia,
-            parentId,
-            userId: currentUser._id
-        }, {
-            onSuccess: () => {
-                setText("");
-                setImgLink("");
+        createPost.mutate(
+            {
+                content: text.trim(),
+                media: imgLinks,
+                parentId,
+                userId: currentUser._id
+            },
+            {
+                onSuccess: () => {
+                    setText("");
+                    setImgLinks([]);
+                }
             }
-        });
+        );
     };
 
     const handleKeyDown = (e) => {
@@ -65,10 +102,17 @@ const Composer = ({
     const handlePhoto = (e) => {
         e.preventDefault();
 
-        const link = `https://picsum.photos/60${getRandomValue(9)}/30${getRandomValue(9)}`;
+        const link = `https://picsum.photos/id/${getRandomValue(1000)}/600/300`;
 
-        setImgLink(link);
+        setImgLinks(prev => [...prev, { url: link }]);
     };
+
+    const handleRemovePhoto = (indexToRemove) => {
+        setImgLinks(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    };
+
+    const handleGif = (e) => e.preventDefault();
+    const handleEmoji = (e) => e.preventDefault();
 
     return (
         <div className="border-b border-slate-800 p-4 flex">
@@ -82,52 +126,28 @@ const Composer = ({
                 )}
 
                 <div
-                    className="flex-1 border-b border-slate-800 flex flex-col text-white font-semibold">
-                    <textarea
-                        ref={textareaRef}
+                    className={`flex-1 border-b border-slate-800 flex flex-col text-white font-semibold ${imgLinks.length && "pb-6"}`}>
+                    <ComposerTextarea
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
-                        rows={1}
-                        className={`w-full bg-transparent text-xl py-3 mb-2 outline-none resize-none overflow-hidden placeholder-slate-500 leading-5 ${
-                            overLimit ? "text-red-500" : "text-white"
-                        }`}
                     />
-                    {imgLink &&
-                        <div className="flex rounded-xl overflow-hidden mb-6 relative">
-                            <img src={imgLink} alt="image" className="object-contain w-full object-center" />
-                            <button
-                                className="flex bg-black/80 backdrop-blur-md hover:bg-black items-center p-2 rounded-full cursor-pointer transition absolute top-2 right-2"
-                                onClick={() => setImgLink("")}>
-                                <Icon name="x-mark" />
-                            </button>
-                        </div>
-                    }
+
+                    <MediaGallery images={imgLinks} editable={true} onRemove={handleRemovePhoto} />
                 </div>
 
-                <div className="flex mt-4 items-center">
-                    <div className="flex items-center justify-center text-white">
-                        <button className="mr-2" onClick={handlePhoto}><Icon name="photo" /></button>
-                        <button className="mr-2"><Icon name="gif" /></button>
-                        <button className="mr-2"><Icon name="face-smile" /></button>
-                    </div>
-
-                    <span className={`ml-auto mr-3 text-sm ${overLimit ? "text-red-500" : "text-slate-400"}`}>
-                        {remaining}
-                    </span>
-
-                    <button
-                        className="bg-white px-3 py-1 font-bold text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={overLimit || !text.trim()}
-                        onClick={handleSubmit}
-                    >
-                        {parentId ? "Reply" : "Post"}
-                    </button>
-                </div>
+                <ComposerActions
+                    remaining={remaining}
+                    overLimit={overLimit}
+                    onAddPhoto={handlePhoto}
+                    onAddGif={handleGif}
+                    onAddEmoji={handleEmoji}
+                    onSubmit={handleSubmit}
+                    isDisabled={overLimit || !text.trim()}
+                    isReply={!!parentId}
+                />
             </div>
         </div>
     );
-};
-
-export default Composer;
+}

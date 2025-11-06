@@ -20,7 +20,7 @@ const MenuItem = ({ keyLi, icon, label, onClick }) => {
     );
 };
 
-const ActionPostOptionsButton = ({ postId, author }) => {
+const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
     const { currentUser } = useUserContext();
     const [isShow, setIsShow] = useState(false);
     const { mutate: deletePost, isLoading } = useDeletePost();
@@ -35,7 +35,10 @@ const ActionPostOptionsButton = ({ postId, author }) => {
     };
 
     const handleEdit = (e) => {
-        console.log(edit);
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (onEdit) onEdit();
     };
 
     const handleDelete = (e) => {
@@ -79,7 +82,7 @@ const ActionPostOptionsButton = ({ postId, author }) => {
             </ActionButton>
 
             <div id="dropdownDots"
-                 className={`absolute right-0 ${!isShow && "hidden"} border border-slate-800 rounded-xl bg-black/80 backdrop-blur-md min-w-24`}>
+                 className={`absolute right-0 ${!isShow && "hidden"} border border-slate-800 rounded-xl bg-black/80 backdrop-blur-md min-w-28`}>
                 <ul className="py-2 text-sm">
                     {mainMenu.map((item, index) => (
                         <MenuItem key={`${item.label}-${index}`} {...item} />

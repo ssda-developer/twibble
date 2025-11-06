@@ -1,4 +1,4 @@
-import PostThread from "@/components/post/PostThread";
+import PostThread from "@/components/PostThread";
 import { Suspense } from "react";
 
 export const PostView = ({ id, username }) => {

@@ -98,7 +98,7 @@ export async function POST(req) {
             parentPost = parentId;
             rootPost = parent.rootPost ? parent.rootPost : parentId;
         }
-
+        console.log("media ", media);
         const newPost = await Post.create({
             author: user._id,
             authorSnapshot: {

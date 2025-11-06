@@ -25,3 +25,17 @@ body {
     color: var(--foreground);
     font-family: Barlow, Arial, Helvetica, sans-serif;
 }
+
+.embla {
+    overflow: hidden;
+}
+
+.embla__container {
+    display: flex;
+}
+
+.embla__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+}
+
