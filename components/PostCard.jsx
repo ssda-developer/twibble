@@ -19,6 +19,7 @@ const PostCard = ({
                       userState
                   }) => {
     const [isEditing, setIsEditing] = useState(false);
+    const postLink = `http://localhost:3000/${authorSnapshot.username}/post/${_id}`;
 
     const handleEdit = () => {
         console.log("handleEdit onEdit");
@@ -26,7 +27,7 @@ const PostCard = ({
     };
 
     return (
-        <Link href={`/${authorSnapshot.username}/post/${_id}`}
+        <Link href={postLink}
               className="flex p-4">
             <div className="mr-2">
                 <Avatar letter={authorSnapshot.avatarInitials} />
@@ -58,6 +59,7 @@ const PostCard = ({
                               views=""
                               tweetId={_id}
                               userState={userState}
+                              postLink={postLink}
                 />
             </div>
         </Link>

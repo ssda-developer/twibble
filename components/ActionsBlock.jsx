@@ -1,12 +1,13 @@
 "use client";
 
 import ActionButton from "@/components/ActionButton";
+import ActionClipboardButton from "@/components/ActionClipboardButton";
 import ActionLikeButton from "@/components/ActionLikeButton";
 import ActionSaveButton from "@/components/ActionSaveButton";
 import Icon from "@/components/Icon";
 import { useUserContext } from "@/context/UserContext";
 
-const ActionsBlock = ({ tweetId, replies, reposts, likes, views, userState, classes }) => {
+const ActionsBlock = ({ tweetId, replies, reposts, likes, views, userState, classes, postLink }) => {
     const { currentUser } = useUserContext();
 
     return (
@@ -23,9 +24,7 @@ const ActionsBlock = ({ tweetId, replies, reposts, likes, views, userState, clas
             </ActionButton>
             <div className="flex space-x-1">
                 <ActionSaveButton postId={tweetId} userState={userState} currentUser={currentUser} />
-                <ActionButton ariaLabel="Share" type="share">
-                    <Icon name="arrow-up-tray" />
-                </ActionButton>
+                <ActionClipboardButton postLink={postLink} />
             </div>
         </div>
     );

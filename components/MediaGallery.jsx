@@ -15,7 +15,7 @@ function MediaGallery({ images = [], editable = false, onRemove }) {
                             <div className="relative">
                                 <img src={img.url}
                                      alt={img.meta?.title || `media-${idx}`}
-                                     className="embla__slide__number object-contain w-full rounded-xl"
+                                     className="embla__slide__number object-contain w-full rounded-xl cursor-pointer"
                                 />
                                 {editable && (
                                     <button
