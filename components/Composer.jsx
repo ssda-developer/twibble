@@ -1,6 +1,6 @@
 "use client";
 
-import { useCreatePost } from "@/app/features/posts/hooks";
+import { useCreatePost, useEditPost } from "@/app/features/posts/hooks";
 import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
 import MediaGallery from "@/components/MediaGallery";
@@ -33,7 +33,17 @@ function ComposerTextarea({ value, onChange, onKeyDown, placeholder }) {
     );
 }
 
-function ComposerActions({ remaining, overLimit, onAddPhoto, onAddGif, onAddEmoji, onSubmit, isDisabled, isReply }) {
+function ComposerActions({
+                             remaining,
+                             overLimit,
+                             onAddPhoto,
+                             onAddGif,
+                             onAddEmoji,
+                             onSubmit,
+                             isDisabled,
+                             isReply,
+                             type
+                         }) {
     return (
         <div className="flex mt-4 items-center">
             <div className="flex items-center justify-center text-white">
@@ -53,21 +63,30 @@ function ComposerActions({ remaining, overLimit, onAddPhoto, onAddGif, onAddEmoj
             </span>
             <button
                 type="button"
-                className="bg-white px-3 py-1 font-bold text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                className="capitalize bg-white px-3 py-1 font-bold text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isDisabled}
                 onClick={onSubmit}
             >
-                {isReply ? "Reply" : "Post"}
+                {type}
             </button>
         </div>
     );
 }
 
-export default function Composer({ placeholder = "What’s happening?", parentId = null, replyingToUser = null }) {
+export default function Composer({
+                                     currentData = { text: "", images: [] },
+                                     placeholder = "What’s happening?",
+                                     parentId = null,
+                                     replyingToUser = null,
+                                     type = "post",
+                                     postId = null,
+                                     setIsEditing
+                                 }) {
     const { currentUser } = useUserContext();
-    const [text, setText] = useState("");
-    const [imgLinks, setImgLinks] = useState([]);
+    const [text, setText] = useState(currentData.text);
+    const [imgLinks, setImgLinks] = useState(currentData.images);
     const createPost = useCreatePost();
+    const editPost = useEditPost();
 
     const maxChars = 280;
     const remaining = maxChars - text.length;
@@ -76,20 +95,41 @@ export default function Composer({ placeholder = "What’s happening?", parentId
     const handleSubmit = () => {
         if (overLimit || !text.trim()) return;
 
-        createPost.mutate(
-            {
-                content: text.trim(),
-                media: imgLinks,
-                parentId,
-                userId: currentUser._id
-            },
-            {
-                onSuccess: () => {
-                    setText("");
-                    setImgLinks([]);
+        if (type === "edit") {
+            editPost.mutate(
+                {
+                    postId: postId,
+                    content: {
+                        content: text.trim(),
+                        media: imgLinks, //TODO: fixed edit imgs
+                        parentId,
+                        userId: currentUser._id
+                    }
+                },
+                {
+                    onSuccess: () => {
+                        setText("");
+                        setImgLinks([]);
+                        setIsEditing(false);
+                    }
                 }
-            }
-        );
+            );
+        } else {
+            createPost.mutate(
+                {
+                    content: text.trim(),
+                    media: imgLinks,
+                    parentId,
+                    userId: currentUser._id
+                },
+                {
+                    onSuccess: () => {
+                        setText("");
+                        setImgLinks([]);
+                    }
+                }
+            );
+        }
     };
 
     const handleKeyDown = (e) => {
@@ -115,7 +155,7 @@ export default function Composer({ placeholder = "What’s happening?", parentId
     const handleEmoji = (e) => e.preventDefault();
 
     return (
-        <div className="border-b border-slate-800 p-4 flex">
+        <div className="p-4 flex">
             <div className="mr-2">
                 <Avatar letter={currentUser?.avatarInitials} />
             </div>
@@ -146,6 +186,7 @@ export default function Composer({ placeholder = "What’s happening?", parentId
                     onSubmit={handleSubmit}
                     isDisabled={overLimit || !text.trim()}
                     isReply={!!parentId}
+                    type={type}
                 />
             </div>
         </div>

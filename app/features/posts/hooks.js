@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import {
     createPost,
     deletePost,
+    editPost,
     fetchPostById,
     fetchPosts,
     fetchReplies,
@@ -187,6 +188,39 @@ export function useCreatePost() {
 
         onSuccess: () => {
             qc.invalidateQueries(postsKeys.all);
+        }
+    });
+}
+
+export function useEditPost() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ postId, content }) => editPost(postId, content),
+
+        onMutate: async ({ postId, content }) => {
+            await queryClient.cancelQueries(postsKeys.lists.byId(postId));
+
+            const previousPost = queryClient.getQueryData(postsKeys.lists.byId(postId));
+
+            if (previousPost) {
+                queryClient.setQueryData(postsKeys.lists.byId(postId), old => ({
+                    ...old,
+                    content
+                }));
+            }
+
+            return { previousPost };
+        },
+
+        onError: (_err, _variables, context) => {
+            if (context?.previousPost) {
+                queryClient.setQueryData(postsKeys.lists.byId(context.previousPost._id), context.previousPost);
+            }
+        },
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === "posts" });
         }
     });
 }

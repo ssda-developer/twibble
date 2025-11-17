@@ -93,6 +93,16 @@ export async function createPost(postData) {
     return res.json();
 }
 
+export async function editPost(postId, postData) {
+    const res = await fetch(`http://localhost:3000/api/posts/${postId}/edit`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(postData)
+    });
+    if (!res.ok) throw new Error("Failed to toggle like");
+    return res.json();
+}
+
 export async function deletePost(postId) {
     const res = await fetch(`http://localhost:3000/api/posts/${postId}`, {
         method: "DELETE"
