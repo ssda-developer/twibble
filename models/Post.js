@@ -10,7 +10,8 @@ const PostSchema = new Schema(
             _id: { type: Schema.Types.ObjectId, required: true },
             username: { type: String, required: true },
             displayName: { type: String },
-            avatarInitials: { type: String }
+            avatarInitials: { type: String },
+            avatarColors: { type: Object }
         },
 
         content: { type: String, maxlength: 280 },

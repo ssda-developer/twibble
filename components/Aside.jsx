@@ -1,4 +1,6 @@
+import AuthorizationBlock from "@/components/AuthorizationBlock";
 import Profile from "@/components/Profile";
+import Protected from "@/components/Protected";
 import Search from "@/components/Search";
 
 const Aside = () => {
@@ -8,11 +10,13 @@ const Aside = () => {
                 <Search />
             </div>
             <div className="mb-6">
-                <Profile />
+                <Protected>
+                    <Profile />
+                </Protected>
+                <Protected mode="guest">
+                    <AuthorizationBlock />
+                </Protected>
             </div>
-            {/*<div className="mb-6">*/}
-            {/*    <AuthorizationBlock />*/}
-            {/*</div>*/}
             <div className="mb-6">
                 <div className="flex flex-col p-4 rounded-xl border border-slate-800">
                     <h3 className="font-black mb-4 text-xl">Popular today</h3>

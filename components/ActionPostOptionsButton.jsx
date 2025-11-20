@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeletePost } from "@/app/features/posts/hooks";
+import { useDeletePost } from "@/app/features/hooks";
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
 import { useUserContext } from "@/context/UserContext";
@@ -23,7 +23,7 @@ const MenuItem = ({ keyLi, icon, label, onClick }) => {
 const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
     const { currentUser } = useUserContext();
     const [isShow, setIsShow] = useState(false);
-    const { mutate: deletePost, isLoading } = useDeletePost();
+    const { mutate: deletePost } = useDeletePost();
 
     const dropdownRef = useRef(null);
 
@@ -69,7 +69,7 @@ const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
         { icon: "eye-slash", label: "Hide", onClick: handleHide }
     ];
 
-    const authorMenu = author === currentUser._id ? [
+    const authorMenu = author === currentUser?._id ? [
         { icon: "pencil-square", label: "Edit", onClick: handleEdit },
         { icon: "trash", label: "Delete", onClick: handleDelete }
     ] : [];

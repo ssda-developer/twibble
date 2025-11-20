@@ -1,59 +1,81 @@
+"use client";
+
+import LoginForm from "@/components/LoginForm";
+import RegisterForm from "@/components/RegisterForm";
+import { useUserContext } from "@/context/UserContext";
+import { useEffect, useRef, useState } from "react";
+
 const AuthorizationBlock = () => {
+    const [loginForm, setLoginForm] = useState(true);
+    const { authAttentionId } = useUserContext();
+    const boxRef = useRef(null);
+    const [shake, setShake] = useState(false);
+
+    useEffect(() => {
+        if (!authAttentionId) return;
+
+        if (boxRef.current) {
+            boxRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+            setShake(true);
+
+            const timeout = setTimeout(() => {
+                setShake(false);
+            }, 600);
+
+            return () => clearTimeout(timeout);
+        }
+    }, [authAttentionId]);
+
     return (
-        <div className="p-4 rounded-xl border border-slate-800 flex flex-col">
-            <form className="space-y-4" aria-label="Authorization form">
-                <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm text-slate-300">
-                        Email
-                    </label>
-                    <input
-                        id="email"
-                        type="email"
-                        inputMode="email"
-                        placeholder="you@example.com"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 px-3 py-2 transition"
-                    />
-                </div>
+        <div ref={boxRef}
+             className={`p-4 rounded-xl border border-slate-800 flex flex-col ${shake ? "shake-animation" : ""}`}>
+            {loginForm &&
+                <>
+                    <LoginForm />
+                    <p className="mt-2 text-sm text-slate-400">
+                        Don't have an account?
+                        <button onClick={() => setLoginForm(false)}
+                                className="ml-2 text-sky-400 hover:text-sky-300 transition">
+                            Register
+                        </button>
+                    </p>
+                </>
+            }
+            {!loginForm &&
+                <>
+                    <RegisterForm />
+                    <p className="mt-2 text-sm text-slate-400">
+                        Already have an account?
+                        <button onClick={() => setLoginForm(true)}
+                                className="ml-2 text-sky-400 hover:text-sky-300 transition">
+                            Login
+                        </button>
+                    </p>
+                </>
+            }
 
-                <div className="space-y-2">
-                    <label htmlFor="password" className="block text-sm text-slate-300">
-                        Password
-                    </label>
-                    <input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 px-3 py-2 transition"
-                    />
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm text-slate-300 select-none">
-                        <input
-                            type="checkbox"
-                            className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-sky-500 focus:ring-sky-500"
-                        />
-                        Remember me
-                    </label>
-                    <a href="#" className="text-sm text-sky-400 hover:text-sky-300 transition">
-                        Forgot password?
-                    </a>
-                </div>
-
-                <button
-                    type="submit"
-                    className="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white px-4 py-2.5 transition"
-                >
-                    Login
-                </button>
-            </form>
-
-            <p className="mt-2 text-center text-sm text-slate-400">
-                Don't have an account?
-                <a href="#" className="text-sky-400 hover:text-sky-300 transition">
-                    Register
-                </a>
-            </p>
+            <style>
+                {`
+                    @keyframes shake {
+                        0% { transform: translateX(0); }
+                        15% { transform: translateX(-6px); }
+                        30% { transform: translateX(6px); }
+                        45% { transform: translateX(-5px); }
+                        60% { transform: translateX(5px); }
+                        75% { transform: translateX(-3px); }
+                        90% { transform: translateX(3px); }
+                        100% { transform: translateX(0); }
+                    }
+                        
+                    .shake-animation {
+                        animation: shake 0.6s ease-in-out;
+                    }
+                `}
+            </style>
         </div>
     );
 };

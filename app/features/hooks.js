@@ -1,8 +1,10 @@
+import { useUserContext } from "@/context/UserContext";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createPost,
     deletePost,
     editPost,
+    fetchMe,
     fetchPostById,
     fetchPosts,
     fetchReplies,
@@ -10,6 +12,9 @@ import {
     fetchUserPosts,
     fetchUserReplies,
     fetchUserSaves,
+    loginRequest,
+    logoutRequest,
+    registerRequest,
     toggleLike,
     toggleSave
 } from "./api";
@@ -253,5 +258,62 @@ export function useDeletePost() {
         onSettled: () => {
             qc.invalidateQueries({ queryKey: postsKeys.all });
         }
+    });
+}
+
+export function useLoginUser() {
+    const qc = useQueryClient();
+    const { setCurrentUser } = useUserContext();
+
+    return useMutation({
+        mutationFn: loginRequest,
+        onSuccess: async (data) => {
+            setCurrentUser(data.user);
+
+            qc.invalidateQueries(postsKeys.all);
+        }
+    });
+}
+
+export function useRegisterUser() {
+    const qc = useQueryClient();
+    const { setCurrentUser } = useUserContext();
+
+    return useMutation({
+        mutationFn: registerRequest,
+        onSuccess: async (data) => {
+            setCurrentUser(data.user);
+
+            qc.invalidateQueries(postsKeys.all);
+        }
+    });
+}
+
+export function useLogoutUser() {
+    const qc = useQueryClient();
+    const { setCurrentUser } = useUserContext();
+
+    return useMutation({
+        mutationFn: logoutRequest,
+        onSuccess: async () => {
+            setCurrentUser(null);
+
+            qc.invalidateQueries({
+                predicate: (query) => {
+                    const key = query.queryKey;
+                    if (!Array.isArray(key)) return false;
+                    return key[0] === "posts";
+                }
+            });
+        }
+    });
+}
+
+export function useMeQuery() {
+    return useQuery({
+        queryKey: ["auth", "me"],
+        queryFn: fetchMe,
+        staleTime: 5 * 60 * 1000,
+        retry: false
     });
 }

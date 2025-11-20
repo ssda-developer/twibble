@@ -1,4 +1,4 @@
-import { addUserStateToPosts } from "@/app/features/posts/utils";
+import { addUserStateToPosts } from "@/app/features/utils";
 import dbConnect from "@/lib/mongoose";
 import Post from "@/models/Post";
 import User from "@/models/User";
@@ -43,7 +43,11 @@ export async function GET(req) {
             nextCursor = lastPost.createdAt.toISOString();
         }
 
-        const postsWithState = await addUserStateToPosts(posts, currentUserId);
+        let postsWithState = posts;
+
+        if (currentUserId) {
+            postsWithState = await addUserStateToPosts(posts, currentUserId);
+        }
 
         return new Response(
             JSON.stringify({ posts: postsWithState, nextCursor }),
@@ -73,7 +77,7 @@ export async function POST(req) {
             });
         }
 
-        const user = await User.findById(userId).select("_id username displayName avatarInitials");
+        const user = await User.findById(userId).select("_id username displayName avatarInitials avatarColors");
         if (!user) {
             return new Response(JSON.stringify({ error: "User not found" }), {
                 status: 404,
@@ -98,14 +102,15 @@ export async function POST(req) {
             parentPost = parentId;
             rootPost = parent.rootPost ? parent.rootPost : parentId;
         }
-        console.log("media ", media);
+
         const newPost = await Post.create({
             author: user._id,
             authorSnapshot: {
                 _id: user._id,
                 username: user.username,
                 displayName: user.displayName,
-                avatarInitials: user.avatarInitials
+                avatarInitials: user.avatarInitials,
+                avatarColors: user.avatarColors
             },
             content,
             media: media || [],

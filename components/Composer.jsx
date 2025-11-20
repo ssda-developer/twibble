@@ -1,6 +1,6 @@
 "use client";
 
-import { useCreatePost, useEditPost } from "@/app/features/posts/hooks";
+import { useCreatePost, useEditPost } from "@/app/features/hooks";
 import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
 import MediaGallery from "@/components/MediaGallery";
@@ -41,7 +41,6 @@ function ComposerActions({
                              onAddEmoji,
                              onSubmit,
                              isDisabled,
-                             isReply,
                              type
                          }) {
     return (
@@ -103,7 +102,7 @@ export default function Composer({
                         content: text.trim(),
                         media: imgLinks, //TODO: fixed edit imgs
                         parentId,
-                        userId: currentUser._id
+                        userId: currentUser?._id
                     }
                 },
                 {
@@ -120,7 +119,7 @@ export default function Composer({
                     content: text.trim(),
                     media: imgLinks,
                     parentId,
-                    userId: currentUser._id
+                    userId: currentUser?._id
                 },
                 {
                     onSuccess: () => {
@@ -157,7 +156,7 @@ export default function Composer({
     return (
         <div className="p-4 flex">
             <div className="mr-2">
-                <Avatar letter={currentUser?.avatarInitials} />
+                <Avatar colors={currentUser?.avatarColors} letter={currentUser?.avatarInitials} />
             </div>
 
             <div className="w-full">

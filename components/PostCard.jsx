@@ -37,7 +37,7 @@ const PostCard = ({
     return (
         <Link href={postLink} className="flex p-4">
             <div className="mr-2">
-                <Avatar letter={authorSnapshot.avatarInitials} />
+                <Avatar colors={authorSnapshot?.avatarColors} letter={authorSnapshot.avatarInitials} />
             </div>
             <div className="flex-1">
                 <div className="flex mb-1 items-center">

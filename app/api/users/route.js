@@ -18,7 +18,7 @@ export async function GET(req) {
             : {};
 
         const users = await User.find(filter)
-            .select("_id username displayName avatarInitials bio stats")
+            .select("_id username displayName avatarInitials avatarColors bio stats")
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -52,7 +52,7 @@ export async function POST(req) {
         await dbConnect();
 
         const body = await req.json();
-        const { username, displayName, avatarInitials, bio } = body;
+        const { username, displayName, avatarInitials, avatarColors, bio } = body;
 
         if (!username) {
             return new Response(JSON.stringify({ error: "Username is required" }), {
@@ -66,6 +66,7 @@ export async function POST(req) {
             username,
             displayName: displayName || "",
             avatarInitials: avatarInitials || "",
+            avatarColors: avatarColors,
             bio: bio || "",
             likedPostsCache: [],
             savedPostsCache: [],

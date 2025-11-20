@@ -110,3 +110,56 @@ export async function deletePost(postId) {
     if (!res.ok) throw new Error("Failed to delete post");
     return res.json();
 }
+
+export async function loginRequest({ username, password }) {
+    const res = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Login failed");
+
+    return data;
+}
+
+export async function registerRequest({ displayName, username, password, avatarColors }) {
+    const res = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName, username, password, avatarColors })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Register failed");
+
+    return data;
+}
+
+export async function logoutRequest() {
+    const res = await fetch("http://localhost:3000/api/auth/logout", {
+        method: "POST"
+    });
+
+    if (!res.ok) {
+        throw new Error("Logout failed");
+    }
+
+    return res.json();
+}
+
+export async function fetchMe() {
+    const res = await fetch("http://localhost:3000/api/auth/me", {
+        method: "GET",
+        credentials: "include"
+    });
+
+    if (!res.ok) {
+        return { user: null };
+    }
+
+    return res.json();
+}

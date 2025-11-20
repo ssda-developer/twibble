@@ -7,7 +7,7 @@ const ProfileLikesPage = () => {
     const { currentUser } = useUserContext();
 
     return (
-        <PostListData userId={currentUser._id} type="userLikes" />
+        <PostListData userId={currentUser?._id} type="userLikes" />
     );
 };
 

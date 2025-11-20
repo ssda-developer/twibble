@@ -39,3 +39,18 @@ export const timeAgo = (date) => {
 };
 
 export const getRandomValue = (maxValue) => Math.floor(Math.random() * maxValue);
+
+export const generateAvatarColors = () => {
+    const randomChannel = () => Math.floor(Math.random() * 156) + 50;
+    const r = randomChannel();
+    const g = randomChannel();
+    const b = randomChannel();
+
+    const bgColor = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    const textColor = brightness > 128 ? "#000000" : "#ffffff";
+
+    return { bgColor, textColor };
+};

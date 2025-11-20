@@ -1,6 +1,6 @@
 "use client";
 
-import { usePostById } from "@/app/features/posts/hooks";
+import { usePostById } from "@/app/features/hooks";
 import Composer from "@/components/Composer";
 import PostCard from "@/components/PostCard";
 import PostListData from "@/components/PostListData";
@@ -9,7 +9,7 @@ import { useUserContext } from "@/context/UserContext";
 const PostThread = ({ id, username }) => {
     const { currentUser } = useUserContext();
 
-    const { data } = usePostById(id, { currentUserId: currentUser._id });
+    const { data } = usePostById(id, { currentUserId: currentUser?._id });
 
     return (
         <>

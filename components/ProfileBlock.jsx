@@ -7,6 +7,10 @@ import Link from "next/link";
 const ProfileBlock = () => {
     const { currentUser } = useUserContext();
 
+    if (!currentUser) {
+        return false;
+    }
+
     return (
         <div>
             <div className="flex border-b border-slate-800 justify-between p-6">
@@ -15,7 +19,7 @@ const ProfileBlock = () => {
                     <span className="mb-4">@{currentUser.username}</span>
                     <span className="text-sm">Joined October 2025</span>
                 </div>
-                <Avatar letter={currentUser.avatarInitials} size="big" />
+                <Avatar colors={currentUser?.avatarColors} letter={currentUser.avatarInitials} size="big" />
             </div>
             <div>
                 <div className="border-b border-slate-800 py-2 px-6">

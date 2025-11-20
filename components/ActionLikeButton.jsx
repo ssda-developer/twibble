@@ -1,23 +1,34 @@
 "use client";
 
-import { useToggleLike } from "@/app/features/posts/hooks";
+import { useToggleLike } from "@/app/features/hooks";
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
-import { useState } from "react";
+import { useUserContext } from "@/context/UserContext";
+import { useEffect, useState } from "react";
 
-const ActionLikeButton = ({ postId, userState, likeCount, currentUser }) => {
-    const { mutate: toggleLike, isPending } = useToggleLike(currentUser._id);
+const ActionLikeButton = ({ postId, userState, likeCount }) => {
+    const { currentUser, triggerAuthAttention } = useUserContext();
+    const { mutate: toggleLike, isPending } = useToggleLike(currentUser?._id);
     const [liked, setLiked] = useState(userState?.liked || false);
 
     const handleClick = (e) => {
         e.preventDefault();
         e.stopPropagation();
 
+        if (!currentUser) {
+            triggerAuthAttention();
+            return;
+        }
+
         if (isPending) return;
 
         toggleLike({ postId, action: liked ? "unlike" : "like" });
         setLiked((prev) => !prev);
     };
+
+    useEffect(() => {
+        setLiked(userState?.liked || false);
+    }, [userState?.liked]);
 
     return (
         <ActionButton

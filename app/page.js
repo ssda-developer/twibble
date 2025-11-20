@@ -1,10 +1,13 @@
 import Composer from "@/components/Composer";
 import PostListData from "@/components/PostListData";
+import Protected from "@/components/Protected";
 
 export default function HomePage() {
     return (
         <div>
-            <Composer />
+            <Protected>
+                <Composer />
+            </Protected>
             <PostListData />
         </div>
     );

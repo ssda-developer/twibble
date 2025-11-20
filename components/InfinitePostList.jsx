@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfinitePosts, useInfiniteReplies, useInfiniteUserItems } from "@/app/features/posts/hooks";
+import { useInfinitePosts, useInfiniteReplies, useInfiniteUserItems } from "@/app/features/hooks";
 import { useUserContext } from "@/context/UserContext";
 import { useEffect, useRef } from "react";
 import PostList from "./PostList";
@@ -33,7 +33,7 @@ const InfinitePostList = ({ userId, parentId, type }) => {
             posts = query.data?.pages.flatMap(page => page.likes) || [];
             break;
         default:
-            query = useInfinitePosts({ currentUserId: currentUser._id });
+            query = useInfinitePosts({ currentUserId: currentUser?._id });
             posts = query.data?.pages.flatMap(page => page.posts) || [];
     }
 

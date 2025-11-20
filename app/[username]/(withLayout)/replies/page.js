@@ -7,7 +7,7 @@ const ProfilePostsPage = () => {
     const { currentUser } = useUserContext();
 
     return (
-        <PostListData userId={currentUser._id} type="userReplies" />
+        <PostListData userId={currentUser?._id} type="userReplies" />
     );
 };
 
