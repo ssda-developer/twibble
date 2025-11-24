@@ -5,7 +5,7 @@ import Search from "@/components/Search";
 
 const Aside = () => {
     return (
-        <aside className="w-75 sticky top-0 h-screen shrink-0 p-6 hidden lg:block">
+        <>
             <div className="mb-6">
                 <Search />
             </div>
@@ -40,7 +40,7 @@ const Aside = () => {
                     </ul>
                 </div>
             </div>
-        </aside>
+        </>
     );
 };
 

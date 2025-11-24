@@ -39,7 +39,7 @@ const AuthorizationBlock = () => {
                     <p className="mt-2 text-sm text-slate-400">
                         Don't have an account?
                         <button onClick={() => setLoginForm(false)}
-                                className="ml-2 text-sky-400 hover:text-sky-300 transition">
+                                className="ml-1 underline cursor-pointer  text-sky-400 hover:text-sky-300 transition">
                             Register
                         </button>
                     </p>
@@ -51,7 +51,7 @@ const AuthorizationBlock = () => {
                     <p className="mt-2 text-sm text-slate-400">
                         Already have an account?
                         <button onClick={() => setLoginForm(true)}
-                                className="ml-2 text-sky-400 hover:text-sky-300 transition">
+                                className="ml-1 underline cursor-pointer  text-sky-400 hover:text-sky-300 transition">
                             Login
                         </button>
                     </p>

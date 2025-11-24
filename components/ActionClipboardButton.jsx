@@ -7,8 +7,8 @@ import { useState } from "react";
 const ActionClipboardButton = ({ postLink }) => {
     const [status, setStatus] = useState("idle");
     const statusMap = {
-        idle: { icon: <Icon name="arrow-up-tray" />, text: "Copy Link" },
-        copied: { icon: <Icon name="arrow-down-tray" type="solid" />, text: "Copied" },
+        idle: { icon: <Icon name="link" />, text: "Copy Link" },
+        copied: { icon: <Icon name="check" type="solid" />, text: "Copied" },
         error: { icon: <Icon name="x-mark" />, text: "Failed to copy" }
     };
     const { icon, text } = statusMap[status];
