@@ -13,8 +13,18 @@ export async function GET(req, { params }) {
         const { searchParams } = new URL(req.url);
         const limit = parseInt(searchParams.get("limit")) || 20;
         const cursor = searchParams.get("cursor");
+        const onlyOriginal = searchParams.get("onlyOriginal") === "true";
+        const includeReposts = searchParams.get("includeReposts") === "true";
 
         const filter = { author: id, type: "original" };
+
+        if (onlyOriginal) {
+            filter.type = "original";
+        }
+
+        if (includeReposts) {
+            filter.type = { $in: ["original", "repost"] };
+        }
 
         if (cursor) {
             filter._id = { $lt: cursor };
@@ -23,6 +33,10 @@ export async function GET(req, { params }) {
         let posts = await Post.find(filter)
             .sort({ _id: -1 })
             .limit(limit)
+            .populate({
+                path: "originalPost",
+                select: "_id author authorSnapshot content media type"
+            })
             .lean();
 
         const postsWithState = await addUserStateToPosts(posts, id);

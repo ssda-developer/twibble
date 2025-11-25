@@ -30,7 +30,7 @@ const PostCard = ({
     const [isReposting, setIsReposting] = useState(false);
     const postLink = `http://localhost:3000/${authorSnapshot.username}/post/${_id}`;
     const isParent = type === "parents";
-    const isRepost = type === "repost";
+    const isRepost = type === "repost-inside";
 
     const handleEdit = () => {
         setIsEditing(true);
@@ -80,7 +80,7 @@ const PostCard = ({
                         </div>}
                 </div>
                 <div className="mt-2">
-                    {originalPost && <PostCard {...originalPost} type="repost" />}
+                    {originalPost && <PostCard {...originalPost} type="repost-inside" />}
                 </div>
                 {!isRepost &&
                     <div className={`flex justify-between text-sm mt-2 mx-[-8px] text-gray-400`}>

@@ -32,7 +32,7 @@ export async function fetchReplies(postId, params = {}) {
 }
 
 export async function fetchUserPosts(userId, params = {}) {
-    const queryString = buildQuery(params);
+    const queryString = buildQuery({ ...params, includeReposts: true });
 
     const res = await fetch(`http://localhost:3000/api/users/${userId}/posts?${queryString}`);
     if (!res.ok) throw new Error("Failed to fetch user posts");

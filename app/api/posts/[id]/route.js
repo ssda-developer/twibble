@@ -18,7 +18,10 @@ export async function GET(req, { params }) {
             Math.min(100, parseInt(searchParams.get("includeDepth") || "20", 10))
         );
 
-        const post = await Post.findById(id).lean();
+        const post = await Post.findById(id).populate({
+            path: "originalPost",
+            select: "_id author authorSnapshot content media type"
+        }).lean();
 
         if (!post) {
             return new Response(JSON.stringify({ error: "Post not found" }), {
@@ -37,7 +40,10 @@ export async function GET(req, { params }) {
                 if (seen.has(String(currentParentId))) break;
                 seen.add(String(currentParentId));
 
-                const parent = await Post.findById(currentParentId).lean();
+                const parent = await Post.findById(currentParentId).populate({
+                    path: "originalPost",
+                    select: "_id author authorSnapshot content media type"
+                }).lean();
                 if (!parent) break;
 
                 parents.push(parent);
