@@ -2,6 +2,7 @@ import { useUserContext } from "@/context/UserContext";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createPost,
+    createRepost,
     deletePost,
     editPost,
     fetchMe,
@@ -31,7 +32,7 @@ export function usePosts(params = {}) {
 
 export function usePostById(id, params = {}) {
     return useQuery({
-        queryKey: postsKeys.lists.byId(id),
+        queryKey: postsKeys.lists.byId(id, params.currentUserId),
         queryFn: () => fetchPostById(id, params),
         staleTime: POSTS_STALE_TIME,
         suspense: true
@@ -171,6 +172,37 @@ export function useCreatePost() {
 
     return useMutation({
         mutationFn: createPost,
+
+        onMutate: async (newPost) => {
+            await qc.cancelQueries(postsKeys.all);
+
+            const prevData = qc.getQueryData(postsKeys.all);
+
+            qc.setQueryData(postsKeys.all, (old = []) => [
+                { ...newPost, _id: `optimistic-${Date.now()}` },
+                ...old
+            ]);
+
+            return { prevData };
+        },
+
+        onError: (_err, _newPost, ctx) => {
+            if (ctx?.prevData) {
+                qc.setQueryData(postsKeys.all, ctx.prevData);
+            }
+        },
+
+        onSuccess: () => {
+            qc.invalidateQueries(postsKeys.all);
+        }
+    });
+}
+
+export function useRepostPost() {
+    const qc = useQueryClient();
+
+    return useMutation({
+        mutationFn: createRepost,
 
         onMutate: async (newPost) => {
             await qc.cancelQueries(postsKeys.all);

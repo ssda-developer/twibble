@@ -12,6 +12,12 @@ export async function GET(req, { params }) {
         const { searchParams } = new URL(req.url);
         const currentUserId = searchParams.get("currentUserId");
 
+        const includeParents = searchParams.get("includeParents") === "true";
+        const includeDepth = Math.max(
+            1,
+            Math.min(100, parseInt(searchParams.get("includeDepth") || "20", 10))
+        );
+
         const post = await Post.findById(id).lean();
 
         if (!post) {
@@ -21,13 +27,44 @@ export async function GET(req, { params }) {
             });
         }
 
-        const postWithState = await addUserStateToPosts(post, currentUserId);
+        let parents = [];
 
-        return new Response(JSON.stringify({ post: postWithState }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" }
-        });
+        if (includeParents) {
+            let currentParentId = post.parentPost;
+            let depth = 0;
+            const seen = new Set();
+            while (currentParentId && depth < includeDepth) {
+                if (seen.has(String(currentParentId))) break;
+                seen.add(String(currentParentId));
 
+                const parent = await Post.findById(currentParentId).lean();
+                if (!parent) break;
+
+                parents.push(parent);
+
+                currentParentId = parent.parentPost;
+                depth += 1;
+            }
+
+            parents = parents.reverse();
+        }
+
+        if (includeParents && parents.length > 0) {
+            const parentsWithState = await addUserStateToPosts(parents, currentUserId);
+            const postWithState = await addUserStateToPosts(post, currentUserId);
+
+            return new Response(
+                JSON.stringify({ post: postWithState, parents: parentsWithState }),
+                { status: 200, headers: { "Content-Type": "application/json" } }
+            );
+        } else {
+            const postWithState = await addUserStateToPosts(post, currentUserId);
+
+            return new Response(
+                JSON.stringify({ post: postWithState }),
+                { status: 200, headers: { "Content-Type": "application/json" } }
+            );
+        }
     } catch (error) {
         console.error("Failed to fetch post:", error);
         return new Response(JSON.stringify({ error: "Failed to fetch post" }), {

@@ -51,7 +51,7 @@ export default function Modal({ open, onClose, setOpen, children, ariaLabel = "D
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div
-                className="fixed inset-0 bg-black/40 backdrop-blur-md"
+                className="fixed inset-0 bg-slate-800/60"
                 onClick={onClose}
                 aria-hidden="true"
             />
@@ -61,7 +61,7 @@ export default function Modal({ open, onClose, setOpen, children, ariaLabel = "D
                 aria-label={ariaLabel}
                 ref={dialogRef}
                 tabIndex={-1}
-                className="relative z-10 w-full max-w-lg mx-4 bg-[var(--background)] rounded-xl p-6 ring-1 ring-black/5 focus:outline-none"
+                className="relative z-10 w-5/12 min-w-lg mx-4 bg-[var(--background)] rounded-xl p-6 ring-1 ring-black/5 focus:outline-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 {children}

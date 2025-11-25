@@ -13,6 +13,7 @@ export async function GET(req) {
         const { searchParams } = new URL(req.url);
         const limit = parseInt(searchParams.get("limit")) || 20;
         const onlyOriginal = searchParams.get("onlyOriginal") === "true";
+        const includeReposts = searchParams.get("includeReposts") === "true";
         const cursor = searchParams.get("cursor");
         const author = searchParams.get("author");
         const currentUserId = searchParams.get("currentUserId");
@@ -21,6 +22,10 @@ export async function GET(req) {
 
         if (onlyOriginal) {
             filter.type = "original";
+        }
+
+        if (includeReposts) {
+            filter.type = { $in: ["original", "repost"] };
         }
 
         if (author) {
@@ -34,6 +39,10 @@ export async function GET(req) {
         const posts = await Post.find(filter)
             .sort({ createdAt: -1 })
             .limit(limit + 1)
+            .populate({
+                path: "originalPost",
+                select: "_id author authorSnapshot content media type"
+            })
             .lean();
 
         let nextCursor = null;
@@ -68,10 +77,10 @@ export async function POST(req) {
         await dbConnect();
 
         const body = await req.json();
-        const { userId, content, media, parentId = null } = body;
+        const { userId, content, media, parentId = null, originalId = null } = body;
 
-        if (!userId || !content) {
-            return new Response(JSON.stringify({ error: "userId and content are required" }), {
+        if (!userId || (!content && !originalId)) {
+            return new Response(JSON.stringify({ error: "userId and content or originalId are required" }), {
                 status: 400,
                 headers: { "Content-Type": "application/json" }
             });
@@ -88,6 +97,7 @@ export async function POST(req) {
         let type = "original";
         let parentPost = null;
         let rootPost = null;
+        let originalPost = null;
 
         if (parentId) {
             const parent = await Post.findById(parentId);
@@ -103,6 +113,25 @@ export async function POST(req) {
             rootPost = parent.rootPost ? parent.rootPost : parentId;
         }
 
+        if (originalId) {
+            const original = await Post.findById(originalId);
+            if (!original) {
+                return new Response(JSON.stringify({ error: "Original post not found" }), {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            type = "repost";
+            originalPost = original._id;
+            if (content) {
+                parentPost = original._id;
+            }
+            rootPost = original.rootPost || original._id;
+
+            await Post.findByIdAndUpdate(original._id, { $inc: { repostCount: 1 } });
+        }
+
         const newPost = await Post.create({
             author: user._id,
             authorSnapshot: {
@@ -112,11 +141,12 @@ export async function POST(req) {
                 avatarInitials: user.avatarInitials,
                 avatarColors: user.avatarColors
             },
-            content,
+            content: content || null,
             media: media || [],
             type,
             parentPost,
-            rootPost
+            rootPost,
+            originalPost
         });
 
         if (parentId) {

@@ -11,7 +11,8 @@ export const UserContext = createContext({
     },
     triggerAuthAttention: () => {
     },
-    authAttentionId: 0
+    authAttentionId: 0,
+    loading: true
 });
 
 export const UserProvider = ({ children }) => {
@@ -20,9 +21,12 @@ export const UserProvider = ({ children }) => {
     const { data, isLoading } = useMeQuery();
     const { mutateAsync: logoutMutation } = useLogoutUser();
 
+    const [userLoaded, setUserLoaded] = useState(false);
+
     useEffect(() => {
         if (!isLoading) {
             setCurrentUser(data?.user || null);
+            setUserLoaded(true);
         }
     }, [isLoading, data?.user]);
 
@@ -46,7 +50,7 @@ export const UserProvider = ({ children }) => {
                 currentUser,
                 setCurrentUser,
                 logout,
-                loading: isLoading,
+                loading: !userLoaded,
                 triggerAuthAttention,
                 authAttentionId
             }}

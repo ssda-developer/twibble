@@ -1,7 +1,7 @@
 "use client";
 
-import { SITE_NAME } from "@/app/constants";
 import NavLinks from "@/components/NavLinks";
+import { SITE_NAME } from "@/constants";
 import Link from "next/link";
 
 const Header = () => {

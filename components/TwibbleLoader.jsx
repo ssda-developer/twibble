@@ -1,6 +1,6 @@
 "use client";
 
-import { SITE_NAME } from "@/app/constants";
+import { SITE_NAME } from "@/constants";
 
 export default function TwibbleLoader() {
     const letters = SITE_NAME.split("");

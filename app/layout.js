@@ -1,8 +1,8 @@
-import { SITE_NAME } from "@/app/constants";
 import { Providers } from "@/app/providers";
 import Aside from "@/components/Aside";
 import Header from "@/components/Header";
 import NavLinks from "@/components/NavLinks";
+import { SITE_NAME } from "@/constants";
 import { Barlow } from "next/font/google";
 import "./globals.css";
 

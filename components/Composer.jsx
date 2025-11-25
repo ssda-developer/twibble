@@ -1,9 +1,10 @@
 "use client";
 
-import { useCreatePost, useEditPost } from "@/app/features/hooks";
+import { useCreatePost, useEditPost, useRepostPost } from "@/app/features/hooks";
 import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
 import MediaGallery from "@/components/MediaGallery";
+import PostCard from "@/components/PostCard";
 import { useUserContext } from "@/context/UserContext";
 import { getRandomValue } from "@/utils";
 import { useEffect, useRef, useState } from "react";
@@ -79,13 +80,16 @@ export default function Composer({
                                      replyingToUser = null,
                                      type = "post",
                                      postId = null,
-                                     setIsEditing
+                                     setIsEditing,
+                                     setIsReposting,
+                                     post = null
                                  }) {
     const { currentUser } = useUserContext();
     const [text, setText] = useState(currentData.text);
     const [imgLinks, setImgLinks] = useState(currentData.images);
     const createPost = useCreatePost();
     const editPost = useEditPost();
+    const repostPost = useRepostPost();
 
     const maxChars = 280;
     const remaining = maxChars - text.length;
@@ -94,7 +98,25 @@ export default function Composer({
     const handleSubmit = () => {
         if (overLimit || !text.trim()) return;
 
-        if (type === "edit") {
+        if (type === "repost") {
+            repostPost.mutate(
+                {
+                    postId: postId,
+                    content: text.trim(),
+                    media: imgLinks,
+                    parentId,
+                    userId: currentUser?._id,
+                    originalId: post._id
+                },
+                {
+                    onSuccess: () => {
+                        setText("");
+                        setImgLinks([]);
+                        setIsReposting(false);
+                    }
+                }
+            );
+        } else if (type === "edit") {
             editPost.mutate(
                 {
                     postId: postId,
@@ -174,6 +196,7 @@ export default function Composer({
                     />
 
                     <MediaGallery images={imgLinks} editable={true} onRemove={handleRemovePhoto} />
+                    {post && <PostCard {...post} type="repost" />}
                 </div>
 
                 <ComposerActions
