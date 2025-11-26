@@ -40,8 +40,16 @@ export async function GET(req) {
             .sort({ createdAt: -1 })
             .limit(limit + 1)
             .populate({
-                path: "originalPost",
-                select: "_id author authorSnapshot content media type"
+                path: "author",
+                select: "_id username displayName avatar"
+            })
+            .populate({
+                path: "repostedPost",
+                select: "_id author content media type createdAt",
+                populate: {
+                    path: "author",
+                    select: "_id username displayName avatar"
+                }
             })
             .lean();
 
@@ -77,16 +85,17 @@ export async function POST(req) {
         await dbConnect();
 
         const body = await req.json();
-        const { userId, content, media, parentId = null, originalId = null } = body;
+        const { userId, content, media, parentId = null, repostId = null } = body;
 
-        if (!userId || (!content && !originalId)) {
-            return new Response(JSON.stringify({ error: "userId and content or originalId are required" }), {
-                status: 400,
-                headers: { "Content-Type": "application/json" }
-            });
+        if (!userId || (!content && !parentId && !repostId)) {
+            return new Response(
+                JSON.stringify({ error: "userId and content or parentId or repostId are required" }),
+                { status: 400, headers: { "Content-Type": "application/json" } }
+            );
         }
 
-        const user = await User.findById(userId).select("_id username displayName avatarInitials avatarColors");
+        const user = await User.findById(userId).select("_id username displayName avatar");
+
         if (!user) {
             return new Response(JSON.stringify({ error: "User not found" }), {
                 status: 404,
@@ -97,10 +106,11 @@ export async function POST(req) {
         let type = "original";
         let parentPost = null;
         let rootPost = null;
-        let originalPost = null;
+        let repostedPost = null;
 
         if (parentId) {
             const parent = await Post.findById(parentId);
+
             if (!parent) {
                 return new Response(JSON.stringify({ error: "Parent post not found" }), {
                     status: 404,
@@ -110,48 +120,36 @@ export async function POST(req) {
 
             type = "reply";
             parentPost = parentId;
-            rootPost = parent.rootPost ? parent.rootPost : parentId;
+            rootPost = parent.rootPost || parentId;
+
+            await Post.findByIdAndUpdate(parentId, { $inc: { replyCount: 1 } });
         }
 
-        if (originalId) {
-            const original = await Post.findById(originalId);
-            if (!original) {
-                return new Response(JSON.stringify({ error: "Original post not found" }), {
+        if (repostId) {
+            const repost = await Post.findById(repostId);
+            if (!repost) {
+                return new Response(JSON.stringify({ error: "Post to repost not found" }), {
                     status: 404,
                     headers: { "Content-Type": "application/json" }
                 });
             }
 
             type = "repost";
-            originalPost = original._id;
-            if (content) {
-                parentPost = original._id;
-            }
-            rootPost = original.rootPost || original._id;
+            repostedPost = repost._id;
+            rootPost = repost.rootPost || repost._id;
 
-            await Post.findByIdAndUpdate(original._id, { $inc: { repostCount: 1 } });
+            await Post.findByIdAndUpdate(repost._id, { $inc: { repostCount: 1 } });
         }
 
         const newPost = await Post.create({
             author: user._id,
-            authorSnapshot: {
-                _id: user._id,
-                username: user.username,
-                displayName: user.displayName,
-                avatarInitials: user.avatarInitials,
-                avatarColors: user.avatarColors
-            },
             content: content || null,
             media: media || [],
             type,
             parentPost,
             rootPost,
-            originalPost
+            repostedPost
         });
-
-        if (parentId) {
-            await Post.findByIdAndUpdate(parentId, { $inc: { replyCount: 1 } });
-        }
 
         return new Response(JSON.stringify({ post: newPost }), {
             status: 201,

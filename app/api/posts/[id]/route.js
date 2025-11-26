@@ -18,10 +18,20 @@ export async function GET(req, { params }) {
             Math.min(100, parseInt(searchParams.get("includeDepth") || "20", 10))
         );
 
-        const post = await Post.findById(id).populate({
-            path: "originalPost",
-            select: "_id author authorSnapshot content media type"
-        }).lean();
+        const post = await Post.findById(id)
+            .populate({
+                path: "author",
+                select: "_id username displayName avatar"
+            })
+            .populate({
+                path: "repostedPost",
+                select: "_id author content media type",
+                populate: {
+                    path: "author",
+                    select: "_id username displayName avatar"
+                }
+            })
+            .lean();
 
         if (!post) {
             return new Response(JSON.stringify({ error: "Post not found" }), {
@@ -40,10 +50,20 @@ export async function GET(req, { params }) {
                 if (seen.has(String(currentParentId))) break;
                 seen.add(String(currentParentId));
 
-                const parent = await Post.findById(currentParentId).populate({
-                    path: "originalPost",
-                    select: "_id author authorSnapshot content media type"
-                }).lean();
+                const parent = await Post.findById(currentParentId)
+                    .populate({
+                        path: "author",
+                        select: "_id username displayName avatar"
+                    })
+                    .populate({
+                        path: "repostedPost",
+                        select: "_id author content media type",
+                        populate: {
+                            path: "author",
+                            select: "_id username displayName avatar"
+                        }
+                    })
+                    .lean();
                 if (!parent) break;
 
                 parents.push(parent);

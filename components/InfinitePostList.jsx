@@ -5,7 +5,7 @@ import { useUserContext } from "@/context/UserContext";
 import { useEffect, useRef } from "react";
 import PostList from "./PostList";
 
-const InfinitePostList = ({ userId, parentId, type }) => {
+const InfinitePostList = ({ user, parentId, type }) => {
     const { currentUser } = useUserContext();
 
     let query;
@@ -17,19 +17,19 @@ const InfinitePostList = ({ userId, parentId, type }) => {
             posts = query.data?.pages.flatMap(page => page.replies) || [];
             break;
         case "userPosts":
-            query = useInfiniteUserItems({ userId, type: "posts" });
+            query = useInfiniteUserItems({ user, type: "posts", params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.posts) || [];
             break;
         case "userReplies":
-            query = useInfiniteUserItems({ userId, type: "replies" });
+            query = useInfiniteUserItems({ user, type: "replies", params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.replies) || [];
             break;
         case "userSaves":
-            query = useInfiniteUserItems({ userId, type: "saves" });
+            query = useInfiniteUserItems({ user, type: "saves", params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.saves) || [];
             break;
         case "userLikes":
-            query = useInfiniteUserItems({ userId, type: "likes" });
+            query = useInfiniteUserItems({ user, type: "likes", params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.likes) || [];
             break;
         default:

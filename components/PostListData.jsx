@@ -4,10 +4,10 @@ import InfinitePostList from "@/components/InfinitePostList";
 import SkeletonList from "@/components/SkeletonList";
 import { Suspense } from "react";
 
-const PostListData = ({ userId, parentId, type = "original" }) => {
+const PostListData = ({ user, parentId, type = "original" }) => {
     return (
         <Suspense fallback={<SkeletonList />}>
-            <InfinitePostList userId={userId} parentId={parentId} type={type} />
+            <InfinitePostList user={user} parentId={parentId} type={type} />
         </Suspense>
     );
 };

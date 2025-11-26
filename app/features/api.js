@@ -7,6 +7,14 @@ function buildQuery(params = {}) {
     return query.toString();
 }
 
+export async function fetchUserByNameOrId(user, params) {
+    const queryString = buildQuery(params);
+
+    const res = await fetch(`http://localhost:3000/api/users/${user}?${queryString}`);
+    if (!res.ok) throw new Error("Failed to fetch post");
+    return res.json();
+}
+
 export async function fetchPosts(params = {}) {
     const queryString = buildQuery({ ...params, includeReposts: true });
 
@@ -31,34 +39,34 @@ export async function fetchReplies(postId, params = {}) {
     return res.json();
 }
 
-export async function fetchUserPosts(userId, params = {}) {
+export async function fetchUserPosts(user, params = {}) {
     const queryString = buildQuery({ ...params, includeReposts: true });
 
-    const res = await fetch(`http://localhost:3000/api/users/${userId}/posts?${queryString}`);
+    const res = await fetch(`http://localhost:3000/api/users/${user}/posts?${queryString}`);
     if (!res.ok) throw new Error("Failed to fetch user posts");
     return res.json();
 }
 
-export async function fetchUserReplies(userId, params = {}) {
+export async function fetchUserReplies(user, params = {}) {
     const queryString = buildQuery(params);
 
-    const res = await fetch(`http://localhost:3000/api/users/${userId}/replies?${queryString}`);
+    const res = await fetch(`http://localhost:3000/api/users/${user}/replies?${queryString}`);
     if (!res.ok) throw new Error("Failed to fetch user replies");
     return res.json();
 }
 
-export async function fetchUserSaves(userId, params = {}) {
+export async function fetchUserSaves(user, params = {}) {
     const queryString = buildQuery(params);
 
-    const res = await fetch(`http://localhost:3000/api/users/${userId}/saves?${queryString}`);
+    const res = await fetch(`http://localhost:3000/api/users/${user}/saves?${queryString}`);
     if (!res.ok) throw new Error("Failed to fetch user saves");
     return res.json();
 }
 
-export async function fetchUserLikes(userId, params = {}) {
+export async function fetchUserLikes(user, params = {}) {
     const queryString = buildQuery(params);
 
-    const res = await fetch(`http://localhost:3000/api/users/${userId}/likes?${queryString}`);
+    const res = await fetch(`http://localhost:3000/api/users/${user}/likes?${queryString}`);
     if (!res.ok) throw new Error("Failed to fetch user likes");
     return res.json();
 }

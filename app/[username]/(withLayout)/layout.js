@@ -1,9 +1,12 @@
 import ProfileBlock from "@/components/ProfileBlock";
 
-const ProfileLayout = ({ children }) => {
+const ProfileLayout = async ({ children, params }) => {
+    const parameters = await params;
+    const userName = parameters.username;
+
     return (
         <>
-            <ProfileBlock />
+            <ProfileBlock userName={userName} />
             {children}
         </>
     );

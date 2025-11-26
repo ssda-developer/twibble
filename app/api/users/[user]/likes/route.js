@@ -1,6 +1,8 @@
 import { addUserStateToPosts } from "@/app/features/utils";
 import dbConnect from "@/lib/mongoose";
 import Like from "@/models/Like";
+import User from "@/models/User";
+import mongoose from "mongoose";
 
 /**
  * GET /api/users/:id/likes?cursor=...&limit=20
@@ -9,24 +11,47 @@ export async function GET(req, { params }) {
     try {
         await dbConnect();
 
-        const { id } = await params;
+        let userId = null;
+        const { user } = await params;
         const { searchParams } = new URL(req.url);
         const limit = parseInt(searchParams.get("limit")) || 20;
         const cursor = searchParams.get("cursor");
+        const currentUserId = searchParams.get("currentUserId");
 
-        const filter = { user: id };
+        if (mongoose.Types.ObjectId.isValid(user)) {
+            userId = user;
+        } else {
+            const found = await User.findOne({ username: user }).select("_id").lean();
+            userId = found._id.toString();
+        }
+
+        const filter = { user: userId };
 
         if (cursor) {
             filter._id = { $lt: cursor };
         }
 
         const likes = await Like.find(filter)
-            .populate({
-                path: "post",
-                options: { sort: { _id: -1 } }
-            })
             .sort({ _id: -1 })
             .limit(limit)
+            .populate({
+                path: "post",
+                options: { sort: { _id: -1 } },
+                populate: [
+                    {
+                        path: "author",
+                        select: "_id username displayName avatar"
+                    },
+                    {
+                        path: "repostedPost",
+                        select: "_id author content media type",
+                        populate: {
+                            path: "author",
+                            select: "_id username displayName avatar"
+                        }
+                    }
+                ]
+            })
             .lean();
 
         const posts = likes
@@ -40,7 +65,11 @@ export async function GET(req, { params }) {
             });
         }
 
-        const postsWithState = await addUserStateToPosts(posts, id);
+        let postsWithState = posts;
+
+        if (currentUserId) {
+            postsWithState = await addUserStateToPosts(posts, currentUserId);
+        }
 
         const nextCursor = likes.length === limit ? likes[likes.length - 1]._id : null;
 

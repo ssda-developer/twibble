@@ -22,6 +22,10 @@ export async function GET(req, { params }) {
         let replies = await Post.find(filter)
             .sort({ _id: -1 })
             .limit(limit)
+            .populate({
+                path: "author",
+                select: "_id username displayName avatar"
+            })
             .lean();
 
         const nextCursor = replies.length > 0 ? replies[replies.length - 1]._id : null;

@@ -18,7 +18,7 @@ export async function GET(req) {
             : {};
 
         const users = await User.find(filter)
-            .select("_id username displayName avatarInitials avatarColors bio stats")
+            .select("_id username displayName avatar bio stats")
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -52,7 +52,7 @@ export async function POST(req) {
         await dbConnect();
 
         const body = await req.json();
-        const { username, displayName, avatarInitials, avatarColors, bio } = body;
+        const { username, displayName, avatar, bio } = body;
 
         if (!username) {
             return new Response(JSON.stringify({ error: "Username is required" }), {
@@ -61,12 +61,10 @@ export async function POST(req) {
             });
         }
 
-
         const newUser = await User.create({
             username,
             displayName: displayName || "",
-            avatarInitials: avatarInitials || "",
-            avatarColors: avatarColors,
+            avatar: avatar || {},
             bio: bio || "",
             likedPostsCache: [],
             savedPostsCache: [],
@@ -79,13 +77,10 @@ export async function POST(req) {
             }
         });
 
-
         return new Response(JSON.stringify({ user: newUser }), {
             status: 201,
             headers: { "Content-Type": "application/json" }
         });
-
-
     } catch (error) {
         console.error("Failed to create user:", error);
         return new Response(JSON.stringify({ error: "Failed to create user" }), {

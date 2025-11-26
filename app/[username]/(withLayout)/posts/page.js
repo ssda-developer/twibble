@@ -1,13 +1,11 @@
-"use client";
-
 import PostListData from "@/components/PostListData";
-import { useUserContext } from "@/context/UserContext";
 
-const ProfilePostsPage = () => {
-    const { currentUser } = useUserContext();
+const ProfilePostsPage = async ({ params }) => {
+    const parameters = await params;
+    const userName = parameters.username;
 
     return (
-        <PostListData userId={currentUser?._id} type="userPosts" />
+        <PostListData user={userName} type="userPosts" />
     );
 };
 

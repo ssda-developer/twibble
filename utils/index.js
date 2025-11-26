@@ -54,3 +54,13 @@ export const generateAvatarColors = () => {
 
     return { bgColor, textColor };
 };
+
+export const formatDate = (isoDate) => {
+    if (!isoDate) return "";
+
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    }).format(new Date(isoDate));
+};

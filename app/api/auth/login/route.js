@@ -20,8 +20,7 @@ export async function POST(req) {
             _id: user._id.toString(),
             username: user.username,
             displayName: user.displayName,
-            avatarInitials: user.avatarInitials,
-            avatarColors: user.avatarColors,
+            avatar: user.avatar,
             stats: user.stats,
             createdAt: user.createdAt
         };

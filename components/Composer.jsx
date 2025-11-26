@@ -104,9 +104,8 @@ export default function Composer({
                     postId: postId,
                     content: text.trim(),
                     media: imgLinks,
-                    parentId,
                     userId: currentUser?._id,
-                    originalId: post._id
+                    repostId: post._id
                 },
                 {
                     onSuccess: () => {
@@ -178,7 +177,7 @@ export default function Composer({
     return (
         <div className="p-4 flex">
             <div className="mr-2">
-                <Avatar colors={currentUser?.avatarColors} letter={currentUser?.avatarInitials} />
+                <Avatar colors={currentUser?.avatar.colors} letter={currentUser?.avatar.initials} />
             </div>
 
             <div className="w-full">

@@ -126,7 +126,7 @@ export default function RegisterForm() {
                 displayName: cleaned.displayName,
                 username: cleaned.username,
                 password: cleaned.password,
-                avatarColors: avatar
+                avatar
             },
             {
                 onSuccess: () => {

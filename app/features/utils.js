@@ -19,13 +19,13 @@ export async function addUserStateToPosts(posts, currentUserId) {
 
     const reposts = await Post.find({
         type: "repost",
-        originalPost: { $in: postIds },
+        repostedPost: { $in: postIds },
         author: currentUserId
-    }).select("originalPost").lean();
+    }).select("repostedPost").lean();
 
     const likedIds = new Set(likedPosts.map(l => l.post.toString()));
     const savedIds = new Set(savedPosts.map(l => l.post.toString()));
-    const repostedIds = new Set(reposts.map(r => r.originalPost.toString()));
+    const repostedIds = new Set(reposts.map(r => r.repostedPost.toString()));
 
     const addState = (post) => ({
         ...post,

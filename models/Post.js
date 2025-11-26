@@ -6,14 +6,6 @@ const PostSchema = new Schema(
     {
         author: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
 
-        authorSnapshot: {
-            _id: { type: Schema.Types.ObjectId, required: true },
-            username: { type: String, required: true },
-            displayName: { type: String },
-            avatarInitials: { type: String },
-            avatarColors: { type: Object }
-        },
-
         content: { type: String, maxlength: 280 },
         media: [
             {
@@ -25,10 +17,10 @@ const PostSchema = new Schema(
 
         type: { type: String, enum: ["original", "repost", "reply"], default: "original" },
 
-        originalPost: { type: Schema.Types.ObjectId, ref: "Post" },
-
         parentPost: { type: Schema.Types.ObjectId, ref: "Post" },
         rootPost: { type: Schema.Types.ObjectId, ref: "Post" },
+
+        repostedPost: { type: Schema.Types.ObjectId, ref: "Post" },
 
         likeCount: { type: Number, default: 0 },
         replyCount: { type: Number, default: 0 },

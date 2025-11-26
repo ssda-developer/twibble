@@ -9,6 +9,7 @@ import {
     fetchPostById,
     fetchPosts,
     fetchReplies,
+    fetchUserByNameOrId,
     fetchUserLikes,
     fetchUserPosts,
     fetchUserReplies,
@@ -20,6 +21,15 @@ import {
     toggleSave
 } from "./api";
 import { POSTS_STALE_TIME, postsKeys } from "./keys";
+
+export function useUserByNameOrId(user, params = {}) {
+    return useQuery({
+        queryKey: postsKeys.users.byNameOrId(user),
+        queryFn: () => fetchUserByNameOrId(user, params),
+        staleTime: POSTS_STALE_TIME,
+        suspense: true
+    });
+}
 
 export function usePosts(params = {}) {
     return useQuery({
@@ -68,7 +78,7 @@ export function useInfiniteReplies(postId, params = {}) {
     });
 }
 
-export function useInfiniteUserItems({ userId, type = "posts", params = {} }) {
+export function useInfiniteUserItems({ user, type = "posts", params = {} }) {
     let fetchFn;
     let keyFn;
 
@@ -79,22 +89,22 @@ export function useInfiniteUserItems({ userId, type = "posts", params = {} }) {
 
     if (type === "replies") {
         fetchFn = fetchUserReplies;
-        keyFn = (id, p) => postsKeys.lists.infiniteByUser(id, { ...p, type: "replies" });
+        keyFn = (user, p) => postsKeys.lists.infiniteByUser(user, { ...p, type: "replies" });
     }
 
     if (type === "saves") {
         fetchFn = fetchUserSaves;
-        keyFn = (id, p) => postsKeys.lists.infiniteByUser(id, { ...p, type: "saves" });
+        keyFn = (user, p) => postsKeys.lists.infiniteByUser(user, { ...p, type: "saves" });
     }
 
     if (type === "likes") {
         fetchFn = fetchUserLikes;
-        keyFn = (id, p) => postsKeys.lists.infiniteByUser(id, { ...p, type: "likes" });
+        keyFn = (user, p) => postsKeys.lists.infiniteByUser(user, { ...p, type: "likes" });
     }
 
     return useInfiniteQuery({
-        queryKey: keyFn(userId, params),
-        queryFn: ({ pageParam }) => fetchFn(userId, { ...params, cursor: pageParam }),
+        queryKey: keyFn(user, params),
+        queryFn: ({ pageParam }) => fetchFn(user, { ...params, cursor: pageParam }),
         getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
         staleTime: POSTS_STALE_TIME,
         suspense: true
