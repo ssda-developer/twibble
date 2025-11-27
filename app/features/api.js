@@ -143,11 +143,11 @@ export async function loginRequest({ username, password }) {
     return data;
 }
 
-export async function registerRequest({ displayName, username, password, avatarColors }) {
+export async function registerRequest(user) {
     const res = await fetch("http://localhost:3000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName, username, password, avatarColors })
+        body: JSON.stringify(user)
     });
 
     const data = await res.json();
@@ -179,5 +179,11 @@ export async function fetchMe() {
         return { user: null };
     }
 
+    return res.json();
+}
+
+export async function fetchTrendingPosts() {
+    const res = await fetch(`http://localhost:3000/api/trending`);
+    if (!res.ok) throw new Error("Failed to fetch trending posts");
     return res.json();
 }

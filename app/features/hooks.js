@@ -9,6 +9,7 @@ import {
     fetchPostById,
     fetchPosts,
     fetchReplies,
+    fetchTrendingPosts,
     fetchUserByNameOrId,
     fetchUserLikes,
     fetchUserPosts,
@@ -35,6 +36,15 @@ export function usePosts(params = {}) {
     return useQuery({
         queryKey: postsKeys.lists.infinite(params),
         queryFn: () => fetchPosts(params),
+        staleTime: POSTS_STALE_TIME,
+        suspense: true
+    });
+}
+
+export function useTrendingPosts(params = {}) {
+    return useQuery({
+        queryKey: postsKeys.lists.trending(params),
+        queryFn: () => fetchTrendingPosts(params),
         staleTime: POSTS_STALE_TIME,
         suspense: true
     });

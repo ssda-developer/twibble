@@ -6,6 +6,7 @@ export const postsKeys = {
     lists: {
         all: ["posts", "list"],
         infinite: (params = {}) => ["posts", "list", "infinite", params],
+        trending: (params = {}) => ["posts", "list", "trending", params],
         byUser: (userId, params = {}) => ["posts", "user", userId, params],
         infiniteByUser: (user, params = {}) => ["posts", "user", user, "infinite", params],
         byId: (id, currentUserId) => ["posts", "detail", id, currentUserId],

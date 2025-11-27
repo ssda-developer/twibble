@@ -116,7 +116,7 @@ export default function RegisterForm() {
 
         setLoading(true);
 
-        const avatar = {
+        const colors = {
             background: avatarColors.bgColor || avatarColors.background,
             text: avatarColors.textColor || avatarColors.text
         };
@@ -126,7 +126,10 @@ export default function RegisterForm() {
                 displayName: cleaned.displayName,
                 username: cleaned.username,
                 password: cleaned.password,
-                avatar
+                avatar: {
+                    initials,
+                    colors
+                }
             },
             {
                 onSuccess: () => {

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
     try {
         const body = await req.json();
-        const { displayName, username, password, avatarColors } = body;
+        const { displayName, username, password, avatar } = body;
 
         if (!displayName) {
             return NextResponse.json(
@@ -48,7 +48,7 @@ export async function POST(req) {
             );
         }
 
-        const user = await registerUser(displayName, username, password, avatarColors);
+        const user = await registerUser(displayName, username, password, avatar);
         await setAuthCookie(user._id.toString());
 
         const userSafe = {

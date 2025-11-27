@@ -24,6 +24,7 @@ const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
     const { currentUser } = useUserContext();
     const [isShow, setIsShow] = useState(false);
     const { mutate: deletePost } = useDeletePost();
+    const isCurrentUser = author._id === currentUser?._id;
 
     const dropdownRef = useRef(null);
 
@@ -65,15 +66,12 @@ const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
         };
     }, []);
 
-    const mainMenu = [
-        { icon: "eye-slash", label: "Hide", onClick: handleHide }
-    ];
-
-    const authorMenu = author === currentUser?._id ? [
+    const menu = [
         { icon: "pencil-square", label: "Edit", onClick: handleEdit },
         { icon: "trash", label: "Delete", onClick: handleDelete }
-    ] : [];
+    ];
 
+    if (!isCurrentUser) return false;
 
     return (
         <div className="z-10 relative" ref={dropdownRef}>
@@ -83,19 +81,11 @@ const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
 
             <div id="dropdownDots"
                  className={`absolute right-0 ${!isShow && "hidden"} border border-slate-800 rounded-xl bg-black/80 backdrop-blur-md min-w-28`}>
-                <ul className="py-2 text-sm">
-                    {mainMenu.map((item, index) => (
+                <ul className="py-2 text-sm border-t border-slate-800">
+                    {menu.map((item, index) => (
                         <MenuItem key={`${item.label}-${index}`} {...item} />
                     ))}
                 </ul>
-
-                {authorMenu.length > 0 && (
-                    <ul className="py-2 text-sm border-t border-slate-800">
-                        {authorMenu.map((item, index) => (
-                            <MenuItem key={`${item.label}-${index}`} {...item} />
-                        ))}
-                    </ul>
-                )}
             </div>
         </div>
     );
