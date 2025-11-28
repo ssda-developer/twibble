@@ -5,7 +5,7 @@ const ProfileLikesPage = async ({ params }) => {
     const userName = parameters.username;
 
     return (
-        <PostListData user={userName} type="userLikes" />
+        <PostListData user={userName} type="user-liked" />
     );
 };
 

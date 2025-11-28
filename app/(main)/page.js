@@ -6,7 +6,7 @@ export default function HomePage() {
     return (
         <div>
             <Protected>
-                <Composer />
+                <Composer mode="create" />
             </Protected>
             <PostListData />
         </div>

@@ -1,4 +1,4 @@
-import { addUserStateToPosts } from "@/app/features/utils";
+import { addUserStateToPosts } from "@/features/utils";
 import dbConnect from "@/lib/mongoose";
 import Post from "@/models/Post";
 import User from "@/models/User";

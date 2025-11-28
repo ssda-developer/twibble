@@ -24,7 +24,7 @@ const SkeletonPost = ({ withImage = false }) => {
                         </div>}
                 </div>
 
-                <div className="flex justify-between text-sm my-4 text-gray-400">
+                <div className="flex justify-between text-sm my-4 text-slate-400">
                     <div className="h-5 w-5 skeleton bg-slate-800" />
                     <div className="h-5 w-5 skeleton bg-slate-800" />
                     <div className="h-5 w-5 skeleton bg-slate-800" />

@@ -1,6 +1,5 @@
 "use client";
 
-import { useDeletePost } from "@/app/features/hooks";
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
 import { useUserContext } from "@/context/UserContext";
@@ -20,10 +19,9 @@ const MenuItem = ({ keyLi, icon, label, onClick }) => {
     );
 };
 
-const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
+const ActionPostOptionsButton = ({ onEdit, onDelete, author }) => {
     const { currentUser } = useUserContext();
     const [isShow, setIsShow] = useState(false);
-    const { mutate: deletePost } = useDeletePost();
     const isCurrentUser = author._id === currentUser?._id;
 
     const dropdownRef = useRef(null);
@@ -46,11 +44,7 @@ const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
         e.preventDefault();
         e.stopPropagation();
 
-        deletePost(postId, {
-            onSuccess: () => {
-                console.log("deleted");
-            }
-        });
+        if (onDelete) onDelete();
     };
 
     useEffect(() => {
@@ -81,7 +75,7 @@ const ActionPostOptionsButton = ({ onEdit, postId, author }) => {
 
             <div id="dropdownDots"
                  className={`absolute right-0 ${!isShow && "hidden"} border border-slate-800 rounded-xl bg-black/80 backdrop-blur-md min-w-28`}>
-                <ul className="py-2 text-sm border-t border-slate-800">
+                <ul className="py-2 text-sm">
                     {menu.map((item, index) => (
                         <MenuItem key={`${item.label}-${index}`} {...item} />
                     ))}

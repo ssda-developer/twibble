@@ -1,6 +1,6 @@
 "use client";
 
-import { useLogoutUser, useMeQuery } from "@/app/features/hooks";
+import { useLogoutUser, useMeQuery } from "@/features/hooks";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 export const UserContext = createContext({

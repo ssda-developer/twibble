@@ -1,12 +1,12 @@
 "use client";
 
-import { useRegisterUser } from "@/app/features/hooks";
 import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
+import { useRegisterUser } from "@/features/hooks";
 import { generateAvatarColors } from "@/utils";
 import React, { useState } from "react";
 
-export default function RegisterForm() {
+const RegisterForm = () => {
     const [form, setForm] = useState({
         username: "",
         displayName: "",
@@ -257,4 +257,6 @@ export default function RegisterForm() {
             </button>
         </form>
     );
-}
+};
+
+export default RegisterForm;

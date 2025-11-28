@@ -5,7 +5,7 @@ const ProfileSavedPage = async ({ params }) => {
     const userName = parameters.username;
 
     return (
-        <PostListData user={userName} type="userSaves" />
+        <PostListData user={userName} type="user-saved" />
     );
 };
 

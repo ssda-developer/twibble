@@ -2,7 +2,7 @@
 
 import { SITE_NAME } from "@/constants";
 
-export default function TwibbleLoader() {
+const TwibbleLoader = () => {
     const letters = SITE_NAME.split("");
 
     return (
@@ -35,4 +35,6 @@ export default function TwibbleLoader() {
             </style>
         </div>
     );
-}
+};
+
+export default TwibbleLoader;

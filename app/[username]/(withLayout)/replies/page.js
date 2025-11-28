@@ -5,7 +5,7 @@ const ProfilePostsPage = async ({ params }) => {
     const userName = parameters.username;
 
     return (
-        <PostListData user={userName} type="userReplies" />
+        <PostListData user={userName} type="user-replied" />
     );
 };
 

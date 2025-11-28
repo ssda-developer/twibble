@@ -1,7 +1,8 @@
+import EmptyState from "@/components/EmptyState";
 import PostCard from "@/components/PostCard";
 
 const PostList = ({ posts, type }) => {
-    if (!posts || posts.length === 0) return <p>No posts</p>;
+    if (!posts || posts.length === 0) return <EmptyState type={type} />;
 
     return (
         <ul className="border-t border-slate-800">

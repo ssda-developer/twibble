@@ -24,7 +24,7 @@ const ActionRepostButton = ({ repostsCount, userState, onRepost }) => {
     }, [userState?.reposted]);
 
     return (
-        <ActionButton count={repostsCount} ariaLabel="Reposts" type="reposts" onClick={handleRepost}
+        <ActionButton count={repostsCount} ariaLabel="Reposts" type="repost" onClick={handleRepost}
                       isActive={reposted}>
             <Icon name="arrow-path-rounded-square" />
         </ActionButton>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useLoginUser } from "@/app/features/hooks";
 import Icon from "@/components/Icon";
+import { useLoginUser } from "@/features/hooks";
 import { useState } from "react";
 
-export default function LoginForm() {
+const LoginForm = () => {
     const [form, setForm] = useState({
         username: "",
         password: ""
@@ -153,4 +153,6 @@ export default function LoginForm() {
             </button>
         </form>
     );
-}
+};
+
+export default LoginForm;

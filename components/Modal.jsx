@@ -4,8 +4,7 @@ import Icon from "@/components/Icon";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-
-export default function Modal({ open, onClose, setOpen, children, ariaLabel = "Dialog" }) {
+const Modal = ({ open, onClose, children, ariaLabel = "Dialog" }) => {
     const [mounted, setMounted] = useState(false);
     const containerRef = useRef(null);
     const dialogRef = useRef(null);
@@ -61,7 +60,7 @@ export default function Modal({ open, onClose, setOpen, children, ariaLabel = "D
                 aria-label={ariaLabel}
                 ref={dialogRef}
                 tabIndex={-1}
-                className="relative z-10 w-5/12 min-w-lg mx-4 bg-[var(--background)] rounded-xl p-6 ring-1 ring-black/5 focus:outline-none"
+                className="relative z-10 w-11/12 sm:w-5/12 sm:min-w-lg mx-4 bg-[var(--background)] rounded-xl p-6 ring-1 ring-black/5 focus:outline-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 {children}
@@ -76,4 +75,6 @@ export default function Modal({ open, onClose, setOpen, children, ariaLabel = "D
         </div>,
         containerRef.current
     );
-}
+};
+
+export default Modal;

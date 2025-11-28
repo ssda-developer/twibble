@@ -1,10 +1,12 @@
 "use client";
 
-import { useTrendingPosts } from "@/app/features/hooks";
+import { useTrendingPosts } from "@/features/hooks";
 import Link from "next/link";
 
 const TrendingBlock = () => {
     const { data } = useTrendingPosts();
+
+    if (!data || data?.posts?.length === 0) return null;
 
     return (
         <div className="flex flex-col p-4 rounded-xl border border-slate-800">

@@ -1,7 +1,7 @@
 "use client";
 
-import { useUserByNameOrId } from "@/app/features/hooks";
 import Avatar from "@/components/Avatar";
+import { useUserByNameOrId } from "@/features/hooks";
 import { formatDate } from "@/utils";
 import Link from "next/link";
 
@@ -11,7 +11,7 @@ const ProfileBlock = ({ userName }) => {
     return (
         <div>
             <div className="flex border-b border-slate-800 justify-between p-6">
-                <div className="flex flex-col text-gray-400 ml-1">
+                <div className="flex flex-col text-slate-400 ml-1">
                     <h2 className="font-bold text-white text-2xl">{data.displayName}</h2>
                     <span className="mb-4">@{data.username}</span>
                     <span className="text-sm">Joined {formatDate(data.createdAt)}</span>

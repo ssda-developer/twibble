@@ -1,4 +1,4 @@
-import { addUserStateToPosts } from "@/app/features/utils";
+import { addUserStateToPosts } from "@/features/utils";
 import dbConnect from "@/lib/mongoose";
 import Save from "@/models/Save";
 import User from "@/models/User";
@@ -11,7 +11,7 @@ export async function GET(req, { params }) {
     try {
         await dbConnect();
 
-        let userId = null;
+        let userId;
         const { user } = await params;
         const { searchParams } = new URL(req.url);
         const limit = parseInt(searchParams.get("limit")) || 20;

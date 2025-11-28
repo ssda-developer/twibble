@@ -15,11 +15,11 @@ const ActionButton = ({
     const formatted = formatCount(count);
 
     const colors = {
-        replies: {
+        reply: {
             text: "text-blue-500",
             hover: "hover:bg-blue-500/10 hover:text-blue-500"
         },
-        reposts: {
+        repost: {
             text: "text-green-500",
             hover: "hover:bg-green-500/10 hover:text-green-500"
         },
@@ -40,8 +40,8 @@ const ActionButton = ({
             hover: "hover:bg-orange-500/10 hover:text-orange-500"
         },
         default: {
-            text: "text-gray-500",
-            hover: "hover:bg-gray-500/10"
+            text: "text-slate-500",
+            hover: "hover:bg-slate-500/10"
         }
     };
 

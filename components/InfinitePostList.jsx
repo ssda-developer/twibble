@@ -1,7 +1,7 @@
 "use client";
 
-import { useInfinitePosts, useInfiniteReplies, useInfiniteUserItems } from "@/app/features/hooks";
 import { useUserContext } from "@/context/UserContext";
+import { useInfinitePosts, useInfiniteReplies, useInfiniteUserItems } from "@/features/hooks";
 import { useEffect, useRef } from "react";
 import PostList from "./PostList";
 
@@ -16,19 +16,19 @@ const InfinitePostList = ({ user, parentId, type }) => {
             query = useInfiniteReplies(parentId);
             posts = query.data?.pages.flatMap(page => page.replies) || [];
             break;
-        case "userPosts":
+        case "user-posted":
             query = useInfiniteUserItems({ user, type: "posts", params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.posts) || [];
             break;
-        case "userReplies":
+        case "user-replied":
             query = useInfiniteUserItems({ user, type: "replies", params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.replies) || [];
             break;
-        case "userSaves":
+        case "user-saved":
             query = useInfiniteUserItems({ user, type: "saves", params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.saves) || [];
             break;
-        case "userLikes":
+        case "user-liked":
             query = useInfiniteUserItems({ user, type: "likes", params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.likes) || [];
             break;
@@ -53,14 +53,10 @@ const InfinitePostList = ({ user, parentId, type }) => {
 
     return (
         <>
-            <PostList posts={posts} />
+            <PostList posts={posts} type={type} />
 
             <div ref={loaderRef} className="py-4 text-center">
-                {isFetchingNextPage
-                    ? "Loading more..."
-                    : hasNextPage
-                        ? "Scroll to load more"
-                        : `No more ${type}`}
+                {isFetchingNextPage && "Loading more..."}
             </div>
         </>
     );

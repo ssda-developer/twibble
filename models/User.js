@@ -2,9 +2,18 @@ import mongoose, { Schema } from "mongoose";
 
 const UserSchema = new Schema(
     {
-        username: { type: String, required: true, unique: true, index: true },
+        username: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true,
+            trim: true,
+            lowercase: true,
+            minlength: 3,
+            maxlength: 15
+        },
         passwordHash: { type: String, required: true },
-        displayName: { type: String },
+        displayName: { type: String, trim: true, maxlength: 18 },
         avatar: {
             initials: { type: String, maxlength: 2 },
             colors: {
@@ -12,7 +21,7 @@ const UserSchema = new Schema(
                 text: { type: String, default: "#ffffff" }
             }
         },
-        bio: { type: String },
+        bio: { type: String, maxlength: 280 },
         stats: {
             postsCount: { type: Number, default: 0 },
             followersCount: { type: Number, default: 0 },
@@ -23,5 +32,7 @@ const UserSchema = new Schema(
     },
     { timestamps: true }
 );
+
+UserSchema.index({ createdAt: -1 });
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

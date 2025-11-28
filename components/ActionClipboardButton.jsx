@@ -7,8 +7,8 @@ import { useState } from "react";
 const ActionClipboardButton = ({ postLink }) => {
     const [status, setStatus] = useState("idle");
     const statusMap = {
-        idle: { icon: <Icon name="link" />, text: "Copy Link" },
-        copied: { icon: <Icon name="check" type="solid" />, text: "Copied" },
+        idle: { icon: <Icon name="clipboard-document" />, text: "Copy Link" },
+        copied: { icon: <Icon name="clipboard-document-check" type="solid" />, text: "Copied" },
         error: { icon: <Icon name="x-mark" />, text: "Failed to copy" }
     };
     const { icon, text } = statusMap[status];
@@ -20,11 +20,11 @@ const ActionClipboardButton = ({ postLink }) => {
         try {
             await navigator.clipboard.writeText(postLink);
             setStatus("copied");
-            setTimeout(() => setStatus("idle"), 1500);
+            setTimeout(() => setStatus("idle"), 1000);
         } catch (error) {
             console.error("Failed to copy:", error);
             setStatus("error");
-            setTimeout(() => setStatus("idle"), 1500);
+            setTimeout(() => setStatus("idle"), 1000);
         }
     };
 

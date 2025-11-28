@@ -1,4 +1,4 @@
-import { PostView } from "@/components/PostView";
+import PostView from "@/components/PostView";
 
 const PostPage = async ({ params }) => {
     const { id, username } = await params;

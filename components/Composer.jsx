@@ -1,25 +1,27 @@
 "use client";
 
-import { useCreatePost, useEditPost, useRepostPost } from "@/app/features/hooks";
+import ActionIconButton from "@/components/ActionIconButton";
 import Avatar from "@/components/Avatar";
-import Icon from "@/components/Icon";
 import MediaGallery from "@/components/MediaGallery";
 import PostCard from "@/components/PostCard";
 import { useUserContext } from "@/context/UserContext";
+import { useCreatePost, useEditPost, useRepostPost } from "@/features/hooks";
 import { getRandomValue } from "@/utils";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+
+const MAX_CHARS = 280;
 
 function ComposerTextarea({ value, onChange, onKeyDown, placeholder }) {
     const ref = useRef(null);
 
     useEffect(() => {
         const el = ref.current;
-
         if (!el) return;
 
         el.style.height = "auto";
         el.style.height = `${el.scrollHeight}px`;
-    }, [ref, value]);
+    }, [value]);
 
     return (
         <textarea
@@ -36,120 +38,179 @@ function ComposerTextarea({ value, onChange, onKeyDown, placeholder }) {
 
 function ComposerActions({
                              remaining,
-                             overLimit,
+                             isOverLimit,
                              onAddPhoto,
-                             onAddGif,
-                             onAddEmoji,
                              onSubmit,
                              isDisabled,
-                             type
+                             mode,
+                             kind,
+                             variant
                          }) {
-    return (
-        <div className="flex mt-4 items-center">
-            <div className="flex items-center justify-center text-white">
-                <button type="button" className="mr-2" onClick={onAddPhoto} aria-label="Add photo">
-                    <Icon name="photo" />
-                </button>
-                <button type="button" className="mr-2" onClick={onAddGif} aria-label="Add gif">
-                    <Icon name="gif" />
-                </button>
-                <button type="button" className="mr-2" onClick={onAddEmoji} aria-label="Add emoji">
-                    <Icon name="face-smile" />
-                </button>
-            </div>
+    const getButtonLabel = () => {
+        if (mode === "edit") return "Save";
+        if (mode === "repost") return "Repost";
+        if (mode === "create" && kind === "reply") return "Reply";
+        return "Post";
+    };
 
-            <span className={`ml-auto mr-3 text-sm ${overLimit ? "text-red-500" : "text-slate-400"}`}>
+    const isModal = variant === "modal";
+    const buttonLabel = getButtonLabel();
+
+    return (
+        <div
+            className={`mt-4 flex ${isModal && "flex-col"} sm:flex-row ${isModal ? "items-end" : "items-center"} sm:items-center`}>
+            <div className="flex w-full">
+                <div className="flex items-center justify-center text-white">
+                    <ActionIconButton
+                        iconName="photo"
+                        onClick={onAddPhoto}
+                        ariaLabel="Add photo"
+                        className="text-sky-500"
+                    />
+                    <ActionIconButton
+                        iconName="gif"
+                        isLocked={true}
+                        ariaLabel="Add gif"
+                        className="text-sky-500"
+                    />
+                    <ActionIconButton
+                        iconName="list-bullet"
+                        isLocked={true}
+                        ariaLabel="Add poll"
+                        className="text-sky-500"
+                    />
+                    <ActionIconButton
+                        iconName="face-smile"
+                        isLocked={true}
+                        className="text-sky-500"
+                        ariaLabel="Add emoji"
+                    />
+                    <ActionIconButton
+                        iconName="map-pin"
+                        isLocked={true}
+                        className="text-sky-500"
+                        ariaLabel="Add location"
+                    />
+                    <ActionIconButton
+                        iconName="calendar-days"
+                        isLocked={true}
+                        className="text-sky-500"
+                        ariaLabel="Add schedule"
+                    />
+                </div>
+
+                <span
+                    className={`ml-auto mr-3 text-sm ${
+                        isOverLimit ? "text-red-500" : "text-slate-400"
+                    }`}
+                >
                 {remaining}
             </span>
+            </div>
+
             <button
                 type="button"
-                className="capitalize bg-white px-3 py-1 font-bold text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`rounded-full ${isModal && "mt-3"} sm:m-0 bg-white px-3 py-1 font-bold text-black disabled:cursor-not-allowed disabled:opacity-50`}
                 disabled={isDisabled}
                 onClick={onSubmit}
             >
-                {type}
+                {buttonLabel}
             </button>
         </div>
     );
 }
 
-export default function Composer({
-                                     currentData = { text: "", images: [] },
-                                     placeholder = "What’s happening?",
-                                     parentId = null,
-                                     replyingToUser = null,
-                                     type = "post",
-                                     postId = null,
-                                     setIsEditing,
-                                     setIsReposting,
-                                     post = null
-                                 }) {
+const Composer = ({
+                      currentData = { text: "", images: [] },
+                      placeholder = "What’s happening?",
+                      parentId = null,
+                      replyingToUser = null,
+                      mode = "create",
+                      kind = "post",
+                      postId = null,
+                      post = null,
+                      onClose,
+                      className = "",
+                      variant = "default"
+                  }) => {
     const { currentUser } = useUserContext();
-    const [text, setText] = useState(currentData.text);
-    const [imgLinks, setImgLinks] = useState(currentData.images);
+    const [text, setText] = useState(currentData.text || "");
+    const [images, setImages] = useState(currentData.images || []);
+
     const createPost = useCreatePost();
     const editPost = useEditPost();
     const repostPost = useRepostPost();
 
-    const maxChars = 280;
-    const remaining = maxChars - text.length;
-    const overLimit = remaining < 0;
+    const isReply = kind === "reply";
+    const isModal = variant === "modal";
+
+    const remaining = MAX_CHARS - text.length;
+    const isOverLimit = remaining < 0;
 
     const handleSubmit = () => {
-        if (overLimit || !text.trim()) return;
+        if (isOverLimit || !text.trim()) return;
 
-        if (type === "repost") {
+        const trimmed = text.trim();
+        const userId = currentUser?._id;
+
+        if (mode === "repost" && postId && post) {
             repostPost.mutate(
                 {
-                    postId: postId,
-                    content: text.trim(),
-                    media: imgLinks,
-                    userId: currentUser?._id,
-                    repostId: post._id
+                    postId,
+                    content: trimmed,
+                    media: images,
+                    userId,
+                    repostId: post._id,
+                    parentId: isReply ? parentId : null
                 },
                 {
                     onSuccess: () => {
                         setText("");
-                        setImgLinks([]);
-                        setIsReposting(false);
+                        setImages([]);
+                        if (onClose) onClose();
                     }
                 }
             );
-        } else if (type === "edit") {
+            return;
+        }
+
+        if (mode === "edit" && postId) {
             editPost.mutate(
                 {
-                    postId: postId,
+                    postId,
                     content: {
-                        content: text.trim(),
-                        media: imgLinks, //TODO: fixed edit imgs
+                        content: trimmed,
+                        media: images,
                         parentId,
-                        userId: currentUser?._id
+                        userId
                     }
                 },
                 {
                     onSuccess: () => {
                         setText("");
-                        setImgLinks([]);
-                        setIsEditing(false);
+                        setImages([]);
+                        if (onClose) onClose();
                     }
                 }
             );
-        } else {
-            createPost.mutate(
-                {
-                    content: text.trim(),
-                    media: imgLinks,
-                    parentId,
-                    userId: currentUser?._id
-                },
-                {
-                    onSuccess: () => {
-                        setText("");
-                        setImgLinks([]);
-                    }
-                }
-            );
+            return;
         }
+
+        createPost.mutate(
+            {
+                content: trimmed,
+                media: images,
+                parentId: isReply ? parentId : null,
+                userId
+            },
+            {
+                onSuccess: () => {
+                    setText("");
+                    setImages([]);
+                    if (onClose) onClose();
+                }
+            }
+        );
     };
 
     const handleKeyDown = (e) => {
@@ -159,57 +220,72 @@ export default function Composer({
         }
     };
 
-    const handlePhoto = (e) => {
+    const handleAddPhoto = (e) => {
         e.preventDefault();
-
         const link = `https://picsum.photos/id/${getRandomValue(1000)}/600/300`;
-
-        setImgLinks(prev => [...prev, { url: link }]);
+        setImages(prev => [...prev, { url: link }]);
     };
 
     const handleRemovePhoto = (indexToRemove) => {
-        setImgLinks(prev => prev.filter((_, idx) => idx !== indexToRemove));
+        setImages(prev => prev.filter((_, index) => index !== indexToRemove));
     };
 
-    const handleGif = (e) => e.preventDefault();
-    const handleEmoji = (e) => e.preventDefault();
-
     return (
-        <div className="p-4 flex">
+        <div className={`flex ${isModal ? "pt-3" : "p-4"} sm:p-4 ${className}`}>
             <div className="mr-2">
-                <Avatar colors={currentUser?.avatar.colors} letter={currentUser?.avatar.initials} />
+                <Avatar
+                    colors={currentUser?.avatar?.colors}
+                    letter={currentUser?.avatar?.initials}
+                />
             </div>
 
             <div className="w-full">
-                {parentId && replyingToUser && (
-                    <p className="text-sm mb-1">Replying to <span className="text-sky-500">@{replyingToUser}</span></p>
+                {isReply && replyingToUser && (
+                    <p className="mb-1 text-sm">
+                        Replying to{" "}
+                        <Link href={`/${replyingToUser}/posts`} className="text-sky-500">@{replyingToUser}</Link>
+                    </p>
                 )}
-
                 <div
-                    className={`flex-1 border-b border-slate-800 flex flex-col text-white font-semibold ${imgLinks.length && "pb-6"}`}>
+                    className={`flex flex-1 flex-col border-b border-slate-800 font-semibold text-white ${
+                        images.length || mode === "repost" ? "pb-6" : ""
+                    }`}
+                >
                     <ComposerTextarea
                         value={text}
-                        onChange={(e) => setText(e.target.value)}
+                        onChange={e => setText(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
                     />
 
-                    <MediaGallery images={imgLinks} editable={true} onRemove={handleRemovePhoto} />
-                    {post && <PostCard {...post} type="repost" />}
+                    {images.length > 0 && (
+                        <MediaGallery
+                            images={images}
+                            editable
+                            onRemove={handleRemovePhoto}
+                        />
+                    )}
+
+                    {post && mode === "repost" && (
+                        <div className="mt-2">
+                            <PostCard {...post} type="repost-inside" />
+                        </div>
+                    )}
                 </div>
 
                 <ComposerActions
                     remaining={remaining}
-                    overLimit={overLimit}
-                    onAddPhoto={handlePhoto}
-                    onAddGif={handleGif}
-                    onAddEmoji={handleEmoji}
+                    isOverLimit={isOverLimit}
+                    onAddPhoto={handleAddPhoto}
                     onSubmit={handleSubmit}
-                    isDisabled={overLimit || !text.trim()}
-                    isReply={!!parentId}
-                    type={type}
+                    isDisabled={isOverLimit || !text.trim()}
+                    mode={mode}
+                    kind={kind}
+                    variant={variant}
                 />
             </div>
         </div>
     );
-}
+};
+
+export default Composer;

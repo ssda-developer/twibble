@@ -1,10 +1,10 @@
-import { Providers } from "@/app/providers";
 import Aside from "@/components/Aside";
 import Header from "@/components/Header";
 import NavLinks from "@/components/NavLinks";
+import Providers from "@/components/Providers";
 import { SITE_NAME } from "@/constants";
 import { Barlow } from "next/font/google";
-import "./globals.css";
+import "@/styles/globals.css";
 
 const geistBarlow = Barlow({
     subsets: ["latin"],
@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
                 <div className="w-78 sticky top-0 h-screen shrink-0 p-6 hidden lg:block">
                     <Aside />
                 </div>
-                <div className="block lg:hidden sticky bottom-0 w-full bg-black/10 backdrop-blur-md z-10">
+                <div className="block lg:hidden fixed bottom-0 w-full bg-black/10 backdrop-blur-md z-10">
                     <NavLinks />
                 </div>
             </div>

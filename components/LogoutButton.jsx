@@ -3,7 +3,7 @@
 import Icon from "@/components/Icon";
 import { useUserContext } from "@/context/UserContext";
 
-export default function LogoutButton() {
+const LogoutButton = () => {
     const { logout } = useUserContext();
 
     const handleLogout = async () => {
@@ -18,4 +18,6 @@ export default function LogoutButton() {
             <Icon name="arrow-right-start-on-rectangle" className="w-3 h-3" />
         </button>
     );
-}
+};
+
+export default LogoutButton;
