@@ -64,3 +64,7 @@ export const formatDate = (isoDate) => {
         year: "numeric"
     }).format(new Date(isoDate));
 };
+
+export const matchAny = (pathname, patterns) => {
+    return patterns.some(regex => regex.test(pathname));
+};

@@ -1,6 +1,7 @@
 "use client";
 
 import { useLogoutUser, useMeQuery } from "@/features/hooks";
+import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 export const UserContext = createContext({
@@ -20,8 +21,8 @@ export const UserProvider = ({ children }) => {
     const [authAttentionId, setAuthAttentionId] = useState(0);
     const { data, isLoading } = useMeQuery();
     const { mutateAsync: logoutMutation } = useLogoutUser();
-
     const [userLoaded, setUserLoaded] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         if (!isLoading) {
@@ -41,6 +42,16 @@ export const UserProvider = ({ children }) => {
     };
 
     const triggerAuthAttention = useCallback(() => {
+        if (typeof window !== "undefined") {
+            const width = window.innerWidth;
+
+            const isMobileOrTablet = width < 1024;
+
+            if (isMobileOrTablet) {
+                router.push("/authorization");
+            }
+        }
+
         setAuthAttentionId((prev) => prev + 1);
     }, []);
 

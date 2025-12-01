@@ -1,13 +1,24 @@
 "use client";
 
 import Icon from "@/components/Icon";
+import { GUEST_PATH_REGEX } from "@/constants";
 import { useUserContext } from "@/context/UserContext";
+import { matchAny } from "@/utils";
+import { usePathname, useRouter } from "next/navigation";
 
 const LogoutButton = () => {
     const { logout } = useUserContext();
+    const router = useRouter();
+    const pathname = usePathname();
 
     const handleLogout = async () => {
         await logout();
+
+        if (!matchAny(pathname, GUEST_PATH_REGEX)) {
+            router.push("/");
+        } else {
+            router.refresh();
+        }
     };
 
     return (

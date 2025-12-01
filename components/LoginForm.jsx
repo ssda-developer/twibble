@@ -2,6 +2,7 @@
 
 import Icon from "@/components/Icon";
 import { useLoginUser } from "@/features/hooks";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 const LoginForm = () => {
@@ -14,7 +15,8 @@ const LoginForm = () => {
     const [generalError, setGeneralError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-
+    const router = useRouter();
+    const pathname = usePathname();
     const { mutate } = useLoginUser();
 
     const handleChange = (e) => {
@@ -72,6 +74,12 @@ const LoginForm = () => {
             {
                 onSuccess: () => {
                     setLoading(false);
+
+                    if (pathname === "/authorization") {
+                        router.push("/");
+                    } else {
+                        router.refresh();
+                    }
                 },
                 onError: (error) => {
                     setLoading(false);

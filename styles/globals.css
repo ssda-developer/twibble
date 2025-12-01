@@ -38,3 +38,7 @@ body {
     flex: 0 0 100%;
     min-width: 0;
 }
+
+ul.parents + ul.detailed {
+    border: none;
+}

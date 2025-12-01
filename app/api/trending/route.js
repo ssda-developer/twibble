@@ -23,7 +23,7 @@ export async function GET() {
             {
                 $sort: { likeCount: -1, _id: 1 }
             },
-            { $limit: 6 }
+            { $limit: 5 }
         ]);
 
         const postIds = aggregated.map(item => item._id);
@@ -35,7 +35,7 @@ export async function GET() {
             });
         }
 
-        const posts = await Post.find({ _id: { $in: postIds }, type: "original" }).populate({
+        const posts = await Post.find({ _id: { $in: postIds }, type: { $in: ["original", "repost"] } }).populate({
             path: "author",
             select: "_id username displayName avatar"
         }).lean();

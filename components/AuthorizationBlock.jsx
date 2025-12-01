@@ -5,7 +5,7 @@ import RegisterForm from "@/components/RegisterForm";
 import { useUserContext } from "@/context/UserContext";
 import { useEffect, useRef, useState } from "react";
 
-const AuthorizationBlock = () => {
+const AuthorizationBlock = ({ classes }) => {
     const [loginForm, setLoginForm] = useState(true);
     const { authAttentionId } = useUserContext();
     const boxRef = useRef(null);
@@ -17,7 +17,7 @@ const AuthorizationBlock = () => {
         if (boxRef.current) {
             boxRef.current.scrollIntoView({
                 behavior: "smooth",
-                block: "center"
+                block: "nearest"
             });
 
             setShake(true);
@@ -32,7 +32,7 @@ const AuthorizationBlock = () => {
 
     return (
         <div ref={boxRef}
-             className={`p-4 rounded-xl border border-slate-800 flex flex-col ${shake ? "shake-animation" : ""}`}>
+             className={`flex flex-col p-4 rounded-xl lg:border lg:border-slate-800 ${shake ? "shake-animation" : ""} ${classes}`}>
             {loginForm &&
                 <>
                     <LoginForm />

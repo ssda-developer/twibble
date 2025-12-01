@@ -22,7 +22,7 @@ const ProfileBlock = ({ userName }) => {
                 <div className="flex justify-between border-b border-slate-800 py-2 px-6">
                     <Link className="w-full text-center" href={`/${data.username}/posts`}>Posted</Link>
                     <Link className="w-full text-center" href={`/${data.username}/replies`}>Replied</Link>
-                    <Link className="w-full text-center" href={`/${data.username}/saved`}>Saved</Link>
+                    <Link className="w-full text-center" href={`/${data.username}/saves`}>Saved</Link>
                     <Link className="w-full text-center" href={`/${data.username}/likes`}>Liked</Link>
                 </div>
             </div>

@@ -4,6 +4,7 @@ import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
 import { useRegisterUser } from "@/features/hooks";
 import { generateAvatarColors } from "@/utils";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const RegisterForm = () => {
@@ -18,7 +19,8 @@ const RegisterForm = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [avatarColors] = useState(() => generateAvatarColors());
-
+    const router = useRouter();
+    const pathname = usePathname();
     const { mutate } = useRegisterUser();
 
     const getInitials = (name) => {
@@ -134,6 +136,12 @@ const RegisterForm = () => {
             {
                 onSuccess: () => {
                     setLoading(false);
+
+                    if (pathname === "/authorization") {
+                        router.push("/");
+                    } else {
+                        router.refresh();
+                    }
                 },
                 onError: (err) => {
                     setLoading(false);

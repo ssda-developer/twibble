@@ -13,10 +13,9 @@ const LikeSchema = new Schema(
             ref: "Post",
             required: true,
             index: true
-        },
-        createdAt: { type: Date, default: Date.now }
+        }
     },
-    { timestamps: false }
+    { timestamps: true }
 );
 
 LikeSchema.index({ user: 1, post: 1 }, { unique: true });

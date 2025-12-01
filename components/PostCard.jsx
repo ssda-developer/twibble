@@ -1,5 +1,4 @@
 import ActionClipboardButton from "@/components/ActionClipboardButton";
-import ActionIconButton from "@/components/ActionIconButton";
 import ActionLikeButton from "@/components/ActionLikeButton";
 import ActionPostOptionsButton from "@/components/ActionPostOptionsButton";
 import ActionRepliesButton from "@/components/ActionRepliesButton";
@@ -33,6 +32,7 @@ const PostCard = ({
 
     const isParent = type === "parents";
     const isRepostType = type === "repost-inside";
+    const isDetailed = type === "detailed";
     const postLink = `/${author?.username}/post/${_id}`;
 
     const openEdit = (e) => {
@@ -77,12 +77,12 @@ const PostCard = ({
             <div
                 className={`flex ${
                     !isParent ? "p-4" : "px-4 pt-4"
-                } border rounded-xl bg-slate-800/20 border-slate-800`}
+                } border rounded-xl bg-slate-800/20 border-slate-800 ${isDetailed && "flex-col"}`}
             >
                 {children}
             </div>
         ) : (
-            <Link href={postLink} className={`flex ${!isParent ? "p-4" : "px-4 pt-4"}`}>
+            <Link href={postLink} className={`flex ${!isParent ? "p-4" : "px-4 pt-4"} ${isDetailed && "flex-col"}`}>
                 {children}
             </Link>
         );
@@ -92,23 +92,33 @@ const PostCard = ({
     return (
         <>
             <Wrapper>
-                <div className="mr-3 flex flex-col items-center">
+                <div className={`flex ${isDetailed ? "flex-row mb-2" : "flex-col mr-3"} items-center`}>
                     <Avatar
                         colors={author?.avatar?.colors}
                         letter={author?.avatar?.initials}
                     />
                     {isParent && <div className="mt-4 w-px flex-1 bg-slate-800" />}
-                </div>
-
-                <div className="flex-1">
-                    <PostHeader
+                    {isDetailed && <PostHeader
                         author={author}
                         createdAt={createdAt}
                         postId={_id}
                         isRepostType={isRepostType}
+                        isDetailed={isDetailed}
                         onEdit={openEdit}
                         onDelete={openDelete}
-                    />
+                    />}
+                </div>
+
+                <div className="flex-1">
+                    {!isDetailed && <PostHeader
+                        author={author}
+                        createdAt={createdAt}
+                        postId={_id}
+                        isRepostType={isRepostType}
+                        isDetailed={isDetailed}
+                        onEdit={openEdit}
+                        onDelete={openDelete}
+                    />}
 
                     <PostContent content={content} media={media} />
 
@@ -229,7 +239,7 @@ const PostCard = ({
     );
 };
 
-const PostHeader = ({ author = {}, createdAt, postId, isRepostType, onEdit, onDelete }) => {
+const PostHeader = ({ author = {}, createdAt, postId, isRepostType, isDetailed, onEdit, onDelete }) => {
     const router = useRouter();
 
     const handlerUserPage = (e) => {
@@ -240,15 +250,17 @@ const PostHeader = ({ author = {}, createdAt, postId, isRepostType, onEdit, onDe
     };
 
     return (
-        <div className="mb-1 flex items-center">
-            <div className="mr-auto text-slate-400">
+        <div className={`mb-1 flex items-center ${isDetailed && "ml-2 w-full"}`}>
+            <div className={`mr-auto text-slate-400 ${isDetailed && "flex flex-col"}`}>
             <span className="mr-1 font-bold text-white">
                 {author?.displayName}
             </span>
-                <span onClick={handlerUserPage}
-                      className="mr-1 text-sky-500">@{author?.username}</span>
-                <span className="mr-1">·</span>
-                <span className="mr-1">{timeAgo(createdAt)}</span>
+                <span className={`${isDetailed && "text-sm"}`}>
+                    <span onClick={handlerUserPage}
+                          className="mr-1 text-sky-500">@{author?.username}</span>
+                    <span className="mr-1">·</span>
+                    <span className="mr-1">{timeAgo(createdAt)}</span>
+                </span>
             </div>
 
             {!isRepostType && (
@@ -285,29 +297,12 @@ const PostActions = ({
                          onReply
                      }) => (
     <div className="mx-[-8px] mt-2 flex justify-between text-sm text-slate-400">
-        <ActionRepliesButton
-            replyCount={replyCount}
-            onReplies={onReply}
-            userState={userState}
-        />
+        <div className="flex space-x-1">
+            <ActionRepliesButton replyCount={replyCount} onReplies={onReply} userState={userState} />
+            <ActionRepostButton repostsCount={repostCount} onRepost={onRepost} userState={userState} />
+        </div>
 
-        <ActionRepostButton
-            repostsCount={repostCount}
-            onRepost={onRepost}
-            userState={userState}
-        />
-
-        <ActionLikeButton
-            postId={postId}
-            likeCount={likeCount}
-            userState={userState}
-        />
-
-        <ActionIconButton
-            iconName="chart-bar-square"
-            isLocked={true}
-            ariaLabel="Views"
-        />
+        <ActionLikeButton postId={postId} likeCount={likeCount} userState={userState} />
 
         <div className="flex space-x-1">
             <ActionSaveButton postId={postId} userState={userState} />
