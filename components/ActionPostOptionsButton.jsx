@@ -2,7 +2,7 @@
 
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useEffect, useRef, useState } from "react";
 
 const MenuItem = ({ keyLi, icon, label, onClick }) => {
@@ -20,7 +20,7 @@ const MenuItem = ({ keyLi, icon, label, onClick }) => {
 };
 
 const ActionPostOptionsButton = ({ onEdit, onDelete, author }) => {
-    const { currentUser } = useUserContext();
+    const { currentUser } = useGlobalContext();
     const [isShow, setIsShow] = useState(false);
     const isCurrentUser = author._id === currentUser?._id;
 

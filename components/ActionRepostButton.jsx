@@ -1,10 +1,10 @@
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useEffect, useState } from "react";
 
 const ActionRepostButton = ({ repostsCount, userState, onRepost }) => {
-    const { currentUser, triggerAuthAttention } = useUserContext();
+    const { currentUser, triggerAuthAttention } = useGlobalContext();
     const [reposted, setReposted] = useState(userState?.reposted || false);
 
     const handleRepost = (e) => {

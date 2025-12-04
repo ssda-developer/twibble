@@ -2,10 +2,10 @@
 
 import Avatar from "@/components/Avatar";
 import LogoutButton from "@/components/LogoutButton";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 
 const Profile = () => {
-    const { currentUser } = useUserContext();
+    const { currentUser } = useGlobalContext();
 
     return (
         <div className="p-4 rounded-xl border border-slate-800 flex items-start">

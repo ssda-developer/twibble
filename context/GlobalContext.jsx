@@ -1,10 +1,10 @@
 "use client";
 
 import { useLogoutUser, useMeQuery } from "@/features/hooks";
-import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
-export const UserContext = createContext({
+export const GlobalContext = createContext({
     currentUser: null,
     setCurrentUser: () => {
     },
@@ -12,39 +12,60 @@ export const UserContext = createContext({
     },
     triggerAuthAttention: () => {
     },
-    authAttentionId: 0,
     loading: true
 });
 
-export const UserProvider = ({ children }) => {
+export const GlobalProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
-    const [authAttentionId, setAuthAttentionId] = useState(0);
+
     const { data, isLoading } = useMeQuery();
     const { mutateAsync: logoutMutation } = useLogoutUser();
-    const [userLoaded, setUserLoaded] = useState(false);
+
     const router = useRouter();
+    const pathname = usePathname();
+
+    const [routeLoading, setRouteLoading] = useState(false);
+    const prevPath = useRef(pathname);
+
+    const [authAttentionHandler, setAuthAttentionHandler] = useState(() => () => {
+    });
 
     useEffect(() => {
         if (!isLoading) {
             setCurrentUser(data?.user || null);
-            setUserLoaded(true);
         }
     }, [isLoading, data?.user]);
 
+    useEffect(() => {
+        if (prevPath.current !== pathname) {
+            setRouteLoading(true);
+
+            const timeout = setTimeout(() => {
+                setRouteLoading(false);
+            }, 350);
+
+            prevPath.current = pathname;
+
+            return () => clearTimeout(timeout);
+        }
+    }, [pathname]);
+
     const logout = async () => {
+        setRouteLoading(true);
+
         try {
             await logoutMutation();
         } catch (e) {
             console.error(e);
         } finally {
             setCurrentUser(null);
+            router.push("/");
         }
     };
 
     const triggerAuthAttention = useCallback(() => {
         if (typeof window !== "undefined") {
             const width = window.innerWidth;
-
             const isMobileOrTablet = width < 1024;
 
             if (isMobileOrTablet) {
@@ -52,23 +73,23 @@ export const UserProvider = ({ children }) => {
             }
         }
 
-        setAuthAttentionId((prev) => prev + 1);
-    }, []);
+        authAttentionHandler();
+    }, [authAttentionHandler, router]);
 
     return (
-        <UserContext.Provider
+        <GlobalContext.Provider
             value={{
                 currentUser,
                 setCurrentUser,
                 logout,
-                loading: !userLoaded,
                 triggerAuthAttention,
-                authAttentionId
+                setAuthAttentionHandler,
+                loading: isLoading || routeLoading
             }}
         >
             {children}
-        </UserContext.Provider>
+        </GlobalContext.Provider>
     );
 };
 
-export const useUserContext = () => useContext(UserContext);
+export const useGlobalContext = () => useContext(GlobalContext);

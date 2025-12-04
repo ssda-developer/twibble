@@ -1,4 +1,4 @@
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createPost,
@@ -32,15 +32,6 @@ export function useUserByNameOrId(user, params = {}) {
     });
 }
 
-export function usePosts(params = {}) {
-    return useQuery({
-        queryKey: postsKeys.lists.infinite(params),
-        queryFn: () => fetchPosts(params),
-        staleTime: POSTS_STALE_TIME,
-        suspense: true
-    });
-}
-
 export function useTrendingPosts(params = {}) {
     return useQuery({
         queryKey: postsKeys.lists.trending(params),
@@ -52,17 +43,8 @@ export function useTrendingPosts(params = {}) {
 
 export function usePostById(id, params = {}) {
     return useQuery({
-        queryKey: postsKeys.lists.byId(id, params.currentUserId),
+        queryKey: postsKeys.lists.byId(id),
         queryFn: () => fetchPostById(id, params),
-        staleTime: POSTS_STALE_TIME,
-        suspense: true
-    });
-}
-
-export function useReplies(postId, params = {}) {
-    return useQuery({
-        queryKey: postsKeys.lists.replies(postId, params),
-        queryFn: () => fetchReplies(postId, params),
         staleTime: POSTS_STALE_TIME,
         suspense: true
     });
@@ -89,32 +71,30 @@ export function useInfiniteReplies(postId, params = {}) {
 }
 
 export function useInfiniteUserItems({ user, type = "posts", params = {} }) {
-    let fetchFn;
-    let keyFn;
+    const map = {
+        posts: {
+            fetchFn: fetchUserPosts,
+            keyFn: (u, p) => postsKeys.lists.infiniteByUser(u, p)
+        },
+        replies: {
+            fetchFn: fetchUserReplies,
+            keyFn: (u, p) => postsKeys.lists.infiniteByUser(u, { ...p, type: "replies" })
+        },
+        saves: {
+            fetchFn: fetchUserSaves,
+            keyFn: (u, p) => postsKeys.lists.infiniteByUser(u, { ...p, type: "saves" })
+        },
+        likes: {
+            fetchFn: fetchUserLikes,
+            keyFn: (u, p) => postsKeys.lists.infiniteByUser(u, { ...p, type: "likes" })
+        }
+    };
 
-    if (type === "posts") {
-        fetchFn = fetchUserPosts;
-        keyFn = postsKeys.lists.infiniteByUser;
-    }
-
-    if (type === "replies") {
-        fetchFn = fetchUserReplies;
-        keyFn = (user, p) => postsKeys.lists.infiniteByUser(user, { ...p, type: "replies" });
-    }
-
-    if (type === "saves") {
-        fetchFn = fetchUserSaves;
-        keyFn = (user, p) => postsKeys.lists.infiniteByUser(user, { ...p, type: "saves" });
-    }
-
-    if (type === "likes") {
-        fetchFn = fetchUserLikes;
-        keyFn = (user, p) => postsKeys.lists.infiniteByUser(user, { ...p, type: "likes" });
-    }
+    const conf = map[type] ?? map.posts;
 
     return useInfiniteQuery({
-        queryKey: keyFn(user, params),
-        queryFn: ({ pageParam }) => fetchFn(user, { ...params, cursor: pageParam }),
+        queryKey: conf.keyFn(user, params),
+        queryFn: ({ pageParam }) => conf.fetchFn(user, { ...params, cursor: pageParam }),
         getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
         staleTime: POSTS_STALE_TIME,
         suspense: true
@@ -139,16 +119,16 @@ export function useToggleLike(userId) {
                 }));
             }
 
-            return { previousPost };
+            return { previousPost, postId };
         },
 
         onError: (_err, _variables, context) => {
-            if (context?.previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(context.previousPost._id), context.previousPost);
+            if (context?.previousPost && context?.postId) {
+                queryClient.setQueryData(postsKeys.lists.byId(context.postId), context.previousPost);
             }
         },
 
-        onSuccess: (_data) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === "posts" });
         }
     });
@@ -172,16 +152,16 @@ export function useToggleSave(userId) {
                 }));
             }
 
-            return { previousPost };
+            return { previousPost, postId };
         },
 
         onError: (_err, _variables, context) => {
-            if (context?.previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(context.previousPost._id), context.previousPost);
+            if (context?.previousPost && context?.postId) {
+                queryClient.setQueryData(postsKeys.lists.byId(context.postId), context.previousPost);
             }
         },
 
-        onSuccess: (_data) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === "posts" });
         }
     });
@@ -315,42 +295,42 @@ export function useDeletePost() {
 
 export function useLoginUser() {
     const qc = useQueryClient();
-    const { setCurrentUser } = useUserContext();
+    const { setCurrentUser } = useGlobalContext();
 
     return useMutation({
         mutationFn: loginRequest,
         onSuccess: async (data) => {
             setCurrentUser(data.user);
 
-            qc.invalidateQueries(postsKeys.all);
+            await qc.invalidateQueries(postsKeys.all);
         }
     });
 }
 
 export function useRegisterUser() {
     const qc = useQueryClient();
-    const { setCurrentUser } = useUserContext();
+    const { setCurrentUser } = useGlobalContext();
 
     return useMutation({
         mutationFn: registerRequest,
         onSuccess: async (data) => {
             setCurrentUser(data.user);
 
-            qc.invalidateQueries(postsKeys.all);
+            await qc.invalidateQueries(postsKeys.all);
         }
     });
 }
 
 export function useLogoutUser() {
     const qc = useQueryClient();
-    const { setCurrentUser } = useUserContext();
+    const { setCurrentUser } = useGlobalContext();
 
     return useMutation({
         mutationFn: logoutRequest,
         onSuccess: async () => {
             setCurrentUser(null);
 
-            qc.invalidateQueries({
+            await qc.invalidateQueries({
                 predicate: (query) => {
                     const key = query.queryKey;
                     if (!Array.isArray(key)) return false;

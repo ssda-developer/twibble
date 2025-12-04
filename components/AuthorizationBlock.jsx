@@ -2,33 +2,26 @@
 
 import LoginForm from "@/components/LoginForm";
 import RegisterForm from "@/components/RegisterForm";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useEffect, useRef, useState } from "react";
 
 const AuthorizationBlock = ({ classes }) => {
     const [loginForm, setLoginForm] = useState(true);
-    const { authAttentionId } = useUserContext();
+    const { setAuthAttentionHandler } = useGlobalContext();
+
     const boxRef = useRef(null);
     const [shake, setShake] = useState(false);
 
     useEffect(() => {
-        if (!authAttentionId) return;
+        setAuthAttentionHandler(() => () => {
+            if (!boxRef.current) return;
 
-        if (boxRef.current) {
-            boxRef.current.scrollIntoView({
-                behavior: "smooth",
-                block: "nearest"
-            });
-
+            boxRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
             setShake(true);
 
-            const timeout = setTimeout(() => {
-                setShake(false);
-            }, 600);
-
-            return () => clearTimeout(timeout);
-        }
-    }, [authAttentionId]);
+            setTimeout(() => setShake(false), 600);
+        });
+    }, [setAuthAttentionHandler]);
 
     return (
         <div ref={boxRef}

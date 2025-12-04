@@ -5,7 +5,7 @@ import User from "@/models/User";
 import mongoose from "mongoose";
 
 /**
- * GET /api/users/:id/replies?cursor=...&limit=20
+ * GET /api/users/:user/replies?cursor=...&limit=20
  */
 export async function GET(req, { params }) {
     try {

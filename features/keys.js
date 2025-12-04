@@ -9,7 +9,7 @@ export const postsKeys = {
         trending: (params = {}) => ["posts", "list", "trending", params],
         byUser: (userId, params = {}) => ["posts", "user", userId, params],
         infiniteByUser: (user, params = {}) => ["posts", "user", user, "infinite", params],
-        byId: (id, currentUserId) => ["posts", "detail", id, currentUserId],
+        byId: (id) => ["posts", "detail", id],
         replies: (postId, params = {}) => ["posts", "detail", postId, "replies", params],
         infiniteReplies: (postId, params = {}) => ["posts", "detail", postId, "replies", "infinite", params],
         delete: (id) => ["posts", "delete", id]

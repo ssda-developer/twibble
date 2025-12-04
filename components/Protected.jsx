@@ -1,9 +1,9 @@
 "use client";
 
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 
 const Protected = ({ children, mode = "auth" }) => {
-    const { currentUser } = useUserContext();
+    const { currentUser } = useGlobalContext();
 
     if (mode === "all") {
         return children;

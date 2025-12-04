@@ -15,7 +15,7 @@ const TrendingBlock = () => {
             <ul className="flex flex-col gap-2">
                 {data.posts.map((post) => (
                     <li key={`trending-${post._id}`} className="flex items-center">
-                        <Link href={`http://localhost:3000/${post.author?.username}/post/${post._id}`}
+                        <Link href={`/${post.author?.username}/post/${post._id}`}
                               className="flex flex-col w-full">
                             <span className="font-bold truncate">{post.content}</span>
                             <span className="text-slate-400 text-xs">

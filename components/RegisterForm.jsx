@@ -18,6 +18,7 @@ const RegisterForm = () => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [avatarColors] = useState(() => generateAvatarColors());
     const router = useRouter();
     const pathname = usePathname();
@@ -221,6 +222,13 @@ const RegisterForm = () => {
                     autoComplete="new-password"
                     aria-invalid={!!errors.password}
                 />
+                <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute right-2 translate-y-1/2 text-sm text-slate-400"
+                >
+                    {showPassword ? <Icon name="eye-slash" /> : <Icon name="eye" />}
+                </button>
                 {errors.password && (
                     <p className="text-yellow-300 text-xs">{errors.password}</p>
                 )}
@@ -233,7 +241,7 @@ const RegisterForm = () => {
                 <input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type={showPassword ? "text" : "password"}
+                    type={showConfirmPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="w-full rounded-lg border border-slate-700 bg-slate-800/60 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 px-3 py-2 transition"
                     value={form.confirmPassword}
@@ -243,10 +251,10 @@ const RegisterForm = () => {
                 />
                 <button
                     type="button"
-                    onClick={() => setShowPassword((s) => !s)}
+                    onClick={() => setShowConfirmPassword((s) => !s)}
                     className="absolute right-2 translate-y-1/2 text-sm text-slate-400"
                 >
-                    {showPassword ? <Icon name="eye-slash" /> : <Icon name="eye" />}
+                    {showConfirmPassword ? <Icon name="eye-slash" /> : <Icon name="eye" />}
                 </button>
                 {errors.confirmPassword && (
                     <p className="text-yellow-300 text-xs">{errors.confirmPassword}</p>

@@ -1,10 +1,10 @@
 "use client";
 
 import TwibbleLoader from "@/components/TwibbleLoader";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 
 const ClientWrapper = ({ children }) => {
-    const { loading } = useUserContext();
+    const { loading } = useGlobalContext();
 
     if (loading) return <TwibbleLoader />;
 

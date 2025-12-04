@@ -6,8 +6,28 @@ import { usePathname } from "next/navigation";
 
 const IconButton = ({ icon, label, href = "#", ariaLabel = "" }) => {
     const pathname = usePathname();
-    const isActive = href
-        ? (href === "/" ? pathname === "/" : pathname.startsWith(href))
+
+    const doesMenuMatch = (href, pathname) => {
+        if (href === "/" && pathname === "/") {
+            return true;
+        }
+
+        const hrefParts = href.split("/").filter(Boolean);
+        const pathParts = pathname.split("/").filter(Boolean);
+
+        if (hrefParts.length === 1) {
+            return pathParts.length === 1 && hrefParts[0] === pathParts[0];
+        }
+
+        if (hrefParts.length === 2 && pathParts.length === 2) {
+            return hrefParts[0] === pathParts[0];
+        }
+
+        return false;
+    };
+
+    const isActive = href && pathname
+        ? doesMenuMatch(href, pathname)
         : false;
 
     const content = (

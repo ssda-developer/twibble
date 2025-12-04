@@ -2,10 +2,11 @@
 
 import IconButton from "@/components/IconButton";
 import Protected from "@/components/Protected";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
+import Link from "next/link";
 
 const NavLinks = () => {
-    const { currentUser } = useUserContext();
+    const { currentUser } = useGlobalContext();
 
     const LIST_LINKS = [
         { label: "Home", href: "/", icon: "home", mode: "auth" },
@@ -23,6 +24,13 @@ const NavLinks = () => {
                     <IconButton label={link.label} href={link.href} icon={link.icon} />
                 </Protected>
             ))}
+            <Protected mode="guest">
+                <div className="p-2 flex justify-center items-center w-full lg:hidden">
+                    <Link href="/authorization">
+                        Access more features — <span className="underline">sign in</span>.
+                    </Link>
+                </div>
+            </Protected>
         </nav>
     );
 };

@@ -4,7 +4,7 @@ import ActionIconButton from "@/components/ActionIconButton";
 import Avatar from "@/components/Avatar";
 import MediaGallery from "@/components/MediaGallery";
 import PostCard from "@/components/PostCard";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useCreatePost, useEditPost, useRepostPost } from "@/features/hooks";
 import { getRandomValue } from "@/utils";
 import Link from "next/link";
@@ -133,7 +133,7 @@ const Composer = ({
                       className = "",
                       variant = "default"
                   }) => {
-    const { currentUser } = useUserContext();
+    const { currentUser } = useGlobalContext();
     const [text, setText] = useState(currentData.text || "");
     const [images, setImages] = useState(currentData.images || []);
 

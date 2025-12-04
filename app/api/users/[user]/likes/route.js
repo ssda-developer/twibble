@@ -5,7 +5,7 @@ import User from "@/models/User";
 import mongoose from "mongoose";
 
 /**
- * GET /api/users/:id/likes?cursor=...&limit=20
+ * GET /api/users/:user/likes?cursor=...&limit=20
  */
 export async function GET(req, { params }) {
     try {

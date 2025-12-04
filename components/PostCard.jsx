@@ -250,7 +250,7 @@ const PostHeader = ({ author = {}, createdAt, postId, isRepostType, isDetailed, 
     };
 
     return (
-        <div className={`mb-1 flex items-center ${isDetailed && "ml-2 w-full"}`}>
+        <div className={`mb-1 flex items-center ${isDetailed && "ml-3 w-full"}`}>
             <div className={`mr-auto text-slate-400 ${isDetailed && "flex flex-col"}`}>
             <span className="mr-1 font-bold text-white">
                 {author?.displayName}

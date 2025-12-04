@@ -1,12 +1,12 @@
 "use client";
 
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useInfinitePosts, useInfiniteReplies, useInfiniteUserItems } from "@/features/hooks";
 import { useEffect, useRef } from "react";
 import PostList from "./PostList";
 
 const InfinitePostList = ({ user, parentId, type }) => {
-    const { currentUser } = useUserContext();
+    const { currentUser } = useGlobalContext();
 
     let query;
     let posts;

@@ -2,12 +2,12 @@
 
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useToggleSave } from "@/features/hooks";
 import { useEffect, useState } from "react";
 
 const ActionSaveButton = ({ postId, userState }) => {
-    const { currentUser, triggerAuthAttention } = useUserContext();
+    const { currentUser, triggerAuthAttention } = useGlobalContext();
     const { mutate: toggleSave, isPending } = useToggleSave(currentUser?._id);
     const [saved, setSaved] = useState(userState?.saved || false);
 

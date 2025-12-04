@@ -1,7 +1,7 @@
 "use client";
 
 import ClientWrapper from "@/components/ClientWrapper";
-import { UserProvider } from "@/context/UserContext";
+import { GlobalProvider } from "@/context/GlobalContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -10,11 +10,11 @@ const Providers = ({ children }) => {
 
     return (
         <QueryClientProvider client={client}>
-            <UserProvider>
+            <GlobalProvider>
                 <ClientWrapper>
                     {children}
                 </ClientWrapper>
-            </UserProvider>
+            </GlobalProvider>
         </QueryClientProvider>
     );
 };

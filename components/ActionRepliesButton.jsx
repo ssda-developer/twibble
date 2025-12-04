@@ -1,10 +1,10 @@
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useEffect, useState } from "react";
 
 const ActionRepliesButton = ({ replyCount, userState, onReplies }) => {
-    const { currentUser, triggerAuthAttention } = useUserContext();
+    const { currentUser, triggerAuthAttention } = useGlobalContext();
     const [replied, setReplied] = useState(userState?.replied || false);
 
     const handleReplies = (e) => {

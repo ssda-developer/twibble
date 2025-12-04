@@ -1,15 +1,24 @@
 "use client";
 
 import Composer from "@/components/Composer";
+import Icon from "@/components/Icon";
 import PostList from "@/components/PostList";
 import PostListData from "@/components/PostListData";
 import Protected from "@/components/Protected";
-import { useUserContext } from "@/context/UserContext";
+import StatusBlock from "@/components/StatusBlock";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { usePostById } from "@/features/hooks";
 
 const PostThread = ({ id }) => {
-    const { currentUser } = useUserContext();
+    const { currentUser } = useGlobalContext();
     const { data } = usePostById(id, { currentUserId: currentUser?._id, includeParents: true });
+
+    if (data.error) return <StatusBlock
+        icon={<Icon name="exclamation-triangle" className="h-12 w-12" />}
+        title="Post not found."
+        description="The page you are looking for does not exist."
+        hint={{ text: "Go back to the homepage.", link: "/" }}
+    />;
 
     return (
         <>

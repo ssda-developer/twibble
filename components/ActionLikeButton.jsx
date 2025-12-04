@@ -2,12 +2,12 @@
 
 import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
-import { useUserContext } from "@/context/UserContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useToggleLike } from "@/features/hooks";
 import { useEffect, useState } from "react";
 
 const ActionLikeButton = ({ postId, userState, likeCount }) => {
-    const { currentUser, triggerAuthAttention } = useUserContext();
+    const { currentUser, triggerAuthAttention } = useGlobalContext();
     const { mutate: toggleLike, isPending } = useToggleLike(currentUser?._id);
     const [liked, setLiked] = useState(userState?.liked || false);
 

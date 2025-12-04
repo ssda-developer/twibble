@@ -1,189 +1,162 @@
-function buildQuery(params = {}) {
-    const query = new URLSearchParams();
+const buildQuery = (params = {}) => {
+    const searchParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) query.append(key, value);
+        if (value === undefined || value === null) return;
+
+        if (Array.isArray(value)) {
+            value.forEach((v) => searchParams.append(key, String(v)));
+            return;
+        }
+
+        if (typeof value === "object") {
+            searchParams.append(key, JSON.stringify(value));
+            return;
+        }
+
+        searchParams.append(key, String(value));
     });
-    return query.toString();
-}
 
-export async function fetchUserByNameOrId(user, params) {
-    const queryString = buildQuery(params);
+    const qs = searchParams.toString();
+    return qs ? `?${qs}` : "";
+};
 
-    const res = await fetch(`http://localhost:3000/api/users/${user}?${queryString}`);
-    if (!res.ok) throw new Error("Failed to fetch post");
-    return res.json();
-}
+const withQuery = (path, params) => `${path}${buildQuery(params)}`;
 
-export async function fetchPosts(params = {}) {
-    const queryString = buildQuery({ ...params, includeReposts: true });
+const apiFetch = async (path, options = {}) => {
+    const opts = { ...options };
+    opts.headers = opts.headers || {};
 
-    const res = await fetch(`http://localhost:3000/api/posts?${queryString}`);
-    if (!res.ok) throw new Error("Failed to fetch posts");
-    return res.json();
-}
+    if (opts.body && !opts.headers["Content-Type"]) {
+        opts.headers["Content-Type"] = "application/json";
+    }
 
-export async function fetchPostById(postId, params) {
-    const queryString = buildQuery(params);
+    if (opts.body && typeof opts.body === "object") {
+        opts.body = JSON.stringify(opts.body);
+    }
 
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}?${queryString}`);
-    if (!res.ok) throw new Error("Failed to fetch post");
-    return res.json();
-}
+    const res = await fetch(path, opts);
 
-export async function fetchReplies(postId, params = {}) {
-    const queryString = buildQuery(params);
+    let data = null;
+    try {
+        data = await res.json();
+    } catch (_) {
+        data = null;
+    }
 
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}/replies?${queryString}`);
-    if (!res.ok) throw new Error("Failed to fetch replies");
-    return res.json();
-}
+    if (!res.ok) {
+        return {
+            ok: false,
+            error: data?.message || "API Error",
+            status: res.status
+        };
+    }
 
-export async function fetchUserPosts(user, params = {}) {
-    const queryString = buildQuery({ ...params, includeReposts: true });
+    return data;
+};
 
-    const res = await fetch(`http://localhost:3000/api/users/${user}/posts?${queryString}`);
-    if (!res.ok) throw new Error("Failed to fetch user posts");
-    return res.json();
-}
+export const fetchUserByNameOrId = (user, params) => {
+    return apiFetch(withQuery(`/api/users/${user}`, params));
+};
 
-export async function fetchUserReplies(user, params = {}) {
-    const queryString = buildQuery(params);
+export const fetchPosts = (params = {}) => {
+    return apiFetch(withQuery(`/api/posts`, { ...params, includeReposts: true }));
+};
 
-    const res = await fetch(`http://localhost:3000/api/users/${user}/replies?${queryString}`);
-    if (!res.ok) throw new Error("Failed to fetch user replies");
-    return res.json();
-}
+export const fetchPostById = (postId, params) => {
+    return apiFetch(withQuery(`/api/posts/${postId}`, params));
+};
 
-export async function fetchUserSaves(user, params = {}) {
-    const queryString = buildQuery(params);
+export const fetchReplies = (postId, params = {}) => {
+    return apiFetch(withQuery(`/api/posts/${postId}/replies`, params));
+};
 
-    const res = await fetch(`http://localhost:3000/api/users/${user}/saves?${queryString}`);
-    if (!res.ok) throw new Error("Failed to fetch user saves");
-    return res.json();
-}
+export const fetchUserPosts = (user, params = {}) => {
+    return apiFetch(withQuery(`/api/users/${user}/posts`, { ...params, includeReposts: true }));
+};
 
-export async function fetchUserLikes(user, params = {}) {
-    const queryString = buildQuery(params);
+export const fetchUserReplies = (user, params = {}) => {
+    return apiFetch(withQuery(`/api/users/${user}/replies`, params));
+};
 
-    const res = await fetch(`http://localhost:3000/api/users/${user}/likes?${queryString}`);
-    if (!res.ok) throw new Error("Failed to fetch user likes");
-    return res.json();
-}
+export const fetchUserSaves = (user, params = {}) => {
+    return apiFetch(withQuery(`/api/users/${user}/saves`, params));
+};
 
-export async function toggleLike(postId, userId, action) {
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}/like`, {
+export const fetchUserLikes = (user, params = {}) => {
+    return apiFetch(withQuery(`/api/users/${user}/likes`, params));
+};
+
+export const toggleLike = (postId, userId, action) => {
+    return apiFetch(`/api/posts/${postId}/like`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, action })
+        body: { userId, action }
     });
-    if (!res.ok) throw new Error("Failed to toggle like");
-    return res.json();
-}
+};
 
-export async function toggleSave(postId, userId, action) {
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}/save`, {
+export const toggleSave = (postId, userId, action) => {
+    return apiFetch(`/api/posts/${postId}/save`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, action })
+        body: { userId, action }
     });
-    if (!res.ok) throw new Error("Failed to toggle like");
-    return res.json();
-}
+};
 
-export async function createPost(postData) {
-    const res = await fetch(`http://localhost:3000/api/posts`, {
+export const createPost = (postData) => {
+    return apiFetch(`/api/posts`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData)
+        body: postData
     });
-    if (!res.ok) throw new Error("Failed to create post");
-    return res.json();
-}
+};
 
-export async function createRepost(postData) {
-    const res = await fetch(`http://localhost:3000/api/posts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData)
-    });
-    if (!res.ok) throw new Error("Failed to create post");
-    return res.json();
-}
+export const createRepost = createPost;
 
-export async function editPost(postId, postData) {
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}/edit`, {
+export const editPost = (postId, postData) => {
+    return apiFetch(`/api/posts/${postId}/edit`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData)
+        body: postData
     });
-    if (!res.ok) throw new Error("Failed to toggle like");
-    return res.json();
-}
+};
 
-export async function deletePost(postId) {
-    const res = await fetch(`http://localhost:3000/api/posts/${postId}`, {
+export const deletePost = (postId) => {
+    return apiFetch(`/api/posts/${postId}`, {
         method: "DELETE"
     });
-    if (!res.ok) throw new Error("Failed to delete post");
-    return res.json();
-}
+};
 
-export async function loginRequest({ username, password }) {
-    const res = await fetch("http://localhost:3000/api/auth/login", {
+export const loginRequest = ({ username, password }) => {
+    return apiFetch(`/api/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        credentials: "include",
+        body: { username, password }
     });
+};
 
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.error || "Login failed");
-
-    return data;
-}
-
-export async function registerRequest(user) {
-    const res = await fetch("http://localhost:3000/api/auth/register", {
+export const registerRequest = (user) => {
+    return apiFetch(`/api/auth/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user)
+        credentials: "include",
+        body: user
     });
+};
 
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.error || "Register failed");
-
-    return data;
-}
-
-export async function logoutRequest() {
-    const res = await fetch("http://localhost:3000/api/auth/logout", {
-        method: "POST"
-    });
-
-    if (!res.ok) {
-        throw new Error("Logout failed");
-    }
-
-    return res.json();
-}
-
-export async function fetchMe() {
-    const res = await fetch("http://localhost:3000/api/auth/me", {
-        method: "GET",
+export const logoutRequest = () => {
+    return apiFetch(`/api/auth/logout`, {
+        method: "POST",
         credentials: "include"
     });
+};
 
-    if (!res.ok) {
+export const fetchMe = async () => {
+    try {
+        return await apiFetch(`/api/auth/me`, {
+            method: "GET",
+            credentials: "include"
+        });
+    } catch (_) {
         return { user: null };
     }
+};
 
-    return res.json();
-}
-
-export async function fetchTrendingPosts() {
-    const res = await fetch(`http://localhost:3000/api/trending`);
-    if (!res.ok) throw new Error("Failed to fetch trending posts");
-    return res.json();
-}
+export const fetchTrendingPosts = () => {
+    return apiFetch(`/api/trending`);
+};
