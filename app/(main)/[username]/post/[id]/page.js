@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import PostThread from "@/components/PostThread";
 
 const PostPage = async ({ params }) => {
@@ -5,6 +6,7 @@ const PostPage = async ({ params }) => {
 
     return (
         <div className="w-full lg:max-w-3xl mx-auto">
+            <BackButton text="Back" />
             <PostThread id={id} username={username} />
         </div>
     );

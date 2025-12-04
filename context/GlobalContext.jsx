@@ -1,6 +1,7 @@
 "use client";
 
 import { useLogoutUser, useMeQuery } from "@/features/hooks";
+import { useNavigationHistory } from "@/hooks/useNavigationHistory";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
@@ -16,6 +17,8 @@ export const GlobalContext = createContext({
 });
 
 export const GlobalProvider = ({ children }) => {
+    useNavigationHistory();
+
     const [currentUser, setCurrentUser] = useState(null);
 
     const { data, isLoading } = useMeQuery();
