@@ -42,11 +42,14 @@ export function useTrendingPosts(params = {}) {
 }
 
 export function usePostById(id, params = {}) {
+    const { userFetchStatus } = useGlobalContext();
+
     return useQuery({
         queryKey: postsKeys.lists.byId(id),
-        queryFn: () => fetchPostById(id, params),
+        queryFn: () => fetchPostById(id, { ...params, userFetchStatus }),
         staleTime: POSTS_STALE_TIME,
-        suspense: true
+        suspense: true,
+        enabled: userFetchStatus !== "idle"
     });
 }
 
@@ -355,14 +358,22 @@ export function useDeletePost() {
 
 export function useLoginUser() {
     const queryClient = useQueryClient();
-    const { setCurrentUser } = useGlobalContext();
+    const { setCurrentUser, setUserFetchStatus } = useGlobalContext();
+    // setUserFetchStatus("idle");
 
     return useMutation({
+        queryKey: ["login"],
         mutationFn: loginRequest,
+        onMutate: () => {
+            setUserFetchStatus("idle");
+        },
         onSuccess: async (data) => {
             setCurrentUser(data.user);
+            setUserFetchStatus(data?.user ? "found" : "not_found");
 
-            await queryClient.invalidateQueries(postsKeys.all);
+            await queryClient.invalidateQueries({
+                predicate: () => true
+            });
         }
     });
 }
@@ -376,7 +387,9 @@ export function useRegisterUser() {
         onSuccess: async (data) => {
             setCurrentUser(data.user);
 
-            await queryClient.invalidateQueries(postsKeys.all);
+            await queryClient.invalidateQueries({
+                predicate: () => true
+            });
         }
     });
 }

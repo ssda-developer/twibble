@@ -13,6 +13,9 @@ export const GlobalContext = createContext({
     },
     triggerAuthAttention: () => {
     },
+    setAuthAttentionHandler: () => {
+    },
+    userFetchStatus: "idle",
     loading: true
 });
 
@@ -20,6 +23,7 @@ export const GlobalProvider = ({ children }) => {
     useNavigationHistory();
 
     const [currentUser, setCurrentUser] = useState(null);
+    const [userFetchStatus, setUserFetchStatus] = useState("idle");
 
     const { data, isLoading } = useMeQuery();
     const { mutateAsync: logoutMutation } = useLogoutUser();
@@ -36,6 +40,7 @@ export const GlobalProvider = ({ children }) => {
     useEffect(() => {
         if (!isLoading) {
             setCurrentUser(data?.user || null);
+            setUserFetchStatus(data?.user ? "found" : "not_found");
         }
     }, [isLoading, data?.user]);
 
@@ -45,7 +50,7 @@ export const GlobalProvider = ({ children }) => {
 
             const timeout = setTimeout(() => {
                 setRouteLoading(false);
-            }, 350);
+            }, 500);
 
             prevPath.current = pathname;
 
@@ -54,7 +59,6 @@ export const GlobalProvider = ({ children }) => {
     }, [pathname]);
 
     const logout = async () => {
-        router.replace("/");
         setRouteLoading(true);
 
         try {
@@ -63,6 +67,7 @@ export const GlobalProvider = ({ children }) => {
             console.error(e);
         } finally {
             setCurrentUser(null);
+            setUserFetchStatus("user_logout");
             setRouteLoading(false);
         }
     };
@@ -85,9 +90,11 @@ export const GlobalProvider = ({ children }) => {
             value={{
                 currentUser,
                 setCurrentUser,
+                setUserFetchStatus,
                 logout,
                 triggerAuthAttention,
                 setAuthAttentionHandler,
+                userFetchStatus,
                 loading: isLoading || routeLoading
             }}
         >

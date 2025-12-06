@@ -4,9 +4,11 @@ import TwibbleLoader from "@/components/TwibbleLoader";
 import { useGlobalContext } from "@/context/GlobalContext";
 
 const ClientWrapper = ({ children }) => {
-    const { loading } = useGlobalContext();
+    const { loading, userFetchStatus } = useGlobalContext();
 
-    if (loading) return <TwibbleLoader />;
+    if (loading || userFetchStatus === "idle") {
+        return <TwibbleLoader />;
+    }
 
     return <>{children}</>;
 };

@@ -3,14 +3,11 @@ import dbConnect from "@/lib/mongoose";
 import Like from "@/models/Like";
 import Post from "@/models/Post";
 import Save from "@/models/Save";
-import User from "@/models/User";
-import mongoose from "mongoose";
 
 export async function GET(req, { params }) {
     try {
         await dbConnect();
 
-        let userId;
         const { id } = await params;
         const { searchParams } = new URL(req.url);
         const currentUserId = searchParams.get("currentUserId");
@@ -19,13 +16,6 @@ export async function GET(req, { params }) {
             1,
             Math.min(100, parseInt(searchParams.get("includeDepth") || "20", 10))
         );
-
-        if (mongoose.Types.ObjectId.isValid(currentUserId)) {
-            userId = currentUserId;
-        } else {
-            const found = await User.findOne({ username: currentUserId }).select("_id").lean();
-            userId = found._id.toString();
-        }
 
         const post = await Post.findById(id)
             .populate({
@@ -85,15 +75,15 @@ export async function GET(req, { params }) {
         }
 
         if (includeParents && parents.length > 0) {
-            const parentsWithState = await addUserStateToPosts(parents, userId);
-            const postWithState = await addUserStateToPosts(post, userId);
+            const parentsWithState = await addUserStateToPosts(parents, currentUserId);
+            const postWithState = await addUserStateToPosts(post, currentUserId);
 
             return new Response(
                 JSON.stringify({ post: postWithState, parents: parentsWithState }),
                 { status: 200, headers: { "Content-Type": "application/json" } }
             );
         } else {
-            const postWithState = await addUserStateToPosts(post, userId);
+            const postWithState = await addUserStateToPosts(post, currentUserId);
 
             return new Response(
                 JSON.stringify({ post: postWithState }),
