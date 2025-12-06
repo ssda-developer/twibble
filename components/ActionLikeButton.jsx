@@ -4,14 +4,13 @@ import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
 import { useGlobalContext } from "@/context/GlobalContext";
 import { useToggleLike } from "@/features/hooks";
-import { useEffect, useState } from "react";
 
 const ActionLikeButton = ({ postId, userState, likeCount }) => {
     const { currentUser, triggerAuthAttention } = useGlobalContext();
-    const { mutate: toggleLike, isPending } = useToggleLike(currentUser?._id);
-    const [liked, setLiked] = useState(userState?.liked || false);
 
-    const handleClick = (e) => {
+    const { mutate: toggleLike, isPending } = useToggleLike(currentUser?._id);
+
+    const handleLikeToggle = (e) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -22,24 +21,25 @@ const ActionLikeButton = ({ postId, userState, likeCount }) => {
 
         if (isPending) return;
 
-        toggleLike({ postId, action: liked ? "unlike" : "like" });
-        setLiked((prev) => !prev);
+        toggleLike({
+            postId,
+            action: userState.liked ? "unlike" : "like"
+        });
     };
-
-    useEffect(() => {
-        setLiked(userState?.liked || false);
-    }, [userState?.liked]);
 
     return (
         <ActionButton
-            count={likeCount || 0}
+            count={likeCount}
             ariaLabel="Likes"
-            onClick={handleClick}
+            onClick={handleLikeToggle}
             disabled={isPending}
             type="like"
-            isActive={liked}
+            isActive={userState.liked}
         >
-            <Icon name={liked ? "heart" : "heart"} type={liked ? "solid" : undefined} />
+            <Icon
+                name="heart"
+                type={userState.liked ? "solid" : undefined}
+            />
         </ActionButton>
     );
 };

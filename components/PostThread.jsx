@@ -6,12 +6,10 @@ import PostList from "@/components/PostList";
 import PostListData from "@/components/PostListData";
 import Protected from "@/components/Protected";
 import StatusBlock from "@/components/StatusBlock";
-import { useGlobalContext } from "@/context/GlobalContext";
 import { usePostById } from "@/features/hooks";
 
-const PostThread = ({ id }) => {
-    const { currentUser } = useGlobalContext();
-    const { data } = usePostById(id, { currentUserId: currentUser?._id, includeParents: true });
+const PostThread = ({ id, username }) => {
+    const { data } = usePostById(id, { currentUserId: username, includeParents: true });
 
     if (data.error) return <StatusBlock
         icon={<Icon name="exclamation-triangle" className="h-12 w-12" />}

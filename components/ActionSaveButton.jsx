@@ -4,14 +4,12 @@ import ActionButton from "@/components/ActionButton";
 import Icon from "@/components/Icon";
 import { useGlobalContext } from "@/context/GlobalContext";
 import { useToggleSave } from "@/features/hooks";
-import { useEffect, useState } from "react";
 
 const ActionSaveButton = ({ postId, userState }) => {
     const { currentUser, triggerAuthAttention } = useGlobalContext();
     const { mutate: toggleSave, isPending } = useToggleSave(currentUser?._id);
-    const [saved, setSaved] = useState(userState?.saved || false);
 
-    const handleClick = (e) => {
+    const handleToggle = (e) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -20,23 +18,18 @@ const ActionSaveButton = ({ postId, userState }) => {
             return;
         }
 
-        toggleSave({ postId, action: saved ? "unsave" : "save" });
-        setSaved((prev) => !prev);
+        toggleSave({ postId, action: userState.saved ? "unsave" : "save" });
     };
-
-    useEffect(() => {
-        setSaved(userState?.saved || false);
-    }, [userState?.saved]);
 
     return (
         <ActionButton
             ariaLabel="Save"
-            onClick={handleClick}
+            onClick={handleToggle}
             disabled={isPending}
             type="save"
-            isActive={saved}
+            isActive={userState.saved}
         >
-            <Icon name="bookmark" type={saved ? "solid" : undefined} />
+            <Icon name="bookmark" type={userState.saved ? "solid" : undefined} />
         </ActionButton>
     );
 };

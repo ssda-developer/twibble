@@ -1,8 +1,9 @@
+import { addUserStateToPosts } from "@/features/utils";
 import dbConnect from "@/lib/mongoose";
 import Post from "@/models/Post";
 
 /**
- * GET /api/posts/:id/replies?cursor=...&limit=20
+ * GET /api/posts/:id/replies?cursor=...&limit=20&currentUserId=...
  */
 export async function GET(req, { params }) {
     try {
@@ -10,8 +11,10 @@ export async function GET(req, { params }) {
 
         const { id } = await params;
         const { searchParams } = new URL(req.url);
+
         const limit = parseInt(searchParams.get("limit")) || 20;
         const cursor = searchParams.get("cursor");
+        const currentUserId = searchParams.get("currentUserId");
 
         const filter = { parentPost: id };
 
@@ -28,18 +31,33 @@ export async function GET(req, { params }) {
             })
             .lean();
 
-        const nextCursor = replies.length > 0 ? replies[replies.length - 1]._id : null;
+        let postsWithState = replies;
 
-        return new Response(JSON.stringify({ replies, nextCursor }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" }
-        });
+        if (currentUserId) {
+            postsWithState = await addUserStateToPosts(replies, currentUserId);
+        }
 
+        const nextCursor =
+            replies.length > 0 ? replies[replies.length - 1]._id : null;
+
+        return new Response(
+            JSON.stringify({
+                replies: postsWithState,
+                nextCursor
+            }),
+            {
+                status: 200,
+                headers: { "Content-Type": "application/json" }
+            }
+        );
     } catch (error) {
         console.error("Failed to fetch replies:", error);
-        return new Response(JSON.stringify({ error: "Failed to fetch replies" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" }
-        });
+        return new Response(
+            JSON.stringify({ error: "Failed to fetch replies" }),
+            {
+                status: 500,
+                headers: { "Content-Type": "application/json" }
+            }
+        );
     }
 }

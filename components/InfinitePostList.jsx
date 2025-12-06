@@ -13,7 +13,7 @@ const InfinitePostList = ({ user, parentId, type }) => {
 
     switch (type) {
         case "reply":
-            query = useInfiniteReplies(parentId);
+            query = useInfiniteReplies({ postId: parentId, params: { currentUserId: currentUser?._id } });
             posts = query.data?.pages.flatMap(page => page.replies) || [];
             break;
         case "user-posted":

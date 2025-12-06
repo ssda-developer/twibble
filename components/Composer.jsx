@@ -222,7 +222,7 @@ const Composer = ({
 
     const handleAddPhoto = (e) => {
         e.preventDefault();
-        const link = `https://picsum.photos/id/${getRandomValue(1000)}/600/300`;
+        const link = `https://picsum.photos/id/${getRandomValue(500)}/600/300`;
         setImages(prev => [...prev, { url: link }]);
     };
 

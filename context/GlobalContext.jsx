@@ -54,6 +54,7 @@ export const GlobalProvider = ({ children }) => {
     }, [pathname]);
 
     const logout = async () => {
+        router.replace("/");
         setRouteLoading(true);
 
         try {
@@ -62,7 +63,7 @@ export const GlobalProvider = ({ children }) => {
             console.error(e);
         } finally {
             setCurrentUser(null);
-            router.push("/");
+            setRouteLoading(false);
         }
     };
 

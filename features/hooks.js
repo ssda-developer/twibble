@@ -60,7 +60,7 @@ export function useInfinitePosts({ currentUserId, ...params } = {}) {
     });
 }
 
-export function useInfiniteReplies(postId, params = {}) {
+export function useInfiniteReplies({ postId, params = {} }) {
     return useInfiniteQuery({
         queryKey: postsKeys.lists.infiniteReplies(postId, params),
         queryFn: ({ pageParam }) => fetchReplies(postId, { ...params, cursor: pageParam }),
@@ -101,84 +101,144 @@ export function useInfiniteUserItems({ user, type = "posts", params = {} }) {
     });
 }
 
-export function useToggleLike(userId) {
+export function useToggleLike(currentUserId) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ postId, action }) => toggleLike(postId, userId, action),
+        mutationKey: ["like"],
+        mutationFn: ({ postId, action }) =>
+            toggleLike(postId, currentUserId, action),
 
-        onMutate: async ({ postId, action }) => {
+        async onMutate({ postId, action }) {
+            const updatePost = (p) =>
+                p._id === postId
+                    ? {
+                        ...p,
+                        userState: { ...p.userState, liked: action === "like" },
+                        likeCount:
+                            action === "like" ? p.likeCount + 1 : Math.max(0, p.likeCount - 1)
+                    }
+                    : p;
+
             await queryClient.cancelQueries(postsKeys.lists.byId(postId));
-
             const previousPost = queryClient.getQueryData(postsKeys.lists.byId(postId));
-
             if (previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(postId), old => ({
-                    ...old,
-                    likeCount: action === "like" ? old.likeCount + 1 : Math.max(0, old.likeCount - 1)
-                }));
+                queryClient.setQueryData(postsKeys.lists.byId(postId), updatePost);
             }
+
+            const queries = queryClient.getQueryCache().findAll({ queryKey: ["posts"] });
+            queries.forEach((query) => {
+                const old = query.state.data;
+                if (!old) return;
+
+                if (old.pages) {
+                    const newPages = old.pages.map((page) => {
+                        const updateArray = (key) =>
+                            page[key]
+                                ? { ...page, [key]: page[key].map(updatePost) }
+                                : page;
+                        page = updateArray("posts");
+                        page = updateArray("replies");
+                        return page;
+                    });
+                    queryClient.setQueryData(query.queryKey, { ...old, pages: newPages });
+                    return;
+                }
+
+                if (old.post) {
+                    const newPost = updatePost(old.post);
+                    const newParents = old.parents ? old.parents.map(updatePost) : undefined;
+                    queryClient.setQueryData(query.queryKey, { ...old, post: newPost, parents: newParents });
+                }
+            });
 
             return { previousPost, postId };
         },
 
-        onError: (_err, _variables, context) => {
-            if (context?.previousPost && context?.postId) {
+        onError(_err, _vars, context) {
+            if (context?.previousPost) {
                 queryClient.setQueryData(postsKeys.lists.byId(context.postId), context.previousPost);
             }
         },
 
-        onSuccess: () => {
-            queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === "posts" });
+        async onSettled() {
+            await queryClient.invalidateQueries({ queryKey: postsKeys.lists.trending({}) });
         }
     });
 }
 
-export function useToggleSave(userId) {
+export function useToggleSave(currentUserId) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ postId, action }) => toggleSave(postId, userId, action),
+        mutationKey: ["save"],
+        mutationFn: ({ postId, action }) =>
+            toggleSave(postId, currentUserId, action),
 
-        onMutate: async ({ postId, action }) => {
+        async onMutate({ postId, action }) {
+            const updatePost = (p) =>
+                p._id === postId
+                    ? {
+                        ...p,
+                        userState: { ...p.userState, saved: action === "save" }
+                    }
+                    : p;
+
             await queryClient.cancelQueries(postsKeys.lists.byId(postId));
-
             const previousPost = queryClient.getQueryData(postsKeys.lists.byId(postId));
-
             if (previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(postId), old => ({
-                    ...old,
-                    saveCount: action === "save" ? old.saveCount + 1 : Math.max(0, old.saveCount - 1)
-                }));
+                queryClient.setQueryData(postsKeys.lists.byId(postId), updatePost);
             }
+
+            const queries = queryClient.getQueryCache().findAll({ queryKey: ["posts"] });
+            queries.forEach((query) => {
+                const old = query.state.data;
+                if (!old) return;
+
+                if (old.pages) {
+                    const newPages = old.pages.map((page) => {
+                        const updateArray = (key) =>
+                            page[key]
+                                ? { ...page, [key]: page[key].map(updatePost) }
+                                : page;
+                        page = updateArray("posts");
+                        page = updateArray("replies");
+                        return page;
+                    });
+                    queryClient.setQueryData(query.queryKey, { ...old, pages: newPages });
+                    return;
+                }
+
+                if (old.post) {
+                    const newPost = updatePost(old.post);
+                    const newParents = old.parents ? old.parents.map(updatePost) : undefined;
+                    queryClient.setQueryData(query.queryKey, { ...old, post: newPost, parents: newParents });
+                }
+            });
 
             return { previousPost, postId };
         },
 
-        onError: (_err, _variables, context) => {
-            if (context?.previousPost && context?.postId) {
+        onError(_err, _vars, context) {
+            if (context?.previousPost) {
                 queryClient.setQueryData(postsKeys.lists.byId(context.postId), context.previousPost);
             }
-        },
-
-        onSuccess: () => {
-            queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === "posts" });
         }
     });
 }
 
 export function useCreatePost() {
-    const qc = useQueryClient();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: createPost,
 
         onMutate: async (newPost) => {
-            await qc.cancelQueries(postsKeys.all);
+            await queryClient.cancelQueries(postsKeys.all);
 
-            const prevData = qc.getQueryData(postsKeys.all);
+            const prevData = queryClient.getQueryData(postsKeys.all);
 
-            qc.setQueryData(postsKeys.all, (old = []) => [
+            queryClient.setQueryData(postsKeys.all, (old = []) => [
                 { ...newPost, _id: `optimistic-${Date.now()}` },
                 ...old
             ]);
@@ -188,28 +248,28 @@ export function useCreatePost() {
 
         onError: (_err, _newPost, ctx) => {
             if (ctx?.prevData) {
-                qc.setQueryData(postsKeys.all, ctx.prevData);
+                queryClient.setQueryData(postsKeys.all, ctx.prevData);
             }
         },
 
         onSuccess: () => {
-            qc.invalidateQueries(postsKeys.all);
+            queryClient.invalidateQueries(postsKeys.all);
         }
     });
 }
 
 export function useRepostPost() {
-    const qc = useQueryClient();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: createRepost,
 
         onMutate: async (newPost) => {
-            await qc.cancelQueries(postsKeys.all);
+            await queryClient.cancelQueries(postsKeys.all);
 
-            const prevData = qc.getQueryData(postsKeys.all);
+            const prevData = queryClient.getQueryData(postsKeys.all);
 
-            qc.setQueryData(postsKeys.all, (old = []) => [
+            queryClient.setQueryData(postsKeys.all, (old = []) => [
                 { ...newPost, _id: `optimistic-${Date.now()}` },
                 ...old
             ]);
@@ -219,12 +279,12 @@ export function useRepostPost() {
 
         onError: (_err, _newPost, ctx) => {
             if (ctx?.prevData) {
-                qc.setQueryData(postsKeys.all, ctx.prevData);
+                queryClient.setQueryData(postsKeys.all, ctx.prevData);
             }
         },
 
         onSuccess: () => {
-            qc.invalidateQueries(postsKeys.all);
+            queryClient.invalidateQueries(postsKeys.all);
         }
     });
 }
@@ -263,17 +323,17 @@ export function useEditPost() {
 }
 
 export function useDeletePost() {
-    const qc = useQueryClient();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (id) => deletePost(id),
 
         onMutate: async (id) => {
-            await qc.cancelQueries({ queryKey: postsKeys.all });
+            await queryClient.cancelQueries({ queryKey: postsKeys.all });
 
-            const previous = qc.getQueryData(postsKeys.all) || [];
+            const previous = queryClient.getQueryData(postsKeys.all) || [];
 
-            qc.setQueryData(postsKeys.all, (old = []) =>
+            queryClient.setQueryData(postsKeys.all, (old = []) =>
                 Array.isArray(old) ? old.filter((p) => p._id !== id) : old
             );
 
@@ -282,19 +342,19 @@ export function useDeletePost() {
 
         onError: (_err, _id, context) => {
             if (context?.previous) {
-                qc.setQueryData(postsKeys.all, context.previous);
+                queryClient.setQueryData(postsKeys.all, context.previous);
             }
             console.error("Delete failed", _err);
         },
 
         onSettled: () => {
-            qc.invalidateQueries({ queryKey: postsKeys.all });
+            queryClient.invalidateQueries({ queryKey: postsKeys.all });
         }
     });
 }
 
 export function useLoginUser() {
-    const qc = useQueryClient();
+    const queryClient = useQueryClient();
     const { setCurrentUser } = useGlobalContext();
 
     return useMutation({
@@ -302,13 +362,13 @@ export function useLoginUser() {
         onSuccess: async (data) => {
             setCurrentUser(data.user);
 
-            await qc.invalidateQueries(postsKeys.all);
+            await queryClient.invalidateQueries(postsKeys.all);
         }
     });
 }
 
 export function useRegisterUser() {
-    const qc = useQueryClient();
+    const queryClient = useQueryClient();
     const { setCurrentUser } = useGlobalContext();
 
     return useMutation({
@@ -316,13 +376,13 @@ export function useRegisterUser() {
         onSuccess: async (data) => {
             setCurrentUser(data.user);
 
-            await qc.invalidateQueries(postsKeys.all);
+            await queryClient.invalidateQueries(postsKeys.all);
         }
     });
 }
 
 export function useLogoutUser() {
-    const qc = useQueryClient();
+    const queryClient = useQueryClient();
     const { setCurrentUser } = useGlobalContext();
 
     return useMutation({
@@ -330,7 +390,7 @@ export function useLogoutUser() {
         onSuccess: async () => {
             setCurrentUser(null);
 
-            await qc.invalidateQueries({
+            await queryClient.invalidateQueries({
                 predicate: (query) => {
                     const key = query.queryKey;
                     if (!Array.isArray(key)) return false;

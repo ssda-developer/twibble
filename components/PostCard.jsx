@@ -29,7 +29,7 @@ const PostCard = ({
                   }) => {
     const [modalType, setModalType] = useState(null);
     const { mutate: deletePost, isLoading: isDeleting } = useDeletePost();
-
+    const router = useRouter();
     const isParent = type === "parents";
     const isRepostType = type === "repost-inside";
     const isDetailed = type === "detailed";
@@ -67,6 +67,7 @@ const PostCard = ({
 
         deletePost(_id, {
             onSuccess: () => {
+                router.push("/");
                 setModalType(null);
             }
         });
@@ -302,6 +303,7 @@ const PostActions = ({
             <ActionRepostButton repostsCount={repostCount} onRepost={onRepost} userState={userState} />
         </div>
 
+        {userState.liked}
         <ActionLikeButton postId={postId} likeCount={likeCount} userState={userState} />
 
         <div className="flex space-x-1">
