@@ -5,9 +5,11 @@ import { timeAgo } from "@/utils";
 import Link from "next/link";
 
 const TrendingBlock = () => {
-    const { data } = useTrendingPosts();
+    const { data, isLoading, isError } = useTrendingPosts();
 
-    if (!data || data?.posts?.length === 0) return null;
+    if (isLoading) return null;
+    if (isError) return null;
+    if (!Array.isArray(data?.posts) || data.posts.length === 0) return null;
 
     return (
         <div className="flex flex-col pt-4 px-4 pb-6 rounded-xl border border-slate-800">

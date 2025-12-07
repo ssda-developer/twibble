@@ -59,8 +59,7 @@ export async function GET() {
         });
     } catch (error) {
         console.error("[GET /api/trending] Error:", error);
-
-        return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+        return new Response(JSON.stringify({ posts: [], error: "Internal Server Error" }), {
             status: 500,
             headers: { "Content-Type": "application/json" }
         });
