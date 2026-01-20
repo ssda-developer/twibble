@@ -2,6 +2,7 @@ import { addUserStateToPosts } from "@/features/utils";
 import dbConnect from "@/lib/mongoose";
 import Post from "@/models/Post";
 import User from "@/models/User";
+import mongoose from "mongoose";
 
 /**
  * GET /api/posts?cursor=...&limit=20
@@ -22,18 +23,20 @@ export async function GET(req) {
 
         if (onlyOriginal) {
             filter.type = "original";
+        } else if (includeReposts) {
+            filter.type = { $in: ["original", "repost"] };
         }
 
-        if (includeReposts) {
-            filter.type = { $in: ["original", "repost"] };
+        if (cursor && mongoose.Types.ObjectId.isValid(cursor)) {
+            filter._id = { $lt: cursor };
         }
 
         if (author) {
             filter.author = author;
         }
-        
+
         const posts = await Post.find(filter)
-            .sort({ createdAt: -1 })
+            .sort({ _id: -1 })
             .limit(limit + 1)
             .populate({
                 path: "author",
@@ -52,13 +55,13 @@ export async function GET(req) {
         let nextCursor = null;
 
         if (posts.length > limit) {
-            const lastPost = posts.pop();
-            nextCursor = lastPost.createdAt.toISOString();
+            const lastItem = posts.pop();
+            nextCursor = lastItem._id.toString();
         }
 
         let postsWithState = posts;
 
-        if (currentUserId) {
+        if (currentUserId && posts.length > 0) {
             postsWithState = await addUserStateToPosts(posts, currentUserId);
         }
 
@@ -85,7 +88,7 @@ export async function POST(req) {
 
         if (!userId || (!content && !parentId && !repostId)) {
             return new Response(
-                JSON.stringify({ error: "userId and content or parentId or repostId are required" }),
+                JSON.stringify({ error: "userId and content/parentId/repostId are required" }),
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
         }
@@ -108,7 +111,7 @@ export async function POST(req) {
             const parent = await Post.findById(parentId);
 
             if (!parent) {
-                return new Response(JSON.stringify({ error: "Parent post not found" }), {
+                return new Response(JSON.stringify({ error: "Parent not found" }), {
                     status: 404,
                     headers: { "Content-Type": "application/json" }
                 });

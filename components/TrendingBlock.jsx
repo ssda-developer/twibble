@@ -21,7 +21,9 @@ const TrendingBlock = () => {
                               className="flex flex-col w-full">
                             <span className="font-bold truncate">{post.content}</span>
                             <span className="text-slate-400 text-xs">
-                                <span className="mr-1">{timeAgo(post.createdAt)} ago</span>
+                                <span className="mr-1">
+                                    {timeAgo(post.createdAt) === "now" ? "just now" : `${timeAgo(post.createdAt)} ago`}
+                                </span>
                                 <span className="mr-1">·</span>
                                 <span>{post.likeCount} {`${post.likeCount === 1 ? "like" : "likes"}`}</span>
                             </span>

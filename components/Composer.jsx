@@ -114,7 +114,7 @@ const Composer = ({
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     rows={1}
-                    className="w-full bg-transparent text-xl outline-none resize-none placeholder-slate-500 overflow-hidden"
+                    className="w-full mt-2 bg-transparent text-xl outline-none resize-none placeholder-slate-500 overflow-hidden"
                 />
 
                 {images.length > 0 && (
