@@ -12,6 +12,8 @@ const ProfileBlock = ({ userName }) => {
     const { currentUser } = useGlobalContext();
     const { data } = useUserByNameOrId(userName);
 
+    const isOwner = currentUser?._id === data?._id;
+
     return (
         <>
             <div className="flex border-b border-slate-800 justify-between p-6">
@@ -22,7 +24,7 @@ const ProfileBlock = ({ userName }) => {
                 </div>
                 <div>
                     <Avatar colors={data?.avatar?.colors} letter={data?.avatar?.initials} size="big" classes="mb-2" />
-                    {currentUser?._id === data?._id &&
+                    {isOwner &&
                         <Protected>
                             <LogoutButton text="Logout" classes="lg:hidden" />
                         </Protected>
@@ -33,8 +35,12 @@ const ProfileBlock = ({ userName }) => {
                 <div className="flex justify-between border-b border-slate-800 py-2 px-6">
                     <Link className="w-full text-center" href={`/${data?.username}/posts`}>Posted</Link>
                     <Link className="w-full text-center" href={`/${data?.username}/replies`}>Replied</Link>
-                    <Link className="w-full text-center" href={`/${data?.username}/saves`}>Saved</Link>
-                    <Link className="w-full text-center" href={`/${data?.username}/likes`}>Liked</Link>
+                    {isOwner && (
+                        <>
+                            <Link className="w-full text-center" href={`/${data?.username}/saves`}>Saved</Link>
+                            <Link className="w-full text-center" href={`/${data?.username}/likes`}>Liked</Link>
+                        </>
+                    )}
                 </div>
             </div>
         </>

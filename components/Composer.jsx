@@ -101,7 +101,7 @@ const Composer = ({
                 {kind === "reply" && replyingToUser && (
                     <p className="mb-2 text-sm text-slate-500">
                         Replying to{" "}
-                        <Link href={`/${replyingToUser}`} className="text-sky-500 hover:underline">
+                        <Link href={`/${replyingToUser}/posts`} className="text-sky-500 hover:underline">
                             @{replyingToUser}
                         </Link>
                     </p>
