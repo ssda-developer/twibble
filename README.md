@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Twibble (Next.js + MongoDB)
+
+Twibble is a modern, streamlined Twitter (X) clone built with **Next.js 15** and **MongoDB**. The application offers a
+familiar user experience with real-time posting, replies, likes, and content bookmarks.
+
+[**Live Demo**](https://twibble-chi.vercel.app/)
+
+---
+
+## Features
+
+* **Post Feed** – Browse the latest publications and trending topics.
+* **Engagement** – Like, retweet, and reply system for building discussion threads.
+* **User Profiles** – Personal pages with post history and replies.
+* **Private Likes** – Your liked posts are kept private and visible only to you.
+* **Bookmarks** – Save your favorite posts to a private list for later reading.
+* **Authentication** – Secure routes and a full registration/login system using JWT.
+* **Dynamic Content** – Infinite scrolling and "live" interaction counters.
+* **Responsive UI** – Adaptive design inspired by the X (Twitter) interface, fully optimized for mobile devices.
+
+---
+
+## Tech Stack
+
+- [Next.js 15](https://nextjs.org/) — The React framework for the web, using App Router and Server Actions.
+- [React 19](https://react.dev/) — The latest version of the JavaScript library for building user interfaces.
+- [MongoDB](https://www.mongodb.com/) — A document-based NoSQL database for scalable applications.
+- [Mongoose](https://mongoosejs.com/) — Elegant MongoDB object modeling for Node.js.
+- [Tailwind CSS](https://tailwindcss.com/) — A utility-first CSS framework for rapid UI development.
+- [TanStack Query](https://tanstack.com/query/latest) — Powerful asynchronous state management for TS/JS.
+- [JSON Web Tokens](https://jwt.io/) — A compact, URL-safe means of representing claims to be transferred between two
+  parties.
+- [Bcrypt.js](https://www.npmjs.com/package/bcryptjs) — Optimized bcrypt in JavaScript for secure password hashing.
+- [Heroicons](https://heroicons.com/) — Beautiful hand-crafted SVG icons by the makers of Tailwind CSS.
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/ssda-developer/twibble
+cd twibble
+```
+
+---
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+---
+
+### 3. Environment variables
+
+Create a file named \`.env.local\` in the project root and add:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+```
+
+Replace the values with your actual credentials.
+
+---
+
+### 4. Run development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the application in your browser:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+### 5. Build for production
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
+- The project uses Next.js 15 App Router and Server Actions.
+- Database models and schemas are located in the \`models\` directory.
+- API routes and server logic are located in the \`app/api\` and \`server\` directories.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contributing
+
+If you want to contribute:
+
+1. Fork the repository
+2. Create a feature branch
+3. Open a pull request with a clear description of your changes
