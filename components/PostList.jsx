@@ -7,9 +7,9 @@ const PostList = ({ posts, type }) => {
     return (
         <ul className={`border-t border-slate-800 ${type}`}>
             {posts.map((post, idx) => (
-                <li key={post._id}
+                <li key={post?._id}
                     className={`${type === "parents" || idx === posts.length - 1 ? "" : "border-b border-slate-800"}`}>
-                    <PostCard {...post} type={type} />
+                    <PostCard post={post} type={type} />
                 </li>
             ))}
         </ul>

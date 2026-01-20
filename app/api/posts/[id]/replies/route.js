@@ -1,6 +1,7 @@
 import { addUserStateToPosts } from "@/features/utils";
 import dbConnect from "@/lib/mongoose";
 import Post from "@/models/Post";
+import mongoose from "mongoose";
 
 /**
  * GET /api/posts/:id/replies?cursor=...&limit=20&currentUserId=...
@@ -18,7 +19,7 @@ export async function GET(req, { params }) {
 
         const filter = { parentPost: id };
 
-        if (cursor) {
+        if (cursor && mongoose.Types.ObjectId.isValid(cursor)) {
             filter._id = { $lt: cursor };
         }
 

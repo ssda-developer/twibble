@@ -5,120 +5,11 @@ import Avatar from "@/components/Avatar";
 import MediaGallery from "@/components/MediaGallery";
 import PostCard from "@/components/PostCard";
 import { useGlobalContext } from "@/context/GlobalContext";
-import { useCreatePost, useEditPost, useRepostPost } from "@/features/hooks";
-import { getRandomValue } from "@/utils";
+import { useCreatePost, useEditPost } from "@/features/hooks";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const MAX_CHARS = 280;
-
-function ComposerTextarea({ value, onChange, onKeyDown, placeholder }) {
-    const ref = useRef(null);
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-
-        el.style.height = "auto";
-        el.style.height = `${el.scrollHeight}px`;
-    }, [value]);
-
-    return (
-        <textarea
-            ref={ref}
-            value={value}
-            onChange={onChange}
-            onKeyDown={onKeyDown}
-            placeholder={placeholder}
-            rows={1}
-            className="w-full bg-transparent text-xl py-3 mb-2 outline-none resize-none overflow-hidden placeholder-slate-500 leading-5"
-        />
-    );
-}
-
-function ComposerActions({
-                             remaining,
-                             isOverLimit,
-                             onAddPhoto,
-                             onSubmit,
-                             isDisabled,
-                             mode,
-                             kind,
-                             variant
-                         }) {
-    const getButtonLabel = () => {
-        if (mode === "edit") return "Save";
-        if (mode === "repost") return "Repost";
-        if (mode === "create" && kind === "reply") return "Reply";
-        return "Post";
-    };
-
-    const isModal = variant === "modal";
-    const buttonLabel = getButtonLabel();
-
-    return (
-        <div
-            className={`mt-4 flex ${isModal && "flex-col"} sm:flex-row ${isModal ? "items-end" : "items-center"} sm:items-center`}>
-            <div className="flex w-full">
-                <div className="flex items-center justify-center text-white">
-                    <ActionIconButton
-                        iconName="photo"
-                        onClick={onAddPhoto}
-                        ariaLabel="Add photo"
-                        className="text-sky-500"
-                    />
-                    <ActionIconButton
-                        iconName="gif"
-                        isLocked={true}
-                        ariaLabel="Add gif"
-                        className="text-sky-500"
-                    />
-                    <ActionIconButton
-                        iconName="list-bullet"
-                        isLocked={true}
-                        ariaLabel="Add poll"
-                        className="text-sky-500"
-                    />
-                    <ActionIconButton
-                        iconName="face-smile"
-                        isLocked={true}
-                        className="text-sky-500"
-                        ariaLabel="Add emoji"
-                    />
-                    <ActionIconButton
-                        iconName="map-pin"
-                        isLocked={true}
-                        className="text-sky-500"
-                        ariaLabel="Add location"
-                    />
-                    <ActionIconButton
-                        iconName="calendar-days"
-                        isLocked={true}
-                        className="text-sky-500"
-                        ariaLabel="Add schedule"
-                    />
-                </div>
-
-                <span
-                    className={`ml-auto mr-3 text-sm ${
-                        isOverLimit ? "text-red-500" : "text-slate-400"
-                    }`}
-                >
-                {remaining}
-            </span>
-            </div>
-
-            <button
-                type="button"
-                className={`rounded-full ${isModal && "mt-3"} sm:m-0 bg-white px-3 py-1 font-bold text-black disabled:cursor-not-allowed disabled:opacity-50`}
-                disabled={isDisabled}
-                onClick={onSubmit}
-            >
-                {buttonLabel}
-            </button>
-        </div>
-    );
-}
+const MAX_CHARACTER_LIMIT = 280;
 
 const Composer = ({
                       currentData = { text: "", images: [] },
@@ -136,82 +27,53 @@ const Composer = ({
     const { currentUser } = useGlobalContext();
     const [text, setText] = useState(currentData.text || "");
     const [images, setImages] = useState(currentData.images || []);
+    const textareaRef = useRef(null);
 
-    const createPost = useCreatePost();
-    const editPost = useEditPost();
-    const repostPost = useRepostPost();
+    const createPostMutation = useCreatePost();
+    const editPostMutation = useEditPost();
 
-    const isReply = kind === "reply";
-    const isModal = variant === "modal";
+    const isOverLimit = text.length > MAX_CHARACTER_LIMIT;
+    const isSubmitting = createPostMutation.isPending || editPostMutation.isPending;
+    const canSubmit = text.trim() && !isOverLimit && !isSubmitting;
 
-    const remaining = MAX_CHARS - text.length;
-    const isOverLimit = remaining < 0;
-
-    const handleSubmit = () => {
-        if (isOverLimit || !text.trim()) return;
-
-        const trimmed = text.trim();
-        const userId = currentUser?._id;
-
-        if (mode === "repost" && postId && post) {
-            repostPost.mutate(
-                {
-                    postId,
-                    content: trimmed,
-                    media: images,
-                    userId,
-                    repostId: post._id,
-                    parentId: isReply ? parentId : null
-                },
-                {
-                    onSuccess: () => {
-                        setText("");
-                        setImages([]);
-                        if (onClose) onClose();
-                    }
-                }
-            );
-            return;
+    const adjustTextareaHeight = useCallback(() => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = "auto";
+            textarea.style.height = `${textarea.scrollHeight}px`;
         }
+    }, []);
+
+    useEffect(() => {
+        adjustTextareaHeight();
+    }, [text, adjustTextareaHeight]);
+
+    const handleSuccess = () => {
+        setText("");
+        setImages([]);
+        if (onClose) onClose();
+    };
+
+    const getSubmissionPayload = () => ({
+        content: text.trim(),
+        media: images,
+        parentId: kind === "reply" ? parentId : (mode === "edit" ? post?.parentId : null),
+        userId: currentUser?._id
+    });
+
+    const handleSubmit = useCallback(() => {
+        if (!canSubmit) return;
+
+        const payload = getSubmissionPayload();
 
         if (mode === "edit" && postId) {
-            editPost.mutate(
-                {
-                    postId,
-                    content: {
-                        content: trimmed,
-                        media: images,
-                        parentId,
-                        userId
-                    }
-                },
-                {
-                    onSuccess: () => {
-                        setText("");
-                        setImages([]);
-                        if (onClose) onClose();
-                    }
-                }
-            );
-            return;
+            editPostMutation.mutate({ postId, ...payload }, { onSuccess: handleSuccess });
+        } else if (mode === "repost" && post) {
+            createPostMutation.mutate({ ...payload, repostId: post._id }, { onSuccess: handleSuccess });
+        } else {
+            createPostMutation.mutate(payload, { onSuccess: handleSuccess });
         }
-
-        createPost.mutate(
-            {
-                content: trimmed,
-                media: images,
-                parentId: isReply ? parentId : null,
-                userId
-            },
-            {
-                onSuccess: () => {
-                    setText("");
-                    setImages([]);
-                    if (onClose) onClose();
-                }
-            }
-        );
-    };
+    }, [canSubmit, mode, postId, post, text, images, currentUser, editPostMutation, createPostMutation]);
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -220,69 +82,78 @@ const Composer = ({
         }
     };
 
-    const handleAddPhoto = (e) => {
-        e.preventDefault();
-        const link = `https://picsum.photos/id/${getRandomValue(500)}/600/300`;
-        setImages(prev => [...prev, { url: link }]);
-    };
-
-    const handleRemovePhoto = (indexToRemove) => {
-        setImages(prev => prev.filter((_, index) => index !== indexToRemove));
+    const addMockImage = () => {
+        const seed = Math.floor(Math.random() * 10000);
+        const mockUrl = `https://picsum.photos/seed/${seed}/600/300`;
+        setImages(prev => [...prev, { url: mockUrl }]);
     };
 
     return (
-        <div className={`flex ${isModal ? "pt-3" : "p-4"} sm:p-4 ${className}`}>
-            <div className="mr-2">
+        <div className={`flex ${variant === "modal" ? "pt-3" : "p-4"} border-slate-800 ${className}`}>
+            <div className="mr-3 shrink-0">
                 <Avatar
                     colors={currentUser?.avatar?.colors}
                     letter={currentUser?.avatar?.initials}
                 />
             </div>
 
-            <div className="w-full">
-                {isReply && replyingToUser && (
-                    <p className="mb-1 text-sm">
+            <div className="flex-1">
+                {kind === "reply" && replyingToUser && (
+                    <p className="mb-2 text-sm text-slate-500">
                         Replying to{" "}
-                        <Link href={`/${replyingToUser}/posts`} className="text-sky-500">@{replyingToUser}</Link>
+                        <Link href={`/${replyingToUser}`} className="text-sky-500 hover:underline">
+                            @{replyingToUser}
+                        </Link>
                     </p>
                 )}
-                <div
-                    className={`flex flex-1 flex-col border-b border-slate-800 font-semibold text-white ${
-                        images.length || mode === "repost" ? "pb-6" : ""
-                    }`}
-                >
-                    <ComposerTextarea
-                        value={text}
-                        onChange={e => setText(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={placeholder}
-                    />
 
-                    {images.length > 0 && (
+                <textarea
+                    ref={textareaRef}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    rows={1}
+                    className="w-full bg-transparent text-xl outline-none resize-none placeholder-slate-500 overflow-hidden"
+                />
+
+                {images.length > 0 && (
+                    <div className="my-3">
                         <MediaGallery
                             images={images}
                             editable
-                            onRemove={handleRemovePhoto}
+                            onRemove={(idx) => setImages(prev => prev.filter((_, i) => i !== idx))}
                         />
-                    )}
+                    </div>
+                )}
 
-                    {post && mode === "repost" && (
-                        <div className="mt-2">
-                            <PostCard {...post} type="repost-inside" />
-                        </div>
-                    )}
+                {mode === "repost" && post && (
+                    <div
+                        className="mt-2 border border-slate-800 rounded-2xl overflow-hidden pointer-events-none opacity-80">
+                        <PostCard post={post} type="repost-inside" />
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between mt-4 pt-2 border-t border-slate-800">
+                    <div className="flex text-sky-500">
+                        <ActionIconButton iconName="photo" onClick={addMockImage} />
+                        <ActionIconButton iconName="face-smile" isLocked />
+                        <ActionIconButton iconName="map-pin" isLocked />
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <span className={`text-sm font-medium ${isOverLimit ? "text-red-500" : "text-slate-500"}`}>
+                            {MAX_CHARACTER_LIMIT - text.length}
+                        </span>
+                        <button
+                            onClick={handleSubmit}
+                            disabled={!canSubmit}
+                            className="bg-white text-black px-6 py-1.5 rounded-full font-bold disabled:opacity-50 transition hover:bg-slate-200 active:scale-95"
+                        >
+                            {isSubmitting ? "..." : (mode === "edit" ? "Save" : "Post")}
+                        </button>
+                    </div>
                 </div>
-
-                <ComposerActions
-                    remaining={remaining}
-                    isOverLimit={isOverLimit}
-                    onAddPhoto={handleAddPhoto}
-                    onSubmit={handleSubmit}
-                    isDisabled={isOverLimit || !text.trim()}
-                    mode={mode}
-                    kind={kind}
-                    variant={variant}
-                />
             </div>
         </div>
     );

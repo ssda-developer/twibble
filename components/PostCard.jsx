@@ -12,21 +12,23 @@ import { useDeletePost } from "@/features/hooks";
 import { timeAgo } from "@/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { memo, useState } from "react";
 
-const PostCard = ({
-                      _id,
-                      author = {},
-                      content = "",
-                      media = [],
-                      createdAt,
-                      replyCount = 0,
-                      repostCount = 0,
-                      likeCount = 0,
-                      userState = {},
-                      repostedPost = null,
-                      type = "post"
-                  }) => {
+const PostCard = ({ post, type = "post" }) => {
+    if (!post) return null;
+
+    const {
+        _id,
+        author = {},
+        content = "",
+        media = [],
+        createdAt,
+        replyCount = 0,
+        repostCount = 0,
+        likeCount = 0,
+        userState = {},
+        repostedPost = null
+    } = post;
     const [modalType, setModalType] = useState(null);
     const { mutate: deletePost, isLoading: isDeleting } = useDeletePost();
     const router = useRouter();
@@ -73,26 +75,11 @@ const PostCard = ({
         });
     };
 
-    const Wrapper = ({ children }) =>
-        isRepostType ? (
-            <div
-                className={`flex ${
-                    !isParent ? "p-4" : "px-4 pt-4"
-                } border rounded-xl bg-slate-800/20 border-slate-800 ${isDetailed && "flex-col"}`}
-            >
-                {children}
-            </div>
-        ) : (
-            <Link href={postLink} className={`flex ${!isParent ? "p-4" : "px-4 pt-4"} ${isDetailed && "flex-col"}`}>
-                {children}
-            </Link>
-        );
-
     const baseKind = "post";
 
     return (
         <>
-            <Wrapper>
+            <PostWrapper isRepostType={isRepostType} isParent={isParent} isDetailed={isDetailed} postLink={postLink}>
                 <div className={`flex ${isDetailed ? "flex-row mb-2" : "flex-col mr-3"} items-center`}>
                     <Avatar
                         colors={author?.avatar?.colors}
@@ -125,7 +112,7 @@ const PostCard = ({
 
                     {repostedPost && (
                         <div className="mt-2">
-                            <PostCard {...repostedPost} type="repost-inside" />
+                            <PostCard post={repostedPost} type="repost-inside" />
                         </div>
                     )}
 
@@ -142,7 +129,7 @@ const PostCard = ({
                         />
                     )}
                 </div>
-            </Wrapper>
+            </PostWrapper>
 
             <Modal
                 open={modalType === "repost"}
@@ -151,7 +138,7 @@ const PostCard = ({
             >
                 <Composer
                     mode="repost"
-                    placeholder="Add a comment"
+                    placeholder="Post your reply"
                     kind={baseKind}
                     postId={_id}
                     post={{
@@ -228,7 +215,7 @@ const PostCard = ({
             >
                 <Composer
                     mode="create"
-                    placeholder="Post your reply"
+                    placeholder="Add a comment"
                     kind="reply"
                     parentId={_id}
                     replyingToUser={author?.username}
@@ -276,6 +263,24 @@ const PostHeader = ({ author = {}, createdAt, postId, isRepostType, isDetailed, 
     );
 };
 
+const PostWrapper = ({ isRepostType, isParent, isDetailed, postLink, children }) => {
+    if (isRepostType) {
+        return (
+            <div
+                className={`flex ${!isParent ? "p-4" : "px-4 pt-4"} border rounded-xl bg-slate-800/20 border-slate-800 ${isDetailed && "flex-col"}`}>
+                {children}
+            </div>
+        );
+    }
+
+    return (
+        <Link href={postLink} className={`flex ${!isParent ? "p-4" : "px-4 pt-4"} ${isDetailed && "flex-col"}`}>
+            {children}
+        </Link>
+    );
+};
+
+
 const PostContent = ({ content, media }) => (
     <div>
         {content && <p className="whitespace-pre-wrap">{content}</p>}
@@ -313,4 +318,4 @@ const PostActions = ({
     </div>
 );
 
-export default PostCard;
+export default memo(PostCard);

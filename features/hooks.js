@@ -1,8 +1,9 @@
+"use client";
+
 import { useGlobalContext } from "@/context/GlobalContext";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createPost,
-    createRepost,
     deletePost,
     editPost,
     fetchMe,
@@ -21,86 +22,147 @@ import {
     toggleLike,
     toggleSave
 } from "./api";
-import { POSTS_STALE_TIME, postsKeys } from "./keys";
 
-export function useUserByNameOrId(user, params = {}) {
-    return useQuery({
-        queryKey: postsKeys.users.byNameOrId(user),
-        queryFn: () => fetchUserByNameOrId(user, params),
-        staleTime: POSTS_STALE_TIME,
-        suspense: true
+const POSTS_ROOT_KEY = "posts_root";
+const CACHE_STALE_TIME = 30_000;
+
+const USER_ITEMS_API_MAP = {
+    posts: fetchUserPosts,
+    replies: fetchUserReplies,
+    saves: fetchUserSaves,
+    likes: fetchUserLikes
+};
+
+const updateCachedPost = (queryClient, targetPostId, updateFn) => {
+    const targetIdString = String(targetPostId);
+
+    queryClient.setQueriesData({ queryKey: [POSTS_ROOT_KEY], exact: false }, (cachedData) => {
+        if (!cachedData) return cachedData;
+
+        if (cachedData.pages) {
+            return {
+                ...cachedData,
+                pages: cachedData.pages.map((page) => {
+                    const listKey = Object.keys(page).find((key) => Array.isArray(page[key]));
+                    if (!listKey) return page;
+
+                    return {
+                        ...page,
+                        [listKey]: page[listKey].map((post) =>
+                            String(post._id) === targetIdString ? updateFn(post) : post
+                        )
+                    };
+                })
+            };
+        }
+
+        if (cachedData.post || cachedData.parents) {
+            let hasUpdates = false;
+            const nextData = { ...cachedData };
+
+            if (nextData.post && String(nextData.post._id) === targetIdString) {
+                nextData.post = updateFn(nextData.post);
+                hasUpdates = true;
+            }
+
+            if (Array.isArray(nextData.parents)) {
+                const nextParents = nextData.parents.map((parent) => {
+                    if (String(parent._id) === targetIdString) {
+                        hasUpdates = true;
+                        return updateFn(parent);
+                    }
+                    return parent;
+                });
+                if (hasUpdates) nextData.parents = nextParents;
+            }
+
+            return hasUpdates ? nextData : cachedData;
+        }
+
+        if (Array.isArray(cachedData)) {
+            return cachedData.map((post) =>
+                String(post._id) === targetIdString ? updateFn(post) : post
+            );
+        }
+
+        if (cachedData._id && String(cachedData._id) === targetIdString) {
+            return updateFn(cachedData);
+        }
+
+        return cachedData;
+    });
+};
+
+export function useLoginUser() {
+    const queryClient = useQueryClient();
+    const { setCurrentUser, setUserFetchStatus } = useGlobalContext();
+
+    return useMutation({
+        mutationFn: loginRequest,
+        onMutate: () => setUserFetchStatus("idle"),
+        onSuccess: async (response) => {
+            setCurrentUser(response.user);
+            setUserFetchStatus(response?.user ? "found" : "not_found");
+            await queryClient.invalidateQueries({ predicate: () => true });
+        }
     });
 }
 
-export function useTrendingPosts(params = {}) {
-    return useQuery({
-        queryKey: postsKeys.lists.trending(params),
-        queryFn: () => fetchTrendingPosts(params),
-        staleTime: POSTS_STALE_TIME,
-        suspense: true
+export function useRegisterUser() {
+    const { setCurrentUser } = useGlobalContext();
+    return useMutation({
+        mutationFn: registerRequest,
+        onSuccess: (response) => setCurrentUser(response.user)
     });
 }
 
-export function usePostById(id, params = {}) {
-    const { userFetchStatus } = useGlobalContext();
+export function useLogoutUser() {
+    const { setCurrentUser } = useGlobalContext();
+    return useMutation({
+        mutationFn: logoutRequest,
+        onSuccess: () => setCurrentUser(null)
+    });
+}
+
+export function useMeQuery() {
+    return useQuery({
+        queryKey: ["auth_me"],
+        queryFn: fetchMe,
+        staleTime: 5 * 60 * 1000,
+        retry: false
+    });
+}
+
+export function useUserByNameOrId(userIdentifier, params = {}) {
+    const id = typeof userIdentifier === "object"
+        ? userIdentifier?._id || userIdentifier?.username
+        : userIdentifier;
 
     return useQuery({
-        queryKey: postsKeys.lists.byId(id),
-        queryFn: () => fetchPostById(id, { ...params, userFetchStatus }),
-        staleTime: POSTS_STALE_TIME,
-        suspense: true,
-        enabled: userFetchStatus !== "idle"
+        queryKey: ["users_root", id, params],
+        queryFn: () => fetchUserByNameOrId(id, params),
+        staleTime: CACHE_STALE_TIME,
+        enabled: !!id,
+        suspense: true
     });
 }
 
 export function useInfinitePosts({ currentUserId, ...params } = {}) {
     return useInfiniteQuery({
-        queryKey: postsKeys.lists.infinite({ ...params, currentUserId }),
-        queryFn: ({ pageParam }) => fetchPosts({ ...params, currentUserId, cursor: pageParam }),
-        getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
-        staleTime: POSTS_STALE_TIME,
-        suspense: true
+        queryKey: [POSTS_ROOT_KEY, "feed", params],
+        queryFn: ({ pageParam = 0 }) => fetchPosts({ ...params, cursor: pageParam, currentUserId }),
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        staleTime: CACHE_STALE_TIME
     });
 }
 
-export function useInfiniteReplies({ postId, params = {} }) {
-    return useInfiniteQuery({
-        queryKey: postsKeys.lists.infiniteReplies(postId, params),
-        queryFn: ({ pageParam }) => fetchReplies(postId, { ...params, cursor: pageParam }),
-        getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
-        staleTime: POSTS_STALE_TIME,
-        suspense: true
-    });
-}
-
-export function useInfiniteUserItems({ user, type = "posts", params = {} }) {
-    const map = {
-        posts: {
-            fetchFn: fetchUserPosts,
-            keyFn: (u, p) => postsKeys.lists.infiniteByUser(u, p)
-        },
-        replies: {
-            fetchFn: fetchUserReplies,
-            keyFn: (u, p) => postsKeys.lists.infiniteByUser(u, { ...p, type: "replies" })
-        },
-        saves: {
-            fetchFn: fetchUserSaves,
-            keyFn: (u, p) => postsKeys.lists.infiniteByUser(u, { ...p, type: "saves" })
-        },
-        likes: {
-            fetchFn: fetchUserLikes,
-            keyFn: (u, p) => postsKeys.lists.infiniteByUser(u, { ...p, type: "likes" })
-        }
-    };
-
-    const conf = map[type] ?? map.posts;
-
-    return useInfiniteQuery({
-        queryKey: conf.keyFn(user, params),
-        queryFn: ({ pageParam }) => conf.fetchFn(user, { ...params, cursor: pageParam }),
-        getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
-        staleTime: POSTS_STALE_TIME,
-        suspense: true
+export function usePostById(id, params = {}) {
+    const { userFetchStatus } = useGlobalContext();
+    return useQuery({
+        queryKey: [POSTS_ROOT_KEY, id],
+        queryFn: () => fetchPostById(id, { ...params, userFetchStatus }),
+        staleTime: 5 * 60 * 1000,
+        enabled: userFetchStatus !== "idle"
     });
 }
 
@@ -108,64 +170,30 @@ export function useToggleLike(currentUserId) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationKey: ["like"],
-        mutationFn: ({ postId, action }) =>
-            toggleLike(postId, currentUserId, action),
+        mutationFn: ({ postId, action }) => toggleLike(postId, currentUserId, action),
+        onMutate: async ({ postId }) => {
+            await queryClient.cancelQueries({ queryKey: [POSTS_ROOT_KEY], exact: false });
+            const previousData = queryClient.getQueriesData({ queryKey: [POSTS_ROOT_KEY], exact: false });
 
-        async onMutate({ postId, action }) {
-            const updatePost = (p) =>
-                p._id === postId
-                    ? {
-                        ...p,
-                        userState: { ...p.userState, liked: action === "like" },
-                        likeCount:
-                            action === "like" ? p.likeCount + 1 : Math.max(0, p.likeCount - 1)
-                    }
-                    : p;
+            updateCachedPost(queryClient, postId, (post) => ({
+                ...post,
+                userState: { ...post.userState, liked: !post.userState.liked },
+                likeCount: post.likeCount + (post.userState.liked ? -1 : 1)
+            }));
 
-            await queryClient.cancelQueries(postsKeys.lists.byId(postId));
-            const previousPost = queryClient.getQueryData(postsKeys.lists.byId(postId));
-            if (previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(postId), updatePost);
-            }
-
-            const queries = queryClient.getQueryCache().findAll({ queryKey: ["posts"] });
-            queries.forEach((query) => {
-                const old = query.state.data;
-                if (!old) return;
-
-                if (old.pages) {
-                    const newPages = old.pages.map((page) => {
-                        const updateArray = (key) =>
-                            page[key]
-                                ? { ...page, [key]: page[key].map(updatePost) }
-                                : page;
-                        page = updateArray("posts");
-                        page = updateArray("replies");
-                        return page;
-                    });
-                    queryClient.setQueryData(query.queryKey, { ...old, pages: newPages });
-                    return;
-                }
-
-                if (old.post) {
-                    const newPost = updatePost(old.post);
-                    const newParents = old.parents ? old.parents.map(updatePost) : undefined;
-                    queryClient.setQueryData(query.queryKey, { ...old, post: newPost, parents: newParents });
-                }
+            return { previousData };
+        },
+        onError: (_, __, context) => {
+            context?.previousData?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey: [POSTS_ROOT_KEY, "trending"],
+                exact: false
             });
-
-            return { previousPost, postId };
-        },
-
-        onError(_err, _vars, context) {
-            if (context?.previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(context.postId), context.previousPost);
-            }
-        },
-
-        async onSettled() {
-            await queryClient.invalidateQueries({ queryKey: postsKeys.lists.trending({}) });
+            queryClient.invalidateQueries({
+                queryKey: [POSTS_ROOT_KEY, "user_items", "likes"]
+            });
         }
     });
 }
@@ -174,58 +202,29 @@ export function useToggleSave(currentUserId) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationKey: ["save"],
-        mutationFn: ({ postId, action }) =>
-            toggleSave(postId, currentUserId, action),
+        mutationFn: ({ postId, action }) => toggleSave(postId, currentUserId, action),
+        onMutate: async ({ postId, action }) => {
+            await queryClient.cancelQueries({ queryKey: [POSTS_ROOT_KEY], exact: false });
+            const previousData = queryClient.getQueriesData({ queryKey: [POSTS_ROOT_KEY], exact: false });
 
-        async onMutate({ postId, action }) {
-            const updatePost = (p) =>
-                p._id === postId
-                    ? {
-                        ...p,
-                        userState: { ...p.userState, saved: action === "save" }
-                    }
-                    : p;
-
-            await queryClient.cancelQueries(postsKeys.lists.byId(postId));
-            const previousPost = queryClient.getQueryData(postsKeys.lists.byId(postId));
-            if (previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(postId), updatePost);
-            }
-
-            const queries = queryClient.getQueryCache().findAll({ queryKey: ["posts"] });
-            queries.forEach((query) => {
-                const old = query.state.data;
-                if (!old) return;
-
-                if (old.pages) {
-                    const newPages = old.pages.map((page) => {
-                        const updateArray = (key) =>
-                            page[key]
-                                ? { ...page, [key]: page[key].map(updatePost) }
-                                : page;
-                        page = updateArray("posts");
-                        page = updateArray("replies");
-                        return page;
-                    });
-                    queryClient.setQueryData(query.queryKey, { ...old, pages: newPages });
-                    return;
+            updateCachedPost(queryClient, postId, (post) => ({
+                ...post,
+                userState: {
+                    ...post.userState,
+                    saved: action === "save"
                 }
+            }));
 
-                if (old.post) {
-                    const newPost = updatePost(old.post);
-                    const newParents = old.parents ? old.parents.map(updatePost) : undefined;
-                    queryClient.setQueryData(query.queryKey, { ...old, post: newPost, parents: newParents });
-                }
-            });
-
-            return { previousPost, postId };
+            return { previousData };
         },
-
-        onError(_err, _vars, context) {
-            if (context?.previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(context.postId), context.previousPost);
-            }
+        onError: (_, __, context) => {
+            context?.previousData?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey: [POSTS_ROOT_KEY, "user_items", "saves"],
+                exact: false
+            });
         }
     });
 }
@@ -235,60 +234,46 @@ export function useCreatePost() {
 
     return useMutation({
         mutationFn: createPost,
+        onMutate: async (newPostPayload) => {
+            await queryClient.cancelQueries({ queryKey: [POSTS_ROOT_KEY], exact: false });
+            const previousData = queryClient.getQueriesData({ queryKey: [POSTS_ROOT_KEY], exact: false });
 
-        onMutate: async (newPost) => {
-            await queryClient.cancelQueries(postsKeys.all);
+            const optimisticPost = {
+                ...newPostPayload,
+                _id: `temp-${Date.now()}`,
+                createdAt: new Date().toISOString(),
+                userState: { liked: false, saved: false },
+                likeCount: 0,
+                replyCount: 0,
+                repostCount: 0,
+                author: {}
+            };
 
-            const prevData = queryClient.getQueryData(postsKeys.all);
+            queryClient.setQueriesData({ queryKey: [POSTS_ROOT_KEY], exact: false }, (cachedData) => {
+                if (!cachedData?.pages) return cachedData;
 
-            queryClient.setQueryData(postsKeys.all, (old = []) => [
-                { ...newPost, _id: `optimistic-${Date.now()}` },
-                ...old
-            ]);
+                return {
+                    ...cachedData,
+                    pages: cachedData.pages.map((page, index) => {
+                        if (index !== 0) return page;
 
-            return { prevData };
+                        const listKey = Object.keys(page).find((key) => Array.isArray(page[key]));
+                        if (!listKey) return page;
+
+                        return {
+                            ...page,
+                            [listKey]: [optimisticPost, ...page[listKey]]
+                        };
+                    })
+                };
+            });
+
+            return { previousData };
         },
-
-        onError: (_err, _newPost, ctx) => {
-            if (ctx?.prevData) {
-                queryClient.setQueryData(postsKeys.all, ctx.prevData);
-            }
+        onError: (_, __, context) => {
+            context?.previousData?.forEach(([key, data]) => queryClient.setQueryData(key, data));
         },
-
-        onSuccess: () => {
-            queryClient.invalidateQueries(postsKeys.all);
-        }
-    });
-}
-
-export function useRepostPost() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: createRepost,
-
-        onMutate: async (newPost) => {
-            await queryClient.cancelQueries(postsKeys.all);
-
-            const prevData = queryClient.getQueryData(postsKeys.all);
-
-            queryClient.setQueryData(postsKeys.all, (old = []) => [
-                { ...newPost, _id: `optimistic-${Date.now()}` },
-                ...old
-            ]);
-
-            return { prevData };
-        },
-
-        onError: (_err, _newPost, ctx) => {
-            if (ctx?.prevData) {
-                queryClient.setQueryData(postsKeys.all, ctx.prevData);
-            }
-        },
-
-        onSuccess: () => {
-            queryClient.invalidateQueries(postsKeys.all);
-        }
+        onSettled: () => queryClient.invalidateQueries({ queryKey: [POSTS_ROOT_KEY], exact: false })
     });
 }
 
@@ -296,31 +281,20 @@ export function useEditPost() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ postId, content }) => editPost(postId, content),
+        mutationFn: ({ postId, ...postData }) => editPost(postId, postData),
+        onMutate: async ({ postId, ...postData }) => {
+            await queryClient.cancelQueries({ queryKey: [POSTS_ROOT_KEY], exact: false });
+            const previousData = queryClient.getQueriesData({ queryKey: [POSTS_ROOT_KEY], exact: false });
 
-        onMutate: async ({ postId, content }) => {
-            await queryClient.cancelQueries(postsKeys.lists.byId(postId));
+            updateCachedPost(queryClient, postId, (post) => ({ ...post, ...postData }));
 
-            const previousPost = queryClient.getQueryData(postsKeys.lists.byId(postId));
-
-            if (previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(postId), old => ({
-                    ...old,
-                    content
-                }));
-            }
-
-            return { previousPost };
+            return { previousData };
         },
-
-        onError: (_err, _variables, context) => {
-            if (context?.previousPost) {
-                queryClient.setQueryData(postsKeys.lists.byId(context.previousPost._id), context.previousPost);
-            }
+        onError: (_, __, context) => {
+            context?.previousData?.forEach(([key, data]) => queryClient.setQueryData(key, data));
         },
-
-        onSuccess: () => {
-            queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === "posts" });
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: [POSTS_ROOT_KEY], exact: false });
         }
     });
 }
@@ -329,96 +303,79 @@ export function useDeletePost() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id) => deletePost(id),
+        mutationFn: deletePost,
+        onMutate: async (postId) => {
+            await queryClient.cancelQueries({ queryKey: [POSTS_ROOT_KEY], exact: false });
+            const previousData = queryClient.getQueriesData({ queryKey: [POSTS_ROOT_KEY], exact: false });
+            const targetIdString = String(postId);
 
-        onMutate: async (id) => {
-            await queryClient.cancelQueries({ queryKey: postsKeys.all });
+            queryClient.setQueriesData({ queryKey: [POSTS_ROOT_KEY], exact: false }, (cachedData) => {
+                if (!cachedData) return cachedData;
 
-            const previous = queryClient.getQueryData(postsKeys.all) || [];
-
-            queryClient.setQueryData(postsKeys.all, (old = []) =>
-                Array.isArray(old) ? old.filter((p) => p._id !== id) : old
-            );
-
-            return { previous };
-        },
-
-        onError: (_err, _id, context) => {
-            if (context?.previous) {
-                queryClient.setQueryData(postsKeys.all, context.previous);
-            }
-            console.error("Delete failed", _err);
-        },
-
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: postsKeys.all });
-        }
-    });
-}
-
-export function useLoginUser() {
-    const queryClient = useQueryClient();
-    const { setCurrentUser, setUserFetchStatus } = useGlobalContext();
-    // setUserFetchStatus("idle");
-
-    return useMutation({
-        queryKey: ["login"],
-        mutationFn: loginRequest,
-        onMutate: () => {
-            setUserFetchStatus("idle");
-        },
-        onSuccess: async (data) => {
-            setCurrentUser(data.user);
-            setUserFetchStatus(data?.user ? "found" : "not_found");
-
-            await queryClient.invalidateQueries({
-                predicate: () => true
-            });
-        }
-    });
-}
-
-export function useRegisterUser() {
-    const queryClient = useQueryClient();
-    const { setCurrentUser } = useGlobalContext();
-
-    return useMutation({
-        mutationFn: registerRequest,
-        onSuccess: async (data) => {
-            setCurrentUser(data.user);
-
-            await queryClient.invalidateQueries({
-                predicate: () => true
-            });
-        }
-    });
-}
-
-export function useLogoutUser() {
-    const queryClient = useQueryClient();
-    const { setCurrentUser } = useGlobalContext();
-
-    return useMutation({
-        mutationFn: logoutRequest,
-        onSuccess: async () => {
-            setCurrentUser(null);
-
-            await queryClient.invalidateQueries({
-                predicate: (query) => {
-                    const key = query.queryKey;
-                    if (!Array.isArray(key)) return false;
-                    return key[0] === "posts";
+                if (cachedData.pages) {
+                    return {
+                        ...cachedData,
+                        pages: cachedData.pages.map((page) => {
+                            const listKey = Object.keys(page).find((key) => Array.isArray(page[key]));
+                            return listKey ? {
+                                ...page,
+                                [listKey]: page[listKey].filter((post) => String(post._id) !== targetIdString)
+                            } : page;
+                        })
+                    };
                 }
+
+                if (cachedData.post) {
+                    if (String(cachedData.post._id) === targetIdString) return null;
+                    return {
+                        ...cachedData,
+                        parents: cachedData.parents?.filter((parent) => String(parent._id) !== targetIdString)
+                    };
+                }
+
+                if (Array.isArray(cachedData)) {
+                    return cachedData.filter((post) => String(post._id) !== targetIdString);
+                }
+
+                return cachedData;
             });
-        }
+
+            return { previousData };
+        },
+        onError: (_, __, context) => {
+            context?.previousData?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+        },
+        onSettled: () => queryClient.invalidateQueries({ queryKey: [POSTS_ROOT_KEY], exact: false })
     });
 }
 
-export function useMeQuery() {
+export function useTrendingPosts(params = {}) {
     return useQuery({
-        queryKey: ["auth", "me"],
-        queryFn: fetchMe,
-        staleTime: 5 * 60 * 1000,
-        retry: false
+        queryKey: [POSTS_ROOT_KEY, "trending", params],
+        queryFn: () => fetchTrendingPosts(params),
+        staleTime: CACHE_STALE_TIME,
+        suspense: true
+    });
+}
+
+export function useInfiniteReplies({ postId, params = {} }) {
+    return useInfiniteQuery({
+        queryKey: [POSTS_ROOT_KEY, "replies", postId, params],
+        queryFn: ({ pageParam = 0 }) => fetchReplies(postId, { ...params, cursor: pageParam }),
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
+        staleTime: CACHE_STALE_TIME
+    });
+}
+
+export function useInfiniteUserItems({ user, type = "posts", params = {} }) {
+    const fetchFn = USER_ITEMS_API_MAP[type] || fetchUserPosts;
+    const userId = typeof user === "object" ? user?._id : user;
+
+    return useInfiniteQuery({
+        queryKey: [POSTS_ROOT_KEY, "user_items", type, userId, params],
+        queryFn: ({ pageParam = 0 }) => fetchFn(userId, { ...params, cursor: pageParam }),
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
+        staleTime: CACHE_STALE_TIME,
+        enabled: !!userId
     });
 }

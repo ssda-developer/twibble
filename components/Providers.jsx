@@ -3,6 +3,7 @@
 import ClientWrapper from "@/components/ClientWrapper";
 import { GlobalProvider } from "@/context/GlobalContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 
 const Providers = ({ children }) => {
@@ -13,6 +14,7 @@ const Providers = ({ children }) => {
             <GlobalProvider>
                 <ClientWrapper>
                     {children}
+                    <ReactQueryDevtools initialIsOpen={false} />
                 </ClientWrapper>
             </GlobalProvider>
         </QueryClientProvider>

@@ -8,60 +8,47 @@ export async function GET() {
 
         const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-        const aggregated = await Like.aggregate([
-            {
-                $match: {
-                    createdAt: { $gte: since }
-                }
-            },
-            {
-                $group: {
-                    _id: "$post",
-                    likeCount: { $sum: 1 }
-                }
-            },
-            {
-                $sort: { likeCount: -1, _id: 1 }
-            },
-            { $limit: 5 }
+        const topLikedData = await Like.aggregate([
+            { $match: { createdAt: { $gte: since } } },
+            { $group: { _id: "$post", count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
         ]);
 
-        const postIds = aggregated.map(item => item._id);
-
-        if (!postIds.length) {
-            return new Response(JSON.stringify({ posts: [] }), {
-                status: 200,
-                headers: { "Content-Type": "application/json" }
-            });
+        if (!topLikedData.length) {
+            return new Response(JSON.stringify({ posts: [] }), { status: 200 });
         }
 
-        const posts = await Post.find({ _id: { $in: postIds }, type: { $in: ["original", "repost"] } }).populate({
-            path: "author",
-            select: "_id username displayName avatar"
-        }).lean();
-        const postsById = new Map(posts.map(post => [String(post._id), post]));
+        const ids = topLikedData.map(item => item._id);
 
-        const trendingPosts = aggregated
-            .map(item => {
-                const post = postsById.get(String(item._id));
-                if (!post) return null;
+        const posts = await Post.find({
+            _id: { $in: ids },
+            type: { $in: ["original", "repost"] }
+        })
+            .populate("author", "_id username displayName avatar")
+            .populate({
+                path: "repostedPost",
+                populate: { path: "author", select: "_id username displayName avatar" }
+            })
+            .lean();
 
+        const trendingPosts = posts
+            .map(post => {
+                const likeInfo = topLikedData.find(l => String(l._id) === String(post._id));
                 return {
                     ...post,
-                    recentLikeCount: item.likeCount
+                    recentLikeCount: likeInfo ? likeInfo.count : 0
                 };
             })
-            .filter(Boolean);
+            .sort((a, b) => b.recentLikeCount - a.recentLikeCount)
+            .slice(0, 5);
 
         return new Response(JSON.stringify({ posts: trendingPosts }), {
             status: 200,
             headers: { "Content-Type": "application/json" }
         });
+
     } catch (error) {
-        console.error("[GET /api/trending] Error:", error);
-        return new Response(JSON.stringify({ posts: [], error: "Internal Server Error" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" }
-        });
+        console.error("[Trending Error]:", error);
+        return new Response(JSON.stringify({ posts: [] }), { status: 500 });
     }
 }

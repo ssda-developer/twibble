@@ -4,25 +4,25 @@ import mongoose from "mongoose";
 
 /**
  * PATCH /api/posts/:id/edit
- * body: { content: string }
+ * body: { content: string, media: array }
  */
 export async function PATCH(req, { params }) {
     try {
         await dbConnect();
 
         const { id } = await params;
-        const { content } = await req.json();
+        const body = await req.json();
 
         const session = await mongoose.startSession();
-
         let updatedPost;
+
         try {
             await session.withTransaction(async () => {
                 updatedPost = await Post.findByIdAndUpdate(
                     id,
-                    { content },
+                    { ...body },
                     { new: true, session }
-                );
+                ).populate("author", "_id username displayName avatar");
             });
 
             if (!updatedPost) {

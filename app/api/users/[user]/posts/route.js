@@ -37,7 +37,7 @@ export async function GET(req, { params }) {
             filter.type = { $in: ["original", "repost"] };
         }
 
-        if (cursor) {
+        if (cursor && mongoose.Types.ObjectId.isValid(cursor)) {
             filter._id = { $lt: cursor };
         }
 

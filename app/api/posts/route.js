@@ -31,11 +31,7 @@ export async function GET(req) {
         if (author) {
             filter.author = author;
         }
-
-        if (cursor) {
-            filter.createdAt = { $lt: new Date(cursor) };
-        }
-
+        
         const posts = await Post.find(filter)
             .sort({ createdAt: -1 })
             .limit(limit + 1)

@@ -27,7 +27,7 @@ export async function GET(req, { params }) {
 
         const filter = { author: userId, type: "reply" };
 
-        if (cursor) {
+        if (cursor && mongoose.Types.ObjectId.isValid(cursor)) {
             filter._id = { $lt: cursor };
         }
 

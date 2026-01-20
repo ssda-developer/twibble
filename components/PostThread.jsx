@@ -12,52 +12,50 @@ import { usePostById } from "@/features/hooks";
 
 const PostBlock = ({ id }) => {
     const { userFetchStatus, currentUser } = useGlobalContext();
-    if (userFetchStatus === "idle") return null;
 
-    const currentUserId = userFetchStatus === "found" ? currentUser?._id : undefined;
-
-    const { data, isLoading } = usePostById(id, {
-        currentUserId,
+    const { data, isLoading, isError } = usePostById(id, {
+        currentUserId: currentUser?._id,
         includeParents: true
     });
 
-    if (isLoading) return <SkeletonList count={1} />;
+    if (isLoading || userFetchStatus === "idle") {
+        return <SkeletonList count={3} />;
+    }
 
-    if (data?.error) return (
-        <StatusBlock
-            icon={<Icon name="exclamation-triangle" className="h-12 w-12" />}
-            title="Post not found."
-            description="The page you are looking for does not exist."
-            hint={{ text: "Go back to the homepage.", link: "/" }}
-        />
-    );
+    if (isError || !data?.post) {
+        return (
+            <StatusBlock
+                icon={<Icon name="exclamation-triangle" className="h-12 w-12 text-slate-500" />}
+                title="Post not found"
+                description="This post might have been deleted or the link is incorrect."
+                hint={{ text: "Back to Home", link: "/" }}
+            />
+        );
+    }
 
     return (
-        <>
-            {data.parents && <PostList type="parents" posts={data.parents} />}
+        <div className="pb-20">
+            {data.parents?.length > 0 && (
+                <PostList type="parents" posts={data.parents} />
+            )}
+
             <PostList type="detailed" posts={[data.post]} />
+
             <Protected>
-                <Composer
-                    mode="create"
-                    placeholder="Post your reply"
-                    kind="reply"
-                    parentId={data?.post?._id}
-                    replyingToUser={data?.post?.author?.username}
-                    className="border-t border-slate-800"
-                />
+                <div className="border-t border-slate-800">
+                    <Composer
+                        mode="create"
+                        kind="reply"
+                        parentId={data.post._id}
+                        replyingToUser={data.post.author?.username}
+                        placeholder="Post your reply"
+                    />
+                </div>
             </Protected>
+
             <PostListData parentId={id} type="reply" />
-        </>
+        </div>
     );
 };
 
-const PostThread = ({ id }) => {
-    const { userFetchStatus } = useGlobalContext();
-
-    // Показываем Skeleton, пока не пытались получить пользователя
-    if (userFetchStatus === "idle") return <SkeletonList count={1} />;
-
-    return <PostBlock id={id} />;
-};
-
-export default PostThread;
+export default PostBlock;
