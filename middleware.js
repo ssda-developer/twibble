@@ -1,6 +1,6 @@
-import { matchAny } from "@/utils";
+import { AUTH_COOKIE_NAME, AUTH_PATH_REGEX, GUEST_PATH_REGEX } from "@/src/constants/auth";
+import { matchAny } from "@/src/utils";
 import { NextResponse } from "next/server";
-import { AUTH_PATH_REGEX, GUEST_PATH_REGEX } from "./constants";
 
 export function middleware(req) {
     const { pathname } = req.nextUrl;
@@ -9,7 +9,7 @@ export function middleware(req) {
         return NextResponse.next();
     }
 
-    const token = req.cookies.get("auth_token")?.value;
+    const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
     const isAuth = Boolean(token);
 
     if (isAuth) {

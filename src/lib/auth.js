@@ -1,0 +1,93 @@
+import { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, AUTH_TOKEN_EXPIRY } from "@/src/constants/auth";
+import dbConnect from "@/src/lib/mongoose";
+import User from "@/src/models/User";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+    throw new Error("Please define JWT_SECRET in .env.local");
+}
+
+export async function registerUser(displayName, username, password, avatar) {
+    await dbConnect();
+
+    const existing = await User.findOne({ displayName: displayName, username: username.toLowerCase() });
+
+    if (existing) {
+        throw new Error("Username already taken");
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    return await User.create({
+        displayName,
+        username: username.toLowerCase(),
+        passwordHash,
+        avatar
+    });
+}
+
+export async function loginUser(username, password) {
+    await dbConnect();
+
+    const user = await User.findOne({ username: username.toLowerCase() });
+
+    if (!user) {
+        throw new Error("Invalid credentials");
+    }
+
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isValid) {
+        throw new Error("Invalid credentials");
+    }
+
+    return user;
+}
+
+export async function setAuthCookie(userId) {
+    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: AUTH_TOKEN_EXPIRY });
+
+    const cookieStore = await cookies();
+    cookieStore.set(AUTH_COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: AUTH_COOKIE_MAX_AGE
+    });
+}
+
+export async function clearAuthCookie() {
+    const cookieStore = await cookies();
+    cookieStore.set(AUTH_COOKIE_NAME, "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 0
+    });
+}
+
+export async function getCurrentUser() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+
+    if (!token) return null;
+
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        await dbConnect();
+        const user = await User.findById(payload.userId).lean();
+
+        if (!user) return null;
+        delete user.passwordHash;
+
+        return user;
+    } catch {
+        return null;
+    }
+}
