@@ -1,5 +1,6 @@
 "use client";
 
+import SkeletonList from "@/src/components/post/SkeletonList";
 import { useGlobalContext } from "@/src/context/GlobalContext";
 import { useInfinitePosts, useInfiniteReplies, useInfiniteUserItems } from "@/src/features/hooks";
 import { useEffect, useRef } from "react";
@@ -37,7 +38,7 @@ const InfinitePostList = ({ user, parentId, type }) => {
             posts = query.data?.pages.flatMap(page => page.posts) || [];
     }
 
-    const { fetchNextPage, hasNextPage, isFetchingNextPage } = query;
+    const { fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = query;
     const loaderRef = useRef(null);
 
     useEffect(() => {
@@ -50,6 +51,10 @@ const InfinitePostList = ({ user, parentId, type }) => {
         if (loaderRef.current) observer.observe(loaderRef.current);
         return () => observer.disconnect();
     }, [hasNextPage, fetchNextPage]);
+
+    if (isLoading) {
+        return <SkeletonList count={5} />;
+    }
 
     return (
         <>
