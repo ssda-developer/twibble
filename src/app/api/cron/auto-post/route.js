@@ -6,6 +6,7 @@ import Post from "@/models/Post";
 import User from "@/models/User";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const CRON_SECRET = process.env.CRON_SECRET;
 
 async function generateAIContent(systemMsg, userMsg) {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -30,7 +31,16 @@ async function generateAIContent(systemMsg, userMsg) {
     return data.choices[0]?.message?.content?.trim() || "No answer";
 }
 
-export async function GET() {
+export async function GET(req) {
+    const authHeader = req.headers.get("authorization");
+
+    if (authHeader !== `Bearer ${CRON_SECRET}`) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" }
+        });
+    }
+
     try {
         await dbConnect();
 

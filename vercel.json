@@ -1,7 +1,7 @@
 {
     "crons": [
         {
-            "path": "/api/auto-post",
+            "path": "/api/cron/auto-post",
             "schedule": "0 */3 * * *"
         }
     ]
