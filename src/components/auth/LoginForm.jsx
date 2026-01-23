@@ -1,7 +1,7 @@
 "use client";
 
-import Icon from "@/src/components/ui/Icon";
-import { useLoginUser } from "@/src/features/hooks";
+import Icon from "@/components/ui/Icon";
+import { useLoginUser } from "@/features/hooks";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 

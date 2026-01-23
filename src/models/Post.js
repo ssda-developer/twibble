@@ -1,7 +1,7 @@
-import { POST_TYPES } from "@/src/constants/post-types";
-import { POST_MAX_LENGTH } from "@/src/constants/validation";
-import Like from "@/src/models/Like";
-import Save from "@/src/models/Save";
+import { POST_TYPES } from "@/constants/post-types";
+import { POST_MAX_LENGTH } from "@/constants/validation";
+import Like from "@/models/Like";
+import Save from "@/models/Save";
 import mongoose, { Schema } from "mongoose";
 
 const PostSchema = new Schema(

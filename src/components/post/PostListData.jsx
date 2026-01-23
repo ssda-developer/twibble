@@ -1,7 +1,7 @@
 "use client";
 
-import InfinitePostList from "@/src/components/post/InfinitePostList";
-import SkeletonList from "@/src/components/post/SkeletonList";
+import InfinitePostList from "@/components/post/InfinitePostList";
+import SkeletonList from "@/components/post/SkeletonList";
 import { Suspense } from "react";
 
 const PostListData = ({ user, parentId, type = "default" }) => {

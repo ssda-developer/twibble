@@ -1,14 +1,14 @@
 "use client";
 
-import Protected from "@/src/components/auth/Protected";
-import Composer from "@/src/components/post/Composer";
-import PostList from "@/src/components/post/PostList";
-import PostListData from "@/src/components/post/PostListData";
-import SkeletonList from "@/src/components/post/SkeletonList";
-import EmptyState from "@/src/components/ui/EmptyState";
-import Icon from "@/src/components/ui/Icon";
-import { useGlobalContext } from "@/src/context/GlobalContext";
-import { usePostById } from "@/src/features/hooks";
+import Protected from "@/components/auth/Protected";
+import Composer from "@/components/post/Composer";
+import PostList from "@/components/post/PostList";
+import PostListData from "@/components/post/PostListData";
+import SkeletonList from "@/components/post/SkeletonList";
+import EmptyState from "@/components/ui/EmptyState";
+import Icon from "@/components/ui/Icon";
+import { useGlobalContext } from "@/context/GlobalContext";
+import { usePostById } from "@/features/hooks";
 
 const PostBlock = ({ id }) => {
     const { userFetchStatus, currentUser } = useGlobalContext();

@@ -1,11 +1,11 @@
 "use client";
 
-import LogoutButton from "@/src/components/auth/LogoutButton";
-import Protected from "@/src/components/auth/Protected";
-import Avatar from "@/src/components/ui/Avatar";
-import { useGlobalContext } from "@/src/context/GlobalContext";
-import { useUserByNameOrId } from "@/src/features/hooks";
-import { formatDate } from "@/src/utils";
+import LogoutButton from "@/components/auth/LogoutButton";
+import Protected from "@/components/auth/Protected";
+import Avatar from "@/components/ui/Avatar";
+import { useGlobalContext } from "@/context/GlobalContext";
+import { useUserByNameOrId } from "@/features/hooks";
+import { formatDate } from "@/utils";
 import Link from "next/link";
 
 const ProfileBlock = ({ userName }) => {

@@ -1,7 +1,7 @@
-import { POST_TYPES } from "@/src/constants/post-types";
-import Like from "@/src/models/Like";
-import Post from "@/src/models/Post";
-import Save from "@/src/models/Save";
+import { POST_TYPES } from "@/constants/post-types";
+import Like from "@/models/Like";
+import Post from "@/models/Post";
+import Save from "@/models/Save";
 
 export async function addUserStateToPosts(posts, currentUserId) {
     if (!currentUserId) return posts;

@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "@/src/components/ui/Button";
-import Icon from "@/src/components/ui/Icon";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
 import { useState } from "react";
 
 const CopyButton = ({ postLink }) => {

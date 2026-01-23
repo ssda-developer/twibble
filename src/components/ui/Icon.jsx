@@ -1,4 +1,4 @@
-import { kebabToPascal } from "@/src/utils";
+import { kebabToPascal } from "@/utils";
 import * as Outline from "@heroicons/react/24/outline";
 import * as Solid from "@heroicons/react/24/solid";
 

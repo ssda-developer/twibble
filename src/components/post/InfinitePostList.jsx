@@ -1,8 +1,8 @@
 "use client";
 
-import SkeletonList from "@/src/components/post/SkeletonList";
-import { useGlobalContext } from "@/src/context/GlobalContext";
-import { useInfinitePosts, useInfiniteReplies, useInfiniteUserItems } from "@/src/features/hooks";
+import SkeletonList from "@/components/post/SkeletonList";
+import { useGlobalContext } from "@/context/GlobalContext";
+import { useInfinitePosts, useInfiniteReplies, useInfiniteUserItems } from "@/features/hooks";
 import { useEffect, useRef } from "react";
 import PostList from "./PostList";
 

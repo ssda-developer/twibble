@@ -1,5 +1,5 @@
-import { AUTH_COOKIE_NAME, AUTH_PATH_REGEX, GUEST_PATH_REGEX } from "@/src/constants/auth";
-import { matchAny } from "@/src/utils";
+import { AUTH_COOKIE_NAME, AUTH_PATH_REGEX, GUEST_PATH_REGEX } from "@/constants/auth";
+import { matchAny } from "@/utils";
 import { NextResponse } from "next/server";
 
 export function middleware(req) {

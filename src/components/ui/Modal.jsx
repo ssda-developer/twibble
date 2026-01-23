@@ -1,6 +1,6 @@
 "use client";
 
-import Icon from "@/src/components/ui/Icon";
+import Icon from "@/components/ui/Icon";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 

@@ -1,7 +1,7 @@
-import Providers from "@/src/components/providers/Providers";
-import { SITE_NAME } from "@/src/constants";
+import Providers from "@/components/providers/Providers";
+import { SITE_NAME } from "@/constants";
 import { Barlow } from "next/font/google";
-import "@/src/styles/globals.css";
+import "@/styles/globals.css";
 
 const geistBarlow = Barlow({
     subsets: ["latin"],

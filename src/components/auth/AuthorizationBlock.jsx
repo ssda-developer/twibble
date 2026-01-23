@@ -1,8 +1,8 @@
 "use client";
 
-import LoginForm from "@/src/components/auth/LoginForm";
-import RegisterForm from "@/src/components/auth/RegisterForm";
-import { useGlobalContext } from "@/src/context/GlobalContext";
+import LoginForm from "@/components/auth/LoginForm";
+import RegisterForm from "@/components/auth/RegisterForm";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useEffect, useRef, useState } from "react";
 
 const AuthorizationBlock = ({ classes }) => {

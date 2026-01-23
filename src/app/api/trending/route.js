@@ -1,7 +1,7 @@
-import { POST_TYPES } from "@/src/constants/post-types";
-import dbConnect from "@/src/lib/mongoose";
-import Like from "@/src/models/Like";
-import Post from "@/src/models/Post";
+import { POST_TYPES } from "@/constants/post-types";
+import dbConnect from "@/lib/mongoose";
+import Like from "@/models/Like";
+import Post from "@/models/Post";
 
 export async function GET() {
     try {

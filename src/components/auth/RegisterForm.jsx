@@ -1,10 +1,10 @@
 "use client";
 
-import Avatar from "@/src/components/ui/Avatar";
-import Icon from "@/src/components/ui/Icon";
-import { DISPLAY_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_MAX_LENGTH } from "@/src/constants/validation";
-import { useRegisterUser } from "@/src/features/hooks";
-import { generateAvatarColors } from "@/src/utils";
+import Avatar from "@/components/ui/Avatar";
+import Icon from "@/components/ui/Icon";
+import { DISPLAY_NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, USERNAME_MAX_LENGTH } from "@/constants/validation";
+import { useRegisterUser } from "@/features/hooks";
+import { generateAvatarColors } from "@/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 

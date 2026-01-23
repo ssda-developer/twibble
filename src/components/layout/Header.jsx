@@ -1,7 +1,7 @@
 "use client";
 
-import NavLinks from "@/src/components/layout/NavLinks";
-import Logo from "@/src/components/ui/Logo";
+import NavLinks from "@/components/layout/NavLinks";
+import Logo from "@/components/ui/Logo";
 
 const Header = () => {
     return (

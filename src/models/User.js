@@ -1,4 +1,4 @@
-import { DISPLAY_NAME_MAX_LENGTH, USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/src/constants/validation";
+import { DISPLAY_NAME_MAX_LENGTH, USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/constants/validation";
 import mongoose, { Schema } from "mongoose";
 
 const UserSchema = new Schema(

@@ -1,7 +1,7 @@
 "use client";
 
-import Icon from "@/src/components/ui/Icon";
-import { useGlobalContext } from "@/src/context/GlobalContext";
+import Icon from "@/components/ui/Icon";
+import { useGlobalContext } from "@/context/GlobalContext";
 
 const LogoutButton = ({ text, classes }) => {
     const { logout } = useGlobalContext();

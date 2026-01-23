@@ -1,7 +1,7 @@
 "use client";
 
-import { useTrendingPosts } from "@/src/features/hooks";
-import { timeAgo } from "@/src/utils";
+import { useTrendingPosts } from "@/features/hooks";
+import { timeAgo } from "@/utils";
 import Link from "next/link";
 
 const TrendingBlock = () => {

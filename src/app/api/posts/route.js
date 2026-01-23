@@ -1,9 +1,9 @@
-import { DEFAULT_PAGE_SIZE } from "@/src/constants";
-import { POST_TYPES } from "@/src/constants/post-types";
-import { addUserStateToPosts } from "@/src/features/utils";
-import dbConnect from "@/src/lib/mongoose";
-import Post from "@/src/models/Post";
-import User from "@/src/models/User";
+import { DEFAULT_PAGE_SIZE } from "@/constants";
+import { POST_TYPES } from "@/constants/post-types";
+import { addUserStateToPosts } from "@/features/utils";
+import dbConnect from "@/lib/mongoose";
+import Post from "@/models/Post";
+import User from "@/models/User";
 import mongoose from "mongoose";
 
 export async function GET(req) {

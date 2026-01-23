@@ -1,5 +1,5 @@
-import PostThread from "@/src/components/post/PostThread";
-import BackButton from "@/src/components/ui/BackButton";
+import PostThread from "@/components/post/PostThread";
+import BackButton from "@/components/ui/BackButton";
 
 const PostPage = async ({ params }) => {
     const { id, username } = await params;

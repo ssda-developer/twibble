@@ -1,7 +1,7 @@
 "use client";
 
-import { useLogoutUser, useMeQuery } from "@/src/features/hooks";
-import { useNavigationHistory } from "@/src/hooks/useNavigationHistory";
+import { useLogoutUser, useMeQuery } from "@/features/hooks";
+import { useNavigationHistory } from "@/hooks/useNavigationHistory";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 

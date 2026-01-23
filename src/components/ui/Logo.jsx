@@ -1,4 +1,4 @@
-import { SITE_NAME } from "@/src/constants";
+import { SITE_NAME } from "@/constants";
 import Link from "next/link";
 
 const Logo = () => {

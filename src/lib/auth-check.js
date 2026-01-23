@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/src/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function verifyOwner(usernameFromUrl) {
     const currentUser = await getCurrentUser();

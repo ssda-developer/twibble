@@ -1,10 +1,10 @@
 "use client";
 
-import Button from "@/src/components/ui/Button";
-import Icon from "@/src/components/ui/Icon";
-import { ACTION_TYPES } from "@/src/constants/post-types";
-import { useGlobalContext } from "@/src/context/GlobalContext";
-import { useToggleLike } from "@/src/features/hooks";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import { ACTION_TYPES } from "@/constants/post-types";
+import { useGlobalContext } from "@/context/GlobalContext";
+import { useToggleLike } from "@/features/hooks";
 
 const LikeButton = ({ postId, userState, likeCount }) => {
     const { currentUser, triggerAuthAttention } = useGlobalContext();

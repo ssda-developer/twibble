@@ -1,5 +1,5 @@
-import PostCard from "@/src/components/post/PostCard";
-import DataPlaceholder from "@/src/components/ui/DataPlaceholder";
+import PostCard from "@/components/post/PostCard";
+import DataPlaceholder from "@/components/ui/DataPlaceholder";
 import { usePathname } from "next/navigation";
 
 const PostList = ({ posts, type }) => {

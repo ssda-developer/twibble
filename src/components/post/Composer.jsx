@@ -1,12 +1,12 @@
 "use client";
 
-import MediaGallery from "@/src/components/post/MediaGallery";
-import PostCard from "@/src/components/post/PostCard";
-import Avatar from "@/src/components/ui/Avatar";
-import IconButton from "@/src/components/ui/IconButton";
-import { POST_MAX_LENGTH } from "@/src/constants/validation";
-import { useGlobalContext } from "@/src/context/GlobalContext";
-import { useCreatePost, useEditPost } from "@/src/features/hooks";
+import MediaGallery from "@/components/post/MediaGallery";
+import PostCard from "@/components/post/PostCard";
+import Avatar from "@/components/ui/Avatar";
+import IconButton from "@/components/ui/IconButton";
+import { POST_MAX_LENGTH } from "@/constants/validation";
+import { useGlobalContext } from "@/context/GlobalContext";
+import { useCreatePost, useEditPost } from "@/features/hooks";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 

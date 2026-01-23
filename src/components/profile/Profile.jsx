@@ -1,8 +1,8 @@
 "use client";
 
-import LogoutButton from "@/src/components/auth/LogoutButton";
-import Avatar from "@/src/components/ui/Avatar";
-import { useGlobalContext } from "@/src/context/GlobalContext";
+import LogoutButton from "@/components/auth/LogoutButton";
+import Avatar from "@/components/ui/Avatar";
+import { useGlobalContext } from "@/context/GlobalContext";
 
 const Profile = () => {
     const { currentUser } = useGlobalContext();

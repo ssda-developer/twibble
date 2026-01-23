@@ -1,5 +1,5 @@
-import dbConnect from "@/src/lib/mongoose";
-import User from "@/src/models/User";
+import dbConnect from "@/lib/mongoose";
+import User from "@/models/User";
 import mongoose from "mongoose";
 
 export async function GET(req, { params }) {

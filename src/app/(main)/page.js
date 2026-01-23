@@ -1,6 +1,6 @@
-import Protected from "@/src/components/auth/Protected";
-import Composer from "@/src/components/post/Composer";
-import PostListData from "@/src/components/post/PostListData";
+import Protected from "@/components/auth/Protected";
+import Composer from "@/components/post/Composer";
+import PostListData from "@/components/post/PostListData";
 
 export default function HomePage() {
     return (

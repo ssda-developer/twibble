@@ -1,6 +1,6 @@
-import { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, AUTH_TOKEN_EXPIRY } from "@/src/constants/auth";
-import dbConnect from "@/src/lib/mongoose";
-import User from "@/src/models/User";
+import { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, AUTH_TOKEN_EXPIRY } from "@/constants/auth";
+import dbConnect from "@/lib/mongoose";
+import User from "@/models/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";

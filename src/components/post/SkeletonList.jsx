@@ -1,4 +1,4 @@
-import SkeletonPost from "@/src/components/post/SkeletonPost";
+import SkeletonPost from "@/components/post/SkeletonPost";
 
 const SkeletonList = ({ count = 5 }) => {
     const items = Array.from({ length: count });

@@ -1,5 +1,5 @@
-import AuthorizationBlock from "@/src/components/auth/AuthorizationBlock";
-import Logo from "@/src/components/ui/Logo";
+import AuthorizationBlock from "@/components/auth/AuthorizationBlock";
+import Logo from "@/components/ui/Logo";
 
 const AuthorizationPage = () => {
     return (

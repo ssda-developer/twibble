@@ -1,8 +1,8 @@
-import { DEFAULT_PAGE_SIZE } from "@/src/constants";
-import { addUserStateToPosts } from "@/src/features/utils";
-import dbConnect from "@/src/lib/mongoose";
-import Save from "@/src/models/Save";
-import User from "@/src/models/User";
+import { DEFAULT_PAGE_SIZE } from "@/constants";
+import { addUserStateToPosts } from "@/features/utils";
+import dbConnect from "@/lib/mongoose";
+import Save from "@/models/Save";
+import User from "@/models/User";
 import mongoose from "mongoose";
 
 export async function GET(req, { params }) {

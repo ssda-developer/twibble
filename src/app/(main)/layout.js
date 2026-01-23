@@ -1,6 +1,6 @@
-import Aside from "@/src/components/layout/Aside";
-import Header from "@/src/components/layout/Header";
-import NavLinks from "@/src/components/layout/NavLinks";
+import Aside from "@/components/layout/Aside";
+import Header from "@/components/layout/Header";
+import NavLinks from "@/components/layout/NavLinks";
 
 export default function MainLayout({ children }) {
     return (

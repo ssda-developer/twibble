@@ -1,6 +1,6 @@
-import Button from "@/src/components/ui/Button";
-import Icon from "@/src/components/ui/Icon";
-import { useGlobalContext } from "@/src/context/GlobalContext";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useEffect, useState } from "react";
 
 const RepostButton = ({ repostsCount, userState, onRepost }) => {

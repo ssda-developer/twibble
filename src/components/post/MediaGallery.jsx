@@ -1,6 +1,6 @@
 "use client";
 
-import Icon from "@/src/components/ui/Icon";
+import Icon from "@/components/ui/Icon";
 import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
 import { memo } from "react";

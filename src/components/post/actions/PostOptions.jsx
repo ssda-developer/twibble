@@ -1,8 +1,8 @@
 "use client";
 
-import Button from "@/src/components/ui/Button";
-import Icon from "@/src/components/ui/Icon";
-import { useGlobalContext } from "@/src/context/GlobalContext";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useEffect, useRef, useState } from "react";
 
 const MenuItem = ({ keyLi, icon, label, onClick }) => {
@@ -22,9 +22,24 @@ const MenuItem = ({ keyLi, icon, label, onClick }) => {
 const PostOptions = ({ onEdit, onDelete, author }) => {
     const { currentUser } = useGlobalContext();
     const [isShow, setIsShow] = useState(false);
-    const isCurrentUser = author._id === currentUser?._id;
-
     const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsShow(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    if (!currentUser) return null;
+
+    const isCurrentUser = author._id === currentUser?._id;
 
     const handleHide = (e) => {
         e.preventDefault();
@@ -46,19 +61,6 @@ const PostOptions = ({ onEdit, onDelete, author }) => {
 
         if (onDelete) onDelete();
     };
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsShow(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
 
     const menu = [
         { icon: "pencil-square", label: "Edit", onClick: handleEdit },

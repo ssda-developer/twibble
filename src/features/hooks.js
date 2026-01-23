@@ -1,8 +1,8 @@
 "use client";
 
-import { ACTION_TYPES } from "@/src/constants/post-types";
-import { AUTH_KEY, CACHE_CONFIG, POSTS_ROOT_KEY, QUERY_KEYS, USERS_ROOT_KEY } from "@/src/constants/query-config";
-import { useGlobalContext } from "@/src/context/GlobalContext";
+import { ACTION_TYPES } from "@/constants/post-types";
+import { AUTH_KEY, CACHE_CONFIG, POSTS_ROOT_KEY, QUERY_KEYS, USERS_ROOT_KEY } from "@/constants/query-config";
+import { useGlobalContext } from "@/context/GlobalContext";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createPost,

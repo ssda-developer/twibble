@@ -1,6 +1,6 @@
 "use client";
 
-import Icon from "@/src/components/ui/Icon";
+import Icon from "@/components/ui/Icon";
 import { useRouter } from "next/navigation";
 
 const BackButton = ({ text = "", fallback = "/" }) => {

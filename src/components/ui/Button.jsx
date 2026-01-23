@@ -1,6 +1,6 @@
 "use client";
 
-import { formatCount } from "@/src/utils";
+import { formatCount } from "@/utils";
 
 const Button = ({
                     count = 0,

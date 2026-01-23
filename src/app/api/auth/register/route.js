@@ -1,5 +1,5 @@
-import { PASSWORD_MIN_LENGTH, USERNAME_MIN_LENGTH } from "@/src/constants/validation";
-import { registerUser, setAuthCookie } from "@/src/lib/auth.js";
+import { PASSWORD_MIN_LENGTH, USERNAME_MIN_LENGTH } from "@/constants/validation";
+import { registerUser, setAuthCookie } from "@/lib/auth.js";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {

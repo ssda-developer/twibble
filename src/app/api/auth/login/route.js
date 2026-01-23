@@ -1,4 +1,4 @@
-import { loginUser, setAuthCookie } from "@/src/lib/auth.js";
+import { loginUser, setAuthCookie } from "@/lib/auth.js";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {

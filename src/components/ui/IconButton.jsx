@@ -1,4 +1,4 @@
-import Icon from "@/src/components/ui/Icon";
+import Icon from "@/components/ui/Icon";
 
 const IconButton = ({
                         iconName,

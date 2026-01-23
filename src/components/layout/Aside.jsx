@@ -1,8 +1,8 @@
-import AuthorizationBlock from "@/src/components/auth/AuthorizationBlock";
-import Protected from "@/src/components/auth/Protected";
-import Profile from "@/src/components/profile/Profile";
-import SubscriptionAlert from "@/src/components/profile/SubscriptionAlert";
-import TrendingBlock from "@/src/components/trending/TrendingBlock";
+import AuthorizationBlock from "@/components/auth/AuthorizationBlock";
+import Protected from "@/components/auth/Protected";
+import Profile from "@/components/profile/Profile";
+import SubscriptionAlert from "@/components/profile/SubscriptionAlert";
+import TrendingBlock from "@/components/trending/TrendingBlock";
 
 const Aside = () => {
     return (

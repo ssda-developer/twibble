@@ -1,4 +1,4 @@
-import { clearAuthCookie } from "@/src/lib/auth.js";
+import { clearAuthCookie } from "@/lib/auth.js";
 import { NextResponse } from "next/server";
 
 export async function POST() {

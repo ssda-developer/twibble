@@ -1,6 +1,6 @@
-import { DEFAULT_PAGE_SIZE } from "@/src/constants";
-import dbConnect from "@/src/lib/mongoose";
-import User from "@/src/models/User";
+import { DEFAULT_PAGE_SIZE } from "@/constants";
+import dbConnect from "@/lib/mongoose";
+import User from "@/models/User";
 
 export async function GET(req) {
     try {

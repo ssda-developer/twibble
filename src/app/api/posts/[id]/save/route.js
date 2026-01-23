@@ -1,6 +1,6 @@
-import { ACTION_TYPES } from "@/src/constants/post-types";
-import dbConnect from "@/src/lib/mongoose";
-import Post from "@/src/models/Post";
+import { ACTION_TYPES } from "@/constants/post-types";
+import dbConnect from "@/lib/mongoose";
+import Post from "@/models/Post";
 import mongoose from "mongoose";
 
 export async function PATCH(req, { params }) {

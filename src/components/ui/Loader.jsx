@@ -1,6 +1,6 @@
 "use client";
 
-import { SITE_NAME } from "@/src/constants";
+import { SITE_NAME } from "@/constants";
 
 const Loader = () => {
     const letters = SITE_NAME.split("");

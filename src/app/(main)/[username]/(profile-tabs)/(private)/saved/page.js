@@ -1,4 +1,4 @@
-import PostListData from "@/src/components/post/PostListData";
+import PostListData from "@/components/post/PostListData";
 
 const ProfileSavedPage = async ({ params }) => {
     const parameters = await params;

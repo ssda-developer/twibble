@@ -1,7 +1,7 @@
 "use client";
 
-import ClientWrapper from "@/src/components/layout/ClientWrapper";
-import { GlobalProvider } from "@/src/context/GlobalContext";
+import ClientWrapper from "@/components/layout/ClientWrapper";
+import { GlobalProvider } from "@/context/GlobalContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";

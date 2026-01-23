@@ -1,6 +1,6 @@
-import EmptyState from "@/src/components/ui/EmptyState";
-import Icon from "@/src/components/ui/Icon";
-import { verifyOwner } from "@/src/lib/auth-check";
+import EmptyState from "@/components/ui/EmptyState";
+import Icon from "@/components/ui/Icon";
+import { verifyOwner } from "@/lib/auth-check";
 
 export default async function PrivateLayout({ children, params }) {
     const parameters = await params;

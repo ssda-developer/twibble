@@ -1,5 +1,5 @@
-import EmptyState from "@/src/components/ui/EmptyState";
-import Icon from "@/src/components/ui/Icon";
+import EmptyState from "@/components/ui/EmptyState";
+import Icon from "@/components/ui/Icon";
 
 export default function ListPage() {
     return (

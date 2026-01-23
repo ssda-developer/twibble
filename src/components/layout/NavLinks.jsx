@@ -1,8 +1,8 @@
 "use client";
 
-import Protected from "@/src/components/auth/Protected";
-import NavLink from "@/src/components/ui/NavLink";
-import { useGlobalContext } from "@/src/context/GlobalContext";
+import Protected from "@/components/auth/Protected";
+import NavLink from "@/components/ui/NavLink";
+import { useGlobalContext } from "@/context/GlobalContext";
 import Link from "next/link";
 
 const NavLinks = () => {

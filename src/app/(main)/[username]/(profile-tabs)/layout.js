@@ -1,4 +1,4 @@
-import ProfileBlock from "@/src/components/profile/ProfileBlock";
+import ProfileBlock from "@/components/profile/ProfileBlock";
 
 const ProfileLayout = async ({ children, params }) => {
     const parameters = await params;
