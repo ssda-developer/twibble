@@ -11,14 +11,16 @@ import { useGlobalContext } from "@/context/GlobalContext";
 import { usePostById } from "@/features/hooks";
 
 const PostBlock = ({ id }) => {
-    const { userFetchStatus, currentUser } = useGlobalContext();
+    const { userLoading, currentUser } = useGlobalContext();
 
-    const { data, isLoading, isError } = usePostById(id, {
+    const { data, isLoading, isError, isFetching } = usePostById(id, {
         currentUserId: currentUser?._id,
         includeParents: true
     });
 
-    if (isLoading || userFetchStatus === "idle") {
+    const isActuallyLoading = userLoading || isLoading || (isFetching && !data?.post);
+
+    if (isActuallyLoading) {
         return <SkeletonList count={3} />;
     }
 

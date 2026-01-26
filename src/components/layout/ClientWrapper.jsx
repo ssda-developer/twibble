@@ -4,9 +4,9 @@ import Loader from "@/components/ui/Loader";
 import { useGlobalContext } from "@/context/GlobalContext";
 
 const ClientWrapper = ({ children }) => {
-    const { loading, userFetchStatus } = useGlobalContext();
+    const { userLoading } = useGlobalContext();
 
-    if (loading || userFetchStatus === "idle") {
+    if (userLoading) {
         return <Loader />;
     }
 

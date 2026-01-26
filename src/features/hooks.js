@@ -69,34 +69,37 @@ export function useMeQuery() {
 }
 
 export function useRegisterUser() {
-    const { setCurrentUser } = useGlobalContext();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: registerRequest,
-        onSuccess: (response) => setCurrentUser(response.user)
+        onSuccess: async () => {
+            queryClient.removeQueries();
+            await queryClient.invalidateQueries({ queryKey: [AUTH_KEY] });
+        }
     });
 }
 
 export function useLoginUser() {
     const queryClient = useQueryClient();
-    const { setCurrentUser, setUserFetchStatus } = useGlobalContext();
 
     return useMutation({
         mutationFn: loginRequest,
-        onSuccess: async (res) => {
-            setCurrentUser(res.user);
-            setUserFetchStatus(res?.user ? "found" : "not_found");
-            await queryClient.invalidateQueries({ predicate: () => true });
+        onSuccess: async () => {
+            queryClient.removeQueries();
+            await queryClient.invalidateQueries({ queryKey: [AUTH_KEY] });
         }
     });
 }
 
 export function useLogoutUser() {
-    const { setCurrentUser } = useGlobalContext();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: logoutRequest,
-        onSuccess: () => setCurrentUser(null)
+        onSuccess: async () => {
+            queryClient.removeQueries();
+        }
     });
 }
 
@@ -123,12 +126,12 @@ export function useInfinitePosts({ currentUserId, ...params } = {}) {
 }
 
 export function usePostById(id, params = {}) {
-    const { userFetchStatus } = useGlobalContext();
+    const { userLoading } = useGlobalContext();
 
     return useQuery({
-        queryKey: [POSTS_ROOT_KEY, id],
-        queryFn: () => fetchPostById(id, { ...params, userFetchStatus }),
-        enabled: userFetchStatus !== "idle"
+        queryKey: [POSTS_ROOT_KEY, id, params],
+        queryFn: () => fetchPostById(id, params),
+        enabled: !userLoading && !!id
     });
 }
 
