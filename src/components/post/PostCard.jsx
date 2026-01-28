@@ -30,7 +30,8 @@ const PostCard = ({ post, type = "post" }) => {
         repostedPost = null
     } = post;
     const [modalType, setModalType] = useState(null);
-    const { mutate: deletePost, isLoading: isDeleting } = useDeletePost();
+    const { mutateAsync: deletePost, isLoading: isDeleting } = useDeletePost();
+
     const router = useRouter();
     const isParent = type === "parents";
     const isRepostType = type === "repost-inside";
@@ -63,16 +64,21 @@ const PostCard = ({ post, type = "post" }) => {
         setModalType(null);
     };
 
-    const handleConfirmDelete = (e) => {
+    const handleConfirmDelete = async (e) => {
         e?.preventDefault();
         e?.stopPropagation();
 
-        deletePost(_id, {
-            onSuccess: () => {
+        try {
+            await deletePost(_id);
+
+            setModalType(null);
+
+            if (isDetailed) {
                 router.push("/");
-                setModalType(null);
             }
-        });
+        } catch (error) {
+            console.error("Delete failed:", error);
+        }
     };
 
     return (

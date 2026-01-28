@@ -53,14 +53,13 @@ export async function GET(req) {
 
         let type = POST_TYPES.ORIGINAL;
         let parentPostId = null;
-        let rootPostId = null;
+        let ancestors = [];
         let finalContent = "";
 
         const isCommentAttempt = Math.random() >= 0.2;
 
         if (isCommentAttempt) {
             const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
             const potentialPosts = await Post.find({
                 createdAt: { $gte: weekAgo },
                 author: { $ne: character._id }
@@ -75,7 +74,7 @@ export async function GET(req) {
 
                 type = POST_TYPES.REPLY;
                 parentPostId = targetPost._id;
-                rootPostId = targetPost.rootPost || targetPost._id;
+                ancestors = [...(targetPost.ancestors || []), targetPost._id];
 
                 finalContent = await generateAIContent(
                     SYSTEM_PROMPTS.GHOSTWRITER(POST_MAX_LENGTH),
@@ -99,7 +98,7 @@ export async function GET(req) {
             content: finalContent,
             type,
             parentPost: parentPostId,
-            rootPost: rootPostId
+            ancestors
         });
 
         return new Response(JSON.stringify({ success: true, post: newPost }), { status: 201 });

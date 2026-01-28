@@ -103,38 +103,27 @@ export async function POST(req) {
 
         let type = POST_TYPES.ORIGINAL;
         let parentPost = null;
-        let rootPost = null;
         let repostedPost = null;
+        let ancestors = [];
 
         if (parentId) {
-            const parent = await Post.findById(parentId);
-
-            if (!parent) {
-                return new Response(JSON.stringify({ error: "Parent not found" }), {
-                    status: 404,
-                    headers: { "Content-Type": "application/json" }
-                });
-            }
+            const parent = await Post.findById(parentId).select("ancestors");
+            if (!parent) return new Response(JSON.stringify({ error: "Parent not found" }), { status: 404 });
 
             type = POST_TYPES.REPLY;
             parentPost = parentId;
-            rootPost = parent.rootPost || parentId;
+            ancestors = [...(parent.ancestors || []), parentId];
 
             await Post.findByIdAndUpdate(parentId, { $inc: { replyCount: 1 } });
         }
 
         if (repostId) {
-            const repost = await Post.findById(repostId);
-            if (!repost) {
-                return new Response(JSON.stringify({ error: "Post to repost not found" }), {
-                    status: 404,
-                    headers: { "Content-Type": "application/json" }
-                });
-            }
+            const repost = await Post.findById(repostId).select("ancestors");
+            if (!repost) return new Response(JSON.stringify({ error: "Post not found" }), { status: 404 });
 
             type = POST_TYPES.REPOST;
             repostedPost = repost._id;
-            rootPost = repost.rootPost || repost._id;
+            ancestors = [...(repost.ancestors || []), repost._id];
 
             await Post.findByIdAndUpdate(repost._id, { $inc: { repostCount: 1 } });
         }
@@ -145,8 +134,8 @@ export async function POST(req) {
             media: media || [],
             type,
             parentPost,
-            rootPost,
-            repostedPost
+            repostedPost,
+            ancestors
         });
 
         return new Response(JSON.stringify({ post: newPost }), {

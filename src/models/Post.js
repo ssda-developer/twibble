@@ -20,9 +20,9 @@ const PostSchema = new Schema(
         type: { type: String, enum: Object.values(POST_TYPES), default: POST_TYPES.ORIGINAL },
 
         parentPost: { type: Schema.Types.ObjectId, ref: "Post" },
-        rootPost: { type: Schema.Types.ObjectId, ref: "Post" },
+        ancestors: [{ type: Schema.Types.ObjectId, ref: "Post", index: true }],
 
-        repostedPost: { type: Schema.Types.ObjectId, ref: "Post" },
+        repostedPost: { type: Schema.Types.ObjectId, ref: "Post", index: true },
 
         likeCount: { type: Number, default: 0 },
         replyCount: { type: Number, default: 0 },
@@ -34,7 +34,6 @@ const PostSchema = new Schema(
 
 PostSchema.index({ createdAt: -1 });
 PostSchema.index({ author: 1, createdAt: -1 });
-PostSchema.index({ rootPost: 1 });
 PostSchema.index({ parentPost: 1 });
 
 PostSchema.statics.addLike = async function (postId, userId, session) {
@@ -92,6 +91,5 @@ PostSchema.statics.removeSave = async function (postId, userId, session) {
 
     return post;
 };
-
 
 export default mongoose.models.Post || mongoose.model("Post", PostSchema);

@@ -106,18 +106,47 @@ export async function DELETE(req, { params }) {
 
         const { id } = await params;
 
-        const deleted = await Post.findByIdAndDelete(id);
+        const postToDelete = await Post.findById(id);
 
-        if (!deleted) {
+        if (!postToDelete) {
             return new Response(JSON.stringify({ error: "Post not found" }), { status: 404 });
         }
 
-        await Promise.all([
-            Like.deleteMany({ post: deleted._id }),
-            Save.deleteMany({ post: deleted._id })
-        ]);
+        const parentId = postToDelete.parentPost;
+        const repostedId = postToDelete.repostedPost;
 
-        return new Response(JSON.stringify({ ok: true, id: deleted._id }), { status: 200 });
+        await Post.findByIdAndDelete(id);
+
+        const tasks = [
+            Like.deleteMany({ post: id }),
+            Save.deleteMany({ post: id }),
+            await Post.deleteMany({
+                $or: [
+                    { _id: id },
+                    { ancestors: id }
+                ]
+            })
+        ];
+
+        if (parentId) {
+            tasks.push(
+                Post.findByIdAndUpdate(parentId, {
+                    $inc: { replyCount: -1 }
+                })
+            );
+        }
+
+        if (repostedId) {
+            tasks.push(
+                Post.findByIdAndUpdate(repostedId, {
+                    $inc: { repostCount: -1 }
+                })
+            );
+        }
+
+        await Promise.all(tasks);
+
+        return new Response(JSON.stringify({ ok: true, id }), { status: 200 });
     } catch (error) {
         console.error("Failed to delete post:", error);
         return new Response(JSON.stringify({ error: "Failed to delete post" }), { status: 500 });
